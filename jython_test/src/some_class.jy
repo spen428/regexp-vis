@@ -1,0 +1,26 @@
+#!/usr/bin/env jython
+
+class some_class:
+
+    def __init__(self, name):
+        self.name = name
+
+    def get_name(self):
+        return self.name
+
+if __name__ == "__main__":
+    import SomeClass
+
+    jc1 = SomeClass("first instance")
+    jc2 = SomeClass("second instance")
+    py1 = some_class("1st instance")
+
+    print([jc1, jc2, py1])
+
+    print(jc1.getName())
+    print(jc2.getName())
+    print(py1.get_name())
+
+    for i in range(0,10):
+        print(jc1.getNanoTime())
+
