@@ -1,5 +1,5 @@
 #!/usr/bin/env jython
-
+# Author: sp611
 class some_class:
 
     def __init__(self, name):
