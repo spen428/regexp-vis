@@ -15,16 +15,25 @@ public final class AutomatonTransition {
         mData = data;
     }
 
+    /**
+     * @return The state this transition is from
+     */
     public AutomatonState getFrom()
     {
         return mFrom;
     }
 
+    /**
+     * @return The state this transition points to
+     */
     public AutomatonState getTo()
     {
         return mTo;
     }
 
+    /**
+     * @return The data associated with this transition
+     */
     public Object getData()
     {
         return mData;
