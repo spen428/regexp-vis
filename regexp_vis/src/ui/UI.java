@@ -1,56 +1,55 @@
-package UI;
+package ui;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.text.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JPanel;
+import javax.swing.WindowConstants;
+
 /**
- * Write a description of class UI here.
- * 
- * @author (your name) 
- * @version (a version number or a date)
+ * @author pg272
  */
-public class UI
-{
+public class UI extends JFrame {
 
-    /**
-     * Constructor for objects of class UI
-     */
-    public UI(){
-       
-    }
-    
-    public static void main(String args[]){
-    final JFrame frame = new JFrame("Regular language vis");
-        frame.setMinimumSize(new Dimension(1200, 700));
-        frame.setResizable(false);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        JPanel panel = new JPanel();
-        JPanel panelN = new JPanel();
-        JPanel panelE = new JPanel();
-        JPanel panelS = new JPanel();
-        panelE.setPreferredSize(new Dimension(200,200));
-        panelS.setPreferredSize(new Dimension(800, 100));
-        panel.setBackground(new Color(1,221,25));
-        panelE.setBackground(new Color(255,0,255));
-        panelS.setBackground(new Color(220,20,60));
-        panel.setLayout( new BorderLayout());
-        panel.add(panelN, BorderLayout.NORTH);
-        panel.add(panelE, BorderLayout.EAST);
-        panel.add(panelS, BorderLayout.SOUTH);
-        frame.add(panel);
-        
-        JMenuBar menuBar = new JMenuBar();
-    panelN.add(menuBar);
-   
-    JMenu fileMenu = new JMenu("File");
-    menuBar.add(fileMenu);
-    JMenu editMenu = new JMenu("Edit");
-    menuBar.add(editMenu);
-        
-        frame.pack();
-        frame.setVisible(true);
-   
-    }
+	/**
+	 * Constructor for objects of class UI
+	 */
+	public UI() {
+		super("Regular Language Visualiser");
+		setMinimumSize(new Dimension(1200, 700));
+		setResizable(false);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+		JPanel panelParent = new JPanel();
+		JPanel panelEast = new JPanel();
+		JPanel panelSouth = new JPanel();
+		panelEast.setPreferredSize(new Dimension(200, 200));
+		panelSouth.setPreferredSize(new Dimension(800, 100));
+		panelParent.setBackground(new Color(1, 221, 25));
+		panelEast.setBackground(new Color(255, 0, 255));
+		panelSouth.setBackground(new Color(220, 20, 60));
+		panelParent.setLayout(new BorderLayout());
+		panelParent.add(panelEast, BorderLayout.EAST);
+		panelParent.add(panelSouth, BorderLayout.SOUTH);
+
+		JMenuBar menuBar = new JMenuBar();
+		JMenu fileMenu = new JMenu("File");
+		menuBar.add(fileMenu);
+		JMenu editMenu = new JMenu("Edit");
+		menuBar.add(editMenu);
+
+		add(menuBar, BorderLayout.NORTH);
+		add(panelParent);
+		pack();
+	}
+
+	public static void main(String args[]) {
+		JFrame frame = new UI();
+		frame.setVisible(true);
+	}
+	
 }
-
