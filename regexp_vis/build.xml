@@ -7,10 +7,14 @@
     <property name="mainclass" value="main.Program" />
 
     <path id="classpath">
-        <fileset dir="lib" includes="**/*.jar" />
+        <fileset dir="lib" includes="*.jar" />
     </path>
 
-    <target name="all" depends="clean, jar" />
+    <path id="test-classpath">
+        <fileset dir="lib" includes="*.jar, test/**/*.jar" />
+    </path>
+
+    <target name="all" depends="clean, test, jar" />
 
     <target name="clean">
         <delete dir="bin" />
@@ -20,13 +24,22 @@
     <target name="build" depends="libs">
         <mkdir dir="bin" />
         <javac srcdir="src" destdir="bin" classpathref="classpath"
-               includes="**/*.java" />
+            includes="**/*.java" excludes="test/**/*.java"
+            includeantruntime="false" />
     </target>
 
     <target name="libs">
         <unjar dest="bin">
-            <fileset dir="lib" includes="**/*.jar" />
+            <fileset dir="lib" includes="*.jar" />
         </unjar>
+    </target>
+
+    <target name="test" depends="build">
+        <unjar dest="bin">
+            <fileset dir="lib" includes="test/**/*.jar" />
+        </unjar>
+        <javac srcdir="src/test" destdir="bin" classpathref="test-classpath"
+            includes="**/*.java" includeantruntime="false" />
     </target>
 
     <target name="jar" depends="build">
