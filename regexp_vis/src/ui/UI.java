@@ -15,12 +15,24 @@ import javax.swing.WindowConstants;
  */
 public class UI extends JFrame {
 
+	private static final int JFRAME_WIDTH_MIN_PX = 1200;
+	private static final int JFRAME_HEIGHT_MIN_PX = 700;
+	private static final String DEFAULT_JFRAME_TITLE = "Regular Language Visualiser";
+
+	public UI() {
+		this(DEFAULT_JFRAME_TITLE);
+	}
+
 	/**
 	 * Constructor for objects of class UI
+	 * 
+	 * @param title
+	 *            The title of the window.
 	 */
-	public UI() {
-		super("Regular Language Visualiser");
-		setMinimumSize(new Dimension(1200, 700));
+	public UI(String title) {
+		super(title);
+
+		setMinimumSize(new Dimension(JFRAME_WIDTH_MIN_PX, JFRAME_HEIGHT_MIN_PX));
 		setResizable(false);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -47,9 +59,4 @@ public class UI extends JFrame {
 		pack();
 	}
 
-	public static void main(String args[]) {
-		JFrame frame = new UI();
-		frame.setVisible(true);
-	}
-	
 }
