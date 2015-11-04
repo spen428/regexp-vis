@@ -1,5 +1,8 @@
 package model;
 
+/**
+ * Command to add a transition to an automaton
+ */
 public class AddTransitionCommand extends Command {
     private AutomatonTransition mTransition;
 
@@ -9,6 +12,9 @@ public class AddTransitionCommand extends Command {
         mTransition = transition;
     }
 
+    /**
+     * @return The transition which is to be added
+     */
     public AutomatonTransition getTransition()
     {
         return mTransition;
@@ -16,12 +22,6 @@ public class AddTransitionCommand extends Command {
 
     public void redo()
     {
-        // mjn33: WAS: old idea
-        // Automaton a = getAutomaton();
-        // if (mTransition == null)
-        //     mTransition = a.addTransition(from, to, data);
-        // else
-        //     a.addTransition(mTransition);
         getAutomaton().addTransition(mTransition);
     }
 

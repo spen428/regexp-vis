@@ -2,10 +2,14 @@ package model;
 
 import java.util.*;
 
+/**
+ * Class which represents a non-deterministic finite automaton (NFA)
+ * or deterministic finite automaton.
+ */
 public class Automaton {
     // Essentially this represents the graph, the key is the automaton
     // state and the values are the transitions from this state
-    // TODO(mjn33): maybe a Set instead of a LinkedList?
+    // IDEA(mjn33): maybe a Set instead of a LinkedList?
     private HashMap<AutomatonState, LinkedList<AutomatonTransition>> mGraph;
     // The state to start in, not stating the end state, since that
     // will be handled by isFinal() in AutomatonState
@@ -20,106 +24,18 @@ public class Automaton {
         mGraph.put(mStartState, new LinkedList<AutomatonTransition>());
     }
 
+    /**
+     * @return The start state for this automaton.
+     */
     public AutomatonState getStartState()
     {
         return mStartState;
     }
 
-    public AutomatonState addState()
-    {
-        AutomatonState newState = new AutomatonState(mCounter++);
-        mGraph.put(newState, new LinkedList<AutomatonTransition>());
-        return newState;
-    }
-
-    public AutomatonState setStateIsFinal(AutomatonState state, boolean isFinal)
-    {
-        if (state.isFinal() == isFinal)
-            return state; // No op
-
-        LinkedList<AutomatonTransition> transitions = mGraph.remove(state);
-        AutomatonState newState = new AutomatonState(state.getId(), isFinal);
-        mGraph.put(newState, transitions);
-        return newState;
-    }
-
     /**
-     * Removes the specified state and all the incoming and outgoing
-     * transitions
-     *
-     * TODO(mjn33): Document more
-     *
-     * Relatively expensive operation, O(s+t)? s = states, t =
-     * transitions? Not yet benchmarked...
+     * For debugging purposes, prints out the current state of the
+     * Automaton.
      */
-    public void removeStateOLD(AutomatonState state)
-    {
-        // TODO(mjn33): Implement
-    }
-
-    /**
-     * Add a transition from one state to another
-     *
-     * @param from The state the transition is from
-     * @param to   The state the transition is to
-     * @param data TODO(mjn33): WIP, extra data for the transition
-     *
-     * @return The newly created transition object, null otherwise if
-     * such a transition already existed
-     */
-    public AutomatonTransition addTransition(AutomatonState from, AutomatonState to, Object data)
-    {
-        LinkedList<AutomatonTransition> transitions = mGraph.get(from);
-        if (transitions == null)
-            throw new RuntimeException("The specified state \"from\" is not part of this automaton, cannot add " +
-                                       "transition");
-
-        // Check a transition doesn't already exist
-        boolean alreadyExists = false;
-        for (AutomatonTransition t : transitions) {
-            // FIXME(mjn33): Implement .equals()?
-            if (t.getFrom() == from && t.getTo() == to && t.getData() == data) {
-                alreadyExists = true;
-                break;
-            }
-        }
-        if (alreadyExists)
-            return null;
-
-        AutomatonTransition newTransition = new AutomatonTransition(from, to, data);
-        transitions.addLast(newTransition);
-        return newTransition;
-    }
-
-    /**
-     * Remove the specified transition which goes from one state to another
-     *
-     * @param from The state the transition is from
-     * @param to   The state the transition is to
-     *
-     * @return True if there was previously a transition there,
-     * otherwise false
-     */
-    public boolean removeTransition(AutomatonState from, AutomatonState to)
-    {
-        LinkedList<AutomatonTransition> transitions = mGraph.get(from);
-        if (transitions == null)
-            throw new RuntimeException("The specified state \"from\" is not part of this automaton, cannot remove " +
-                                       "transition");
-
-        // Check if transition exists and remove it if it does
-        Iterator<AutomatonTransition> it = transitions.iterator();
-        while (it.hasNext()) {
-            AutomatonTransition t = it.next();
-            if (t.getFrom() == from && t.getTo() == to) {
-                it.remove();
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public void debugPrint()
     {
         System.out.println("Automaton {");
@@ -145,19 +61,39 @@ public class Automaton {
         System.out.println("}");
     }
 
-    // Methods for modifying via "Command"
-
+    /**
+     * Create a new automaton state object for this Automaton, with a
+     * unique ID
+     *
+     * @return The newly created automaton state object
+     */
     public AutomatonState createNewState()
     {
         return new AutomatonState(mCounter++);
     }
 
+    /**
+     * Create a new transition object for this Automaton
+     *
+     * @param from The state the transition is from
+     * @param to The state the transition is to
+     * @param data The data associated with this transition
+     *
+     * @return The newly created transition object
+     */
     public AutomatonTransition createNewTransition(AutomatonState from, AutomatonState to, Object data)
     {
         return new AutomatonTransition(from, to, data);
     }
 
-    void addStateWithTransitions(AutomatonState state, LinkedList<AutomatonTransition> transitions)
+    /**
+     * Adds the specified state with the specified
+     * transitions. Doesn't copy the specified LinkedList.
+     *
+     * @param state The state to add
+     * @param transitions The outgoing transitions for this state
+     */
+    public void addStateWithTransitions(AutomatonState state, LinkedList<AutomatonTransition> transitions)
     {
         if (mGraph.containsKey(state))
             throw new RuntimeException("The specified state already exists");
@@ -165,7 +101,15 @@ public class Automaton {
         mGraph.put(state, transitions);
     }
 
-    LinkedList<AutomatonTransition> removeState(AutomatonState state)
+    /**
+     * Removes the specified state from the automaton
+     *
+     * @param state The state to remove
+     *
+     * @return The transitions previously associated with this state,
+     * that have also been removed
+     */
+    public LinkedList<AutomatonTransition> removeState(AutomatonState state)
     {
         if (!mGraph.containsKey(state))
             throw new RuntimeException("The specified state doesn't exist");
@@ -173,7 +117,12 @@ public class Automaton {
         return mGraph.remove(state);
     }
 
-    void addTransition(AutomatonTransition transition)
+    /**
+     * Add a transition from one state to another
+     *
+     * @param transition The transition to add
+     */
+    public void addTransition(AutomatonTransition transition)
     {
         AutomatonState from = transition.getFrom();
         AutomatonState to = transition.getTo();
@@ -194,7 +143,12 @@ public class Automaton {
         transitions.addLast(transition);
     }
 
-    void removeTransition(AutomatonTransition transition)
+    /**
+     * Add a transition from one state to another
+     *
+     * @param transition The transition to remove
+     */
+    public void removeTransition(AutomatonTransition transition)
     {
         AutomatonState from = transition.getFrom();
         AutomatonState to = transition.getTo();
@@ -218,9 +172,4 @@ public class Automaton {
         // If were here, we didn't find the transition
         throw new RuntimeException("The specified transition doesn't exist");
     }
-
-    // NOTE(mjn33): Note to self: Ideas, some may be useful, others
-    // not:
-    // * removeUnreachableTransitions
-    // Maybe here, maybe somewhere else
 }

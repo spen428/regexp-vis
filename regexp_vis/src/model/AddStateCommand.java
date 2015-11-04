@@ -2,6 +2,9 @@ package model;
 
 import java.util.*;
 
+/**
+ * Command to add a state to an automaton
+ */
 public class AddStateCommand extends Command {
     AutomatonState mState;
 
@@ -11,6 +14,9 @@ public class AddStateCommand extends Command {
         mState = state;
     }
 
+    /**
+     * @return The state which is to be added
+     */
     public AutomatonState getState()
     {
         return mState;

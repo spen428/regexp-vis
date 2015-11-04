@@ -1,5 +1,8 @@
 package model;
 
+/**
+ * Command to change whether a state is final or not
+ */
 public class SetIsFinalCommand extends Command {
     private AutomatonState mState;
     private boolean mDiffers;
