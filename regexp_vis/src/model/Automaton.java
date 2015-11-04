@@ -62,6 +62,32 @@ public class Automaton {
     }
 
     /**
+     * @param state The state to check
+     * @return Whether the state exists as part of this automaton
+     */
+    public boolean stateExists(AutomatonState state)
+    {
+        return mGraph.containsKey(state);
+    }
+
+    /**
+     * @param state The state in question
+     * @return The out-going transitions for the specified state, as
+     * an unmodifiable list.
+     */
+    public List<AutomatonTransition> getStateTransitions(AutomatonState state)
+    {
+        LinkedList<AutomatonTransition> transitions = mGraph.get(state);
+        if (transitions == null)
+            throw new RuntimeException("The specified state doesn't exist, cannot get transitions.");
+
+        // Returning an unmodifiable list as the returned list really
+        // shouldn't be modified separately, change this if it becomes
+        // an issue
+        return Collections.unmodifiableList(transitions);
+    }
+
+    /**
      * Create a new automaton state object for this Automaton, with a
      * unique ID
      *
