@@ -3,6 +3,11 @@ package ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.layout.mxEdgeLabelLayout;
 import com.mxgraph.layout.mxFastOrganicLayout;
@@ -16,7 +21,10 @@ import com.mxgraph.view.mxPerimeter;
 import com.mxgraph.view.mxStylesheet;
 
 /**
- * An extension of JPanel that JGraphX draws graphs on to.
+ * An extension of {@link mxGraphComponent} that JGraphX draws graphs on to.
+ * {@link mxGraphComponent} itself is an extension of {@link JScrollPane}, so
+ * this class can be instantiated and then added as a {@link JComponent} to a
+ * {@link JFrame} or {@link JPanel}.
  * 
  * @author sp611
  * 
