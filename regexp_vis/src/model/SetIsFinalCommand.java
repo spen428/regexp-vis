@@ -4,8 +4,8 @@ package model;
  * Command to change whether a state is final or not
  */
 public class SetIsFinalCommand extends Command {
-    private AutomatonState mState;
-    private boolean mDiffers;
+    private final AutomatonState mState;
+    private final boolean mDiffers;
 
     public SetIsFinalCommand(Automaton automaton, AutomatonState state, boolean isFinal)
     {

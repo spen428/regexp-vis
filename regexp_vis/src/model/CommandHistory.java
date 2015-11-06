@@ -3,8 +3,8 @@ package model;
 import java.util.*;
 
 public class CommandHistory {
-    private Automaton mAutomaton;
-    private ArrayList<Command> mCommandList;
+    private final Automaton mAutomaton;
+    private final ArrayList<Command> mCommandList;
     private int mHistoryIdx;
 
     public CommandHistory(Automaton automaton)

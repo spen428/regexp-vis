@@ -4,7 +4,7 @@ package model;
  * Command to add a transition to an automaton
  */
 public class AddTransitionCommand extends Command {
-    private AutomatonTransition mTransition;
+    private final AutomatonTransition mTransition;
 
     public AddTransitionCommand(Automaton automaton, AutomatonTransition transition) 
     {

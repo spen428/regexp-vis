@@ -3,8 +3,8 @@ package model;
 /**
  * Command to remove a transition from an automaton
  */
-class RemoveTransitionCommand extends Command {
-    private AutomatonTransition mTransition;
+public class RemoveTransitionCommand extends Command {
+    private final AutomatonTransition mTransition;
 
     public RemoveTransitionCommand(Automaton automaton, AutomatonTransition transition)
     {

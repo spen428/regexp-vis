@@ -1,11 +1,10 @@
 package model;
 
 public final class AutomatonTransition {
-    // TODO(mjn33): Make final?
     private final AutomatonState mFrom;
     private final AutomatonState mTo;
 
-    // TODO(mjn33): More specific?
+    // TODO(mjn33): Possibly use BasicRegexp in the future
     private final Object mData;
 
     public AutomatonTransition(AutomatonState from, AutomatonState to, Object data)

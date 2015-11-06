@@ -6,8 +6,8 @@ import java.util.*;
  * Command to remove a state and its outgoing transitions from an
  * automaton
  */
-class RemoveStateCommand extends Command {
-    private AutomatonState mState;
+public class RemoveStateCommand extends Command {
+    private final AutomatonState mState;
     private LinkedList<AutomatonTransition> mTransitions;
 
     public RemoveStateCommand(Automaton automaton, AutomatonState state)
@@ -26,13 +26,11 @@ class RemoveStateCommand extends Command {
 
     public void redo()
     {
-        Automaton a = getAutomaton();
-        mTransitions = a.removeState(mState);
+        mTransitions = getAutomaton().removeState(mState);
     }
 
     public void undo()
     {
-        Automaton a = getAutomaton();
-        a.addStateWithTransitions(mState, mTransitions);
+        getAutomaton().addStateWithTransitions(mState, mTransitions);
     }
 }

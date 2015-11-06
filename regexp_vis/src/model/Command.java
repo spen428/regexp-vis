@@ -11,7 +11,7 @@ package model;
  * @see CommandHistory
  */
 abstract class Command {
-    private Automaton mAutomaton;
+    private final Automaton mAutomaton;
 
     public Command(Automaton automaton)
     {
@@ -29,12 +29,14 @@ abstract class Command {
     /**
      * This performs the opposite of the redo() method, should return
      * the state of the Automaton to exactly as it was before redo()
-     * was executed for the first time.
+     * was executed for the first time. Calling undo() if the command
+     * hasn't been done, or has already been "undone" is undefined.
      */
     abstract void undo();
     /**
      * This performs the command. Also used to execute the command for
-     * the first time (despite the name "redo").
+     * the first time (despite the name "redo"). Calling redo() if the
+     * command has already been "done" is undefined.
      */
     abstract void redo();
 }

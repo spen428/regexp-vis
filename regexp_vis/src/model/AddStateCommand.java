@@ -6,7 +6,7 @@ import java.util.*;
  * Command to add a state to an automaton
  */
 public class AddStateCommand extends Command {
-    AutomatonState mState;
+    private final AutomatonState mState;
 
     public AddStateCommand(Automaton automaton, AutomatonState state)
     {
