@@ -1,8 +1,5 @@
 package ui;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -15,10 +12,7 @@ import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.mxOrganicLayout;
 import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
-import com.mxgraph.view.mxPerimeter;
-import com.mxgraph.view.mxStylesheet;
 
 /**
  * An extension of {@link mxGraphComponent} that JGraphX draws graphs on to.
@@ -54,34 +48,25 @@ public class GraphPanel extends mxGraphComponent {
 		this.edgeLayout = new mxParallelEdgeLayout(graph);
 		this.edgeLabelLayout = new mxEdgeLabelLayout(graph);
 
-		/* Perform automatic layout. */
-		Object parent = graph.getDefaultParent();
-		vertexCircleLayout.execute(parent);
-		edgeLayout.execute(parent);
-		edgeLabelLayout.execute(parent);
+		setVertexLayout(0);
 	}
 
 	public void setVertexLayout(int layout) {
 		Object parent = graph.getDefaultParent();
-		graph.getModel().beginUpdate();
-		try {
-			switch (layout) {
-			default:
-			case 0:
-				vertexCircleLayout.execute(parent);
-				break;
-			case 1:
-				vertexFastOrganicLayout.execute(parent);
-				break;
-			case 2:
-				vertexOrganicLayout.execute(parent);
-				break;
-			}
-			edgeLayout.execute(parent);
-			edgeLabelLayout.execute(parent);
-		} finally {
-			graph.getModel().endUpdate();
+		switch (layout) {
+		default:
+		case 0:
+			vertexCircleLayout.execute(parent);
+			break;
+		case 1:
+			vertexFastOrganicLayout.execute(parent);
+			break;
+		case 2:
+			vertexOrganicLayout.execute(parent);
+			break;
 		}
+		edgeLayout.execute(parent);
+		edgeLabelLayout.execute(parent);
 	}
 
 }
