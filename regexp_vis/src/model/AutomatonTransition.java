@@ -7,7 +7,8 @@ public final class AutomatonTransition {
     // TODO(mjn33): Possibly use BasicRegexp in the future
     private final Object mData;
 
-    public AutomatonTransition(AutomatonState from, AutomatonState to, Object data)
+    public AutomatonTransition(AutomatonState from, AutomatonState to,
+        Object data)
     {
         mFrom = from;
         mTo = to;

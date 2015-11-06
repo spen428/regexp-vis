@@ -6,7 +6,8 @@ package model;
 public class RemoveTransitionCommand extends Command {
     private final AutomatonTransition mTransition;
 
-    public RemoveTransitionCommand(Automaton automaton, AutomatonTransition transition)
+    public RemoveTransitionCommand(Automaton automaton,
+        AutomatonTransition transition)
     {
         super(automaton);
         mTransition = transition;

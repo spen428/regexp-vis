@@ -24,7 +24,8 @@ public class AddStateCommand extends Command {
 
     public void redo()
     {
-        getAutomaton().addStateWithTransitions(mState, new LinkedList<AutomatonTransition>());
+        getAutomaton().addStateWithTransitions(mState,
+            new LinkedList<AutomatonTransition>());
     }
 
     public void undo()

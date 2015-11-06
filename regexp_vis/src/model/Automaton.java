@@ -41,7 +41,8 @@ public class Automaton {
         System.out.println("Automaton {");
         System.out.println("    counter = " + mCounter);
         System.out.println("    start state (id) " + mStartState.getId());
-        for (Map.Entry<AutomatonState, LinkedList<AutomatonTransition>> e : mGraph.entrySet()) {
+        for (Map.Entry<AutomatonState, LinkedList<AutomatonTransition>> e :
+                 mGraph.entrySet()) {
             AutomatonState state = e.getKey();
             LinkedList<AutomatonTransition> transitions = e.getValue();
             System.out.println("    AutomatonState {");
@@ -49,10 +50,13 @@ public class Automaton {
             System.out.println("        is final = " +  state.isFinal());
             System.out.println("        transitions = [");
             for (AutomatonTransition t : transitions) {
+                int fromId = t.getFrom().getId();
+                int toId = t.getTo().getId();
+                String strData = t.getData().toString();
                 System.out.println("            AutomatonTransition {");
-                System.out.println("                from (id) = " + t.getFrom().getId());
-                System.out.println("                to (id) = " + t.getTo().getId());
-                System.out.println("                data = " + t.getData().toString());
+                System.out.println("                from (id) = " + fromId);
+                System.out.println("                to (id) = " + toId);
+                System.out.println("                data = " + strData);
                 System.out.println("            },");
             }
             System.out.println("        ]");
@@ -78,8 +82,10 @@ public class Automaton {
     public List<AutomatonTransition> getStateTransitions(AutomatonState state)
     {
         LinkedList<AutomatonTransition> transitions = mGraph.get(state);
-        if (transitions == null)
-            throw new RuntimeException("The specified state doesn't exist, cannot get transitions.");
+        if (transitions == null) {
+            throw new RuntimeException("The specified state doesn't exist, " +
+                                       "cannot get transitions.");
+        }
 
         // Returning an unmodifiable list as the returned list really
         // shouldn't be modified separately, change this if it becomes
@@ -107,7 +113,8 @@ public class Automaton {
      *
      * @return The newly created transition object
      */
-    public AutomatonTransition createNewTransition(AutomatonState from, AutomatonState to, Object data)
+    public AutomatonTransition createNewTransition(AutomatonState from,
+        AutomatonState to, Object data)
     {
         return new AutomatonTransition(from, to, data);
     }
@@ -119,10 +126,12 @@ public class Automaton {
      * @param state The state to add
      * @param transitions The outgoing transitions for this state
      */
-    public void addStateWithTransitions(AutomatonState state, LinkedList<AutomatonTransition> transitions)
+    public void addStateWithTransitions(AutomatonState state,
+        LinkedList<AutomatonTransition> transitions)
     {
-        if (mGraph.containsKey(state))
+        if (mGraph.containsKey(state)) {
             throw new RuntimeException("The specified state already exists");
+        }
 
         mGraph.put(state, transitions);
     }
@@ -137,8 +146,9 @@ public class Automaton {
      */
     public LinkedList<AutomatonTransition> removeState(AutomatonState state)
     {
-        if (!mGraph.containsKey(state))
+        if (!mGraph.containsKey(state)) {
             throw new RuntimeException("The specified state doesn't exist");
+        }
 
         return mGraph.remove(state);
     }
@@ -154,15 +164,19 @@ public class Automaton {
         AutomatonState to = transition.getTo();
         Object data = transition.getData();
         LinkedList<AutomatonTransition> transitions = mGraph.get(from);
-        if (transitions == null)
-            throw new RuntimeException("The specified state \"from\" is not part of this automaton, cannot add " +
-                                       "transition");
+        if (transitions == null) {
+            throw new RuntimeException(
+                "The specified state \"from\" is not part of this automaton, " +
+                "cannot add transition");
+        }
 
         // Check a transition doesn't already exist
         for (AutomatonTransition t : transitions) {
             // FIXME(mjn33): Implement .equals()?
             if (t.getFrom() == from && t.getTo() == to && t.getData() == data) {
-                throw new RuntimeException("The specified transitions already exists in this automaton");
+                throw new RuntimeException(
+                    "The specified transitions already exists in this " +
+                    "automaton");
             }
         }
 
@@ -180,9 +194,11 @@ public class Automaton {
         AutomatonState to = transition.getTo();
         Object data = transition.getData();
         LinkedList<AutomatonTransition> transitions = mGraph.get(from);
-        if (transitions == null)
-            throw new RuntimeException("The specified state \"from\" is not part of this automaton, cannot remove " +
-                                       "transition");
+        if (transitions == null) {
+            throw new RuntimeException(
+                "The specified state \"from\" is not part of this automaton, " +
+                "cannot remove transition");
+        }
 
         // Check if transition exists and remove it if it does
         Iterator<AutomatonTransition> it = transitions.iterator();
