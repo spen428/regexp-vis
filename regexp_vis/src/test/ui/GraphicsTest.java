@@ -6,8 +6,7 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
 
-import com.mxgraph.view.mxGraph;
-
+import ui.Graph;
 import ui.GraphPanel;
 
 /**
@@ -27,7 +26,7 @@ public class GraphicsTest extends KeyAdapter implements KeyListener {
 	private final JFrame frame;
 	private final GraphPanel graphPanel;
 
-	public GraphicsTest(mxGraph graph) {
+	public GraphicsTest(Graph graph) {
 		frame = new JFrame("Regular Language Visualiser - "
 				+ "Graph Layout Demo");
 		frame.addKeyListener(this);
@@ -57,12 +56,12 @@ public class GraphicsTest extends KeyAdapter implements KeyListener {
 	}
 
 	public static void main(String[] args) {
-		mxGraph graph = makeGraph();
+		Graph graph = makeGraph();
 		new GraphicsTest(graph);
 	}
 
-	private static mxGraph makeGraph() {
-		mxGraph graph = new mxGraph();
+	private static Graph makeGraph() {
+		Graph graph = new Graph();
 		Object parent = graph.getDefaultParent();
 
 		graph.getModel().beginUpdate();
