@@ -80,10 +80,10 @@ public class Graph extends mxGraph {
 	 */
 	void addAutomaton(Automaton automaton) {
 		HashMap<AutomatonState, LinkedList<AutomatonTransition>> mGraph = automaton
-				.getmGraph();
+				.getGraph();
 		HashMap<AutomatonState, Object> stateMapping = new HashMap<>();
 		ArrayList<AutomatonTransition> transitions = new ArrayList<>();
-		AutomatonState mStartState = automaton.getmStartState();
+		AutomatonState mStartState = automaton.getStartState();
 
 		getModel().beginUpdate();
 		try {
@@ -144,8 +144,10 @@ public class Graph extends mxGraph {
 			throw new IllegalArgumentException("toVertex cannot be null when"
 					+ " inserting an AutomatonTransition");
 		}
-		return insertEdge(getDefaultParent(),
-				"transition" + transition.getId(), transition.toString(),
+		// String id = "transition" + transition.getId();
+		String id = null; // TODO: Swap if AutomatonTransition.getId()
+							// implemented.
+		return insertEdge(getDefaultParent(), id, transition.toString(),
 				fromVertex, toVertex);
 	}
 

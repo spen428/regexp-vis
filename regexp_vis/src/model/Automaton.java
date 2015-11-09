@@ -33,6 +33,14 @@ public class Automaton {
     }
 
     /**
+     * @return The graph of this automaton as a {@link HashMap}
+     */
+    public HashMap<AutomatonState, LinkedList<AutomatonTransition>> getGraph()
+    {
+		return mGraph;
+	}
+
+	/**
      * For debugging purposes, prints out the current state of the
      * Automaton.
      */
