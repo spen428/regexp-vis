@@ -1,3 +1,11 @@
+bin/
+dist/
+
+# Eclipse
+.classpath
+.project
+.settings
+
 # Java
 *.class
 *.jar
