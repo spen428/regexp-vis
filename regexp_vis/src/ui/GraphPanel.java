@@ -1,8 +1,5 @@
 package ui;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -15,10 +12,7 @@ import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.mxOrganicLayout;
 import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
-import com.mxgraph.view.mxPerimeter;
-import com.mxgraph.view.mxStylesheet;
 
 /**
  * An extension of {@link mxGraphComponent} that JGraphX draws graphs on to.
@@ -31,24 +25,38 @@ import com.mxgraph.view.mxStylesheet;
  */
 public class GraphPanel extends mxGraphComponent {
 
+	public enum GraphLayout {
+		CIRCLE_LAYOUT, ORGANIC_LAYOUT, FAST_ORGANIC_LAYOUT;
+	}
+
 	private final mxGraph graph;
 	private final mxGraphLayout vertexCircleLayout, vertexOrganicLayout,
 			vertexFastOrganicLayout, edgeLayout, edgeLabelLayout;
 
+	/**
+	 * Creates a new instance of {@link GraphPanel} and attaches a new instance
+	 * of {@link Graph} to it.
+	 */
 	public GraphPanel() {
-		this(new mxGraph());
+		this(new Graph());
 	}
 
-	public GraphPanel(mxGraph graph) {
+	/**
+	 * Creates a new instance of {@link GraphPanel} and attaches the given
+	 * {@link Graph} to it.
+	 * 
+	 * @param graph
+	 *            the {@link Graph} to attach to this {@link GraphPanel}.
+	 */
+	public GraphPanel(Graph graph) {
 		super(graph);
-
 		this.graph = graph;
-		graph.setStylesheet(generateStylesheet());
 
 		/*
-		 * The layouts used may vary depending on the structure of the graph. We
-		 * will need to throw a bunch of different graph structures at it and
-		 * see.
+		 * A number of different vertex layout managers, that have their own
+		 * benefits. It may be necessary to switch between them for certain
+		 * graph structures, so I have provided that functionality with the
+		 * setVertexLayout() method.
 		 */
 		this.vertexCircleLayout = new mxCircleLayout(graph);
 		this.vertexOrganicLayout = new mxOrganicLayout(graph);
@@ -56,68 +64,37 @@ public class GraphPanel extends mxGraphComponent {
 		this.edgeLayout = new mxParallelEdgeLayout(graph);
 		this.edgeLabelLayout = new mxEdgeLabelLayout(graph);
 
-		/* Perform automatic layout. */
-		Object parent = graph.getDefaultParent();
-		vertexCircleLayout.execute(parent);
-		edgeLayout.execute(parent);
-		edgeLabelLayout.execute(parent);
+		setVertexLayout(GraphLayout.CIRCLE_LAYOUT);
 	}
 
 	/**
-	 * Generates a stylesheet defining the default visual appearance of the
-	 * graph.
+	 * Switches between the automatic vertex layout types provided by JGraphX.
+	 * This method automatically calls the <code>execute()</code> method on the
+	 * chosen {@link mxGraphLayout} type, and also updates the positions of
+	 * edges and edge labels after the vertices have been laid-out.
+	 * 
+	 * @param layout
+	 *            the {@link GraphPanel.GraphLayout} to use.
 	 */
-	private static mxStylesheet generateStylesheet() {
-		Map<String, Object> edgeStyle = new HashMap<String, Object>();
-		/* The curve shape seems to mess up the arrow heads. */
-		// edgeStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_CURVE);
-		edgeStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_CONNECTOR);
-		edgeStyle.put(mxConstants.STYLE_STROKECOLOR, "#000000");
-		edgeStyle.put(mxConstants.STYLE_FONTSTYLE, mxConstants.FONT_BOLD);
-		edgeStyle.put(mxConstants.STYLE_FONTSIZE, "12");
-		edgeStyle.put(mxConstants.STYLE_ALIGN, mxConstants.ALIGN_CENTER);
-		edgeStyle.put(mxConstants.STYLE_VERTICAL_ALIGN,
-				mxConstants.ALIGN_MIDDLE);
-		edgeStyle.put(mxConstants.STYLE_ENDARROW, mxConstants.ARROW_CLASSIC);
-
-		Map<String, Object> vertexStyle = new HashMap<String, Object>();
-		vertexStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_ELLIPSE);
-		vertexStyle.put(mxConstants.STYLE_STROKECOLOR, "#000000");
-		vertexStyle.put(mxConstants.STYLE_FILLCOLOR, "#ffffff");
-		vertexStyle.put(mxConstants.STYLE_FONTSIZE, "14");
-		vertexStyle.put(mxConstants.STYLE_PERIMETER,
-				mxPerimeter.EllipsePerimeter);
-		vertexStyle.put(mxConstants.STYLE_ALIGN, mxConstants.ALIGN_CENTER);
-		vertexStyle.put(mxConstants.STYLE_VERTICAL_ALIGN,
-				mxConstants.ALIGN_MIDDLE);
-
-		mxStylesheet styleSheet = new mxStylesheet();
-		styleSheet.setDefaultEdgeStyle(edgeStyle);
-		styleSheet.setDefaultVertexStyle(vertexStyle);
-		return styleSheet;
-	}
-
-	public void setVertexLayout(int layout) {
+	public void setVertexLayout(GraphLayout layout) {
 		Object parent = graph.getDefaultParent();
-		graph.getModel().beginUpdate();
-		try {
-			switch (layout) {
-			default:
-			case 0:
-				vertexCircleLayout.execute(parent);
-				break;
-			case 1:
-				vertexFastOrganicLayout.execute(parent);
-				break;
-			case 2:
-				vertexOrganicLayout.execute(parent);
-				break;
-			}
-			edgeLayout.execute(parent);
-			edgeLabelLayout.execute(parent);
-		} finally {
-			graph.getModel().endUpdate();
+
+		switch (layout) {
+		default:
+		case CIRCLE_LAYOUT:
+			vertexCircleLayout.execute(parent);
+			break;
+		case FAST_ORGANIC_LAYOUT:
+			vertexFastOrganicLayout.execute(parent);
+			break;
+		case ORGANIC_LAYOUT:
+			vertexOrganicLayout.execute(parent);
+			break;
 		}
+
+		/* Update edges and edge labels now that the vertices have moved. */
+		edgeLayout.execute(parent);
+		edgeLabelLayout.execute(parent);
 	}
 
 }
