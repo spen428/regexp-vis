@@ -5,6 +5,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import model.Automaton;
+import model.Command;
+
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.layout.mxEdgeLabelLayout;
 import com.mxgraph.layout.mxFastOrganicLayout;
@@ -12,7 +15,6 @@ import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.mxOrganicLayout;
 import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.view.mxGraph;
 
 /**
  * An extension of {@link mxGraphComponent} that JGraphX draws graphs on to.
@@ -29,7 +31,7 @@ public class GraphPanel extends mxGraphComponent {
 		CIRCLE_LAYOUT, ORGANIC_LAYOUT, FAST_ORGANIC_LAYOUT;
 	}
 
-	private final mxGraph graph;
+	private Graph graph;
 	private final mxGraphLayout vertexCircleLayout, vertexOrganicLayout,
 			vertexFastOrganicLayout, edgeLayout, edgeLabelLayout;
 
@@ -95,6 +97,25 @@ public class GraphPanel extends mxGraphComponent {
 		/* Update edges and edge labels now that the vertices have moved. */
 		edgeLayout.execute(parent);
 		edgeLabelLayout.execute(parent);
+	}
+
+	/**
+	 * Sets the graph to a representation of the given automaton.
+	 */
+	public void setGraph(Automaton automaton) {
+		graph.clear();
+		graph.addAutomaton(automaton);
+	}
+
+	/**
+	 * Executes the given {@link Command} on the {@link Graph} contained within
+	 * this panel.
+	 * 
+	 * @param cmd
+	 *            the {@link Command} to execute
+	 */
+	public void doCommand(Command cmd) {
+		graph.doCommand(cmd);
 	}
 
 }
