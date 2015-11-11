@@ -19,9 +19,9 @@ public class BasicRegexp implements Cloneable {
         CHOICE
     }
 
-    private ArrayList<BasicRegexp> mOperands;
-    private char mChar;
-    private RegexpOperator mOperator;
+    final private ArrayList<BasicRegexp> mOperands;
+    final private char mChar;
+    final private RegexpOperator mOperator;
 
     public BasicRegexp(ArrayList<BasicRegexp> operands, RegexpOperator op)
     {
@@ -41,6 +41,7 @@ public class BasicRegexp implements Cloneable {
         }
 
         mOperands = operands;
+        mChar = '\0';
         mOperator = op;
     }
 
@@ -56,6 +57,7 @@ public class BasicRegexp implements Cloneable {
 
         mOperands = new ArrayList<>();
         mOperands.add(operand);
+        mChar = '\0';
         mOperator = op;
     }
 
@@ -67,6 +69,8 @@ public class BasicRegexp implements Cloneable {
             throw new IllegalArgumentException(
                 "Non-unary operators require multiple operands");
         }
+
+        mOperands = null;
         mChar = c;
         mOperator = op;
     }
@@ -100,23 +104,6 @@ public class BasicRegexp implements Cloneable {
         }
 
         return mChar;
-    }
-
-    public void setOperator(RegexpOperator op)
-    {
-        // NOTE(mjn33): Need to think about this, make sure these
-        // checks are right
-        if (op == RegexpOperator.NONE && !isSingleChar()) {
-            throw new IllegalArgumentException(
-                "RegexpOperator.NONE only allowed for single character " +
-                "expressions");
-        }
-        if (isUnaryOperator(op) && mOperands.size() > 1) {
-            throw new IllegalArgumentException(
-                "Multiple operands passed for a unary operator");
-        }
-
-        mOperator = op;
     }
 
     /**
@@ -206,9 +193,9 @@ public class BasicRegexp implements Cloneable {
                     .remove(sequenceOperands.size() - 1);
 
             // If the last regexp operand was just a char on its own
-            if (back.isSingleChar() && back.getOperator() ==
-                RegexpOperator.NONE) {
-                back.setOperator(op);
+            if (back.isSingleChar() &&
+                back.getOperator() == RegexpOperator.NONE) {
+                back = new BasicRegexp(back.getChar(), op);
             } else {
                 BasicRegexp wrappedRegexp = new BasicRegexp(back, op);
 
