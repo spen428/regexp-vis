@@ -5,18 +5,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
-import model.AddStateCommand;
-import model.AddTransitionCommand;
 import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
-import model.Command;
-import model.RemoveStateCommand;
-import model.RemoveTransitionCommand;
-import model.SetIsFinalCommand;
 
+import com.mxgraph.model.mxICell;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxPerimeter;
@@ -43,6 +36,7 @@ public class Graph extends mxGraph {
 	 */
 	@Override
 	protected mxStylesheet createStylesheet() {
+		// TODO: Load from external file
 		Map<String, Object> edgeStyle = new HashMap<String, Object>();
 		/* The curve shape seems to mess up the arrow heads. */
 		// edgeStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_CURVE);
@@ -70,6 +64,68 @@ public class Graph extends mxGraph {
 		styleSheet.setDefaultEdgeStyle(edgeStyle);
 		styleSheet.setDefaultVertexStyle(vertexStyle);
 		return styleSheet;
+	}
+
+	/**
+	 * Removes the given node and any edges connected to the node. If you do not
+	 * wish to remove the edges, use {{@link #removeNode(mxICell, boolean)}.
+	 * 
+	 * @param node
+	 *            the node to remove
+	 * @return an array of the nodes and edges that were removed
+	 */
+	public Object[] removeNode(mxICell node) {
+		return removeNode(node, true);
+	}
+
+	/**
+	 * Removes the given node, and optionally any edges associated with the
+	 * node.
+	 * 
+	 * @param node
+	 *            the node to remove
+	 * @param removeEdges
+	 *            whether to remove edges that are connected to this node
+	 * @return an array of the nodes and edges that were removed
+	 */
+	public Object[] removeNode(mxICell node, boolean removeEdges) {
+		ArrayList<Object> removed = new ArrayList<Object>();
+		model.beginUpdate();
+		try {
+			if (removeEdges) {
+				int numEdges = model.getEdgeCount(node);
+				for (int i = 0; i < numEdges; i++) {
+					mxICell edge = node.getEdgeAt(i);
+					node.remove(edge);
+				}
+			}
+			removed.add(model.remove(node));
+		} finally {
+			model.endUpdate();
+		}
+		return removed.toArray();
+	}
+
+	/**
+	 * Removes all edges between the two given nodes.
+	 * 
+	 * @param node1
+	 *            The starting node
+	 * @param node2
+	 *            The ending node
+	 * @return the edges that were removed
+	 */
+	public Object[] removeEdgesBetween(mxICell node1, mxICell node2) {
+		Object[] edges = getEdgesBetween(node1, node2);
+		model.beginUpdate();
+		try {
+			for (Object edge : edges) {
+				model.remove(edge);
+			}
+		} finally {
+			model.endUpdate();
+		}
+		return edges;
 	}
 
 	/**
@@ -132,7 +188,7 @@ public class Graph extends mxGraph {
 	 *             if any parameters are {@code null}.
 	 * @see {@link #insertAutomatonState(AutomatonState)} *
 	 */
-	private Object insertAutomatonTransition(AutomatonTransition transition,
+	Object insertAutomatonTransition(AutomatonTransition transition,
 			Object fromVertex, Object toVertex) throws IllegalArgumentException {
 		if (transition == null) {
 			throw new IllegalArgumentException("transition cannot be null when"
@@ -162,7 +218,7 @@ public class Graph extends mxGraph {
 	 * @throws IllegalArgumentException
 	 *             if the <b>state</b> parameter is {@code null}.
 	 */
-	private Object insertAutomatonState(AutomatonState state)
+	Object insertAutomatonState(AutomatonState state)
 			throws IllegalArgumentException {
 		if (state == null) {
 			throw new IllegalArgumentException("state cannot be null when"
@@ -171,31 +227,6 @@ public class Graph extends mxGraph {
 		return insertVertex(getDefaultParent(), "state" + state.getId(),
 				state.toString(), 0, 0, VERTEX_DIAMETER_PX, VERTEX_DIAMETER_PX,
 				state.isFinal() ? FINAL_STATE_STYLE : null);
-	}
-
-	/**
-	 * Executes the given {@link Command} on the {@link Graph}
-	 * 
-	 * @param cmd
-	 *            the {@link Command} to execute
-	 */
-	void doCommand(Command cmd) {
-		// TODO: Unimplemented
-		if (cmd == null) {
-			throw new NullPointerException();
-		} else if (cmd instanceof SetIsFinalCommand) {
-
-		} else if (cmd instanceof AddTransitionCommand) {
-
-		} else if (cmd instanceof RemoveTransitionCommand) {
-
-		} else if (cmd instanceof AddStateCommand) {
-
-		} else if (cmd instanceof RemoveStateCommand) {
-
-		} else {
-			throw new NotImplementedException();
-		}
 	}
 
 	/**
