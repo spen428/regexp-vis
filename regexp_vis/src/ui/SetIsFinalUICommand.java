@@ -9,25 +9,24 @@ import com.mxgraph.model.mxICell;
  */
 public class SetIsFinalUICommand extends UICommand {
 
-	private final mxICell state;
+	private final GraphState state;
 	private final boolean differs;
 
-	public SetIsFinalUICommand(Graph graph, mxICell state, boolean isFinal) {
+	public SetIsFinalUICommand(Graph graph, GraphState state, boolean isFinal) {
 		super(graph);
 		this.state = state;
-		differs = (graph.isFinalState(state) != isFinal);
+		differs = (graph.isFinalState(state.getState()) != isFinal);
 	}
 
 	public void redo() {
 		if (differs) {
-			graph.setFinal(state, !graph.isFinalState(state));
+			mxICell cell = state.getState();
+			graph.setFinal(cell, !graph.isFinalState(cell));
 		}
 	}
 
 	public void undo() {
-		if (differs) {
-			graph.setFinal(state, !graph.isFinalState(state));
-		}
+		redo();
 	}
 
 }

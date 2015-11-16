@@ -9,6 +9,7 @@ import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
 
+import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.util.mxConstants;
@@ -318,6 +319,10 @@ public class Graph extends mxGraph {
 	public void addState(GraphState state) {
 		mxICell cell = state.getState();
 		mxGeometry g = cell.getGeometry();
+		if (g == null) {
+			g = new mxGeometry(0, 0, VERTEX_DIAMETER_PX, VERTEX_DIAMETER_PX);
+		}
+
 		insertVertex(getDefaultParent(), cell.getId(), cell.getValue(),
 				g.getX(), g.getY(), g.getWidth(), g.getHeight(),
 				cell.getStyle(), g.isRelative());
@@ -332,6 +337,70 @@ public class Graph extends mxGraph {
 				addTransition(t);
 			}
 		}
+	}
+
+	public boolean containsState(GraphState state) {
+		return states.containsValue(state);
+	}
+
+	public boolean containsState(mxICell state) {
+		return states.containsKey(state);
+	}
+
+	public boolean containsTransition(GraphTransition transition) {
+		return transitions.containsValue(transition);
+	}
+
+	public boolean containsTransition(mxICell transition) {
+		return transitions.containsKey(transition);
+	}
+
+	/**
+	 * Determine which {@link GraphTransition} are connected to a given
+	 * {@link GraphState}
+	 * 
+	 * @param state
+	 *            the {@link GraphState}
+	 * @return an {@link ArrayList} of {@link GraphTransition} that are
+	 *         connected to the given {@link GraphState}
+	 */
+	public ArrayList<GraphTransition> getStateTransitions(GraphState state) {
+		ArrayList<GraphTransition> list = new ArrayList<>();
+		for (GraphTransition t : transitions.values()) {
+			if (t.getFrom() == state || t.getTo() == state) {
+				list.add(t);
+			}
+		}
+		return list;
+	}
+
+	/**
+	 * Creates a new {@link GraphTransition} and adds it to the {@link Graph}
+	 * 
+	 * @param from
+	 *            the {@link GraphState} that this transition is coming from
+	 * @param to
+	 *            the {@link GraphState} that this transition is going to
+	 * @param value
+	 *            a value representing the transition
+	 * @return the {@link GraphTransition} that was created
+	 */
+	public GraphTransition createNewTransition(GraphState from, GraphState to,
+			String value) {
+		mxICell transition = new mxCell(value);
+		return new GraphTransition(from, to, transition);
+	}
+
+	/**
+	 * Creates a new {@link GraphState} and adds it to the {@link Graph}
+	 * 
+	 * @param value
+	 *            a value representing the state
+	 * @return the {@link GraphState} that was created
+	 */
+	public GraphState createNewState(Object value) {
+		mxICell cell = new mxCell(value);
+		return new GraphState(cell);
 	}
 
 }

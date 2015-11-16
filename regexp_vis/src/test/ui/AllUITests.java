@@ -5,6 +5,6 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ UICommandHistoryTest.class })
+@SuiteClasses({ GraphTest.class, UICommandHistoryTest.class })
 public class AllUITests {
 }
