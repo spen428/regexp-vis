@@ -9,6 +9,7 @@ import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
 
+import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
@@ -68,14 +69,14 @@ public class Graph extends mxGraph {
 
 	/**
 	 * Removes the given node and any edges connected to the node. If you do not
-	 * wish to remove the edges, use {{@link #removeNode(mxICell, boolean)}.
+	 * wish to remove the edges, use {{@link #removeState(mxICell, boolean)}.
 	 * 
 	 * @param node
 	 *            the node to remove
-	 * @return an array of the nodes and edges that were removed
+	 * @return an array of the edges that were removed
 	 */
-	public Object[] removeNode(mxICell node) {
-		return removeNode(node, true);
+	public mxICell[] removeState(mxICell node) {
+		return removeState(node, true);
 	}
 
 	/**
@@ -86,9 +87,9 @@ public class Graph extends mxGraph {
 	 *            the node to remove
 	 * @param removeEdges
 	 *            whether to remove edges that are connected to this node
-	 * @return an array of the nodes and edges that were removed
+	 * @return an array of the edges that were removed
 	 */
-	public Object[] removeNode(mxICell node, boolean removeEdges) {
+	public mxICell[] removeState(mxICell node, boolean removeEdges) {
 		ArrayList<Object> removed = new ArrayList<Object>();
 		model.beginUpdate();
 		try {
@@ -99,11 +100,11 @@ public class Graph extends mxGraph {
 					node.remove(edge);
 				}
 			}
-			removed.add(model.remove(node));
+			model.remove(node);
 		} finally {
 			model.endUpdate();
 		}
-		return removed.toArray();
+		return (mxICell[]) removed.toArray();
 	}
 
 	/**
@@ -238,6 +239,59 @@ public class Graph extends mxGraph {
 			// TODO: Unimplemented
 		} finally {
 			getModel().endUpdate();
+		}
+	}
+
+	/**
+	 * Returns true if the given state is a final state.
+	 * 
+	 * @param state
+	 *            the state
+	 * @return true if final
+	 */
+	public boolean isFinalState(mxICell state) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/**
+	 * Sets the finality of the given state
+	 * 
+	 * @param state
+	 *            the state
+	 * @param isFinal
+	 *            finality to set
+	 */
+	public void setFinal(mxICell state, boolean isFinal) {
+		// TODO: Unimplemented
+	}
+
+	public void removeTransition(mxICell transition) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void addTransition(mxICell transition) {
+		mxGeometry g = transition.getGeometry();
+		insertEdge(getDefaultParent(), transition.getId(),
+				transition.getValue(), g.getSourcePoint(), g.getTargetPoint());
+	}
+
+	public void addState(mxICell state) {
+		mxGeometry g = state.getGeometry();
+		insertVertex(getDefaultParent(), state.getId(), state.getValue(),
+				g.getX(), g.getY(), g.getWidth(), g.getHeight(),
+				state.getStyle(), g.isRelative());
+	}
+
+	public void addStateWithTransitions(mxICell state, mxICell[] transitions) {
+		// TODO Caution: I dont think that transitions store the actual states
+		// they are connected to, only the coordinates
+		addState(state);
+		if (transitions != null && transitions.length > 0) {
+			for (mxICell t : transitions) {
+				addTransition(t);
+			}
 		}
 	}
 

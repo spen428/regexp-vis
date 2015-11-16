@@ -8,29 +8,13 @@ import model.Command;
  * @author sp611
  *
  */
-public class UICommand extends Command {
+public abstract class UICommand extends Command {
 
-	private final Graph graph;
+	protected final Graph graph;
 	
 	public UICommand(Graph graph) {
 		super(null);
 		this.graph = graph;
-	}
-
-	public Graph getGraph() {
-		return graph;
-	}
-
-	@Override
-	public void undo() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void redo() {
-		// TODO Auto-generated method stub
-
 	}
 
 }
