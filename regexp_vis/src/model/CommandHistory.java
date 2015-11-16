@@ -3,20 +3,13 @@ package model;
 import java.util.*;
 
 public class CommandHistory {
-    private final Automaton mAutomaton;
     private final ArrayList<Command> mCommandList;
     private int mHistoryIdx;
 
-    public CommandHistory(Automaton automaton)
+    public CommandHistory()
     {
-        mAutomaton = automaton;
         mCommandList = new ArrayList<>();
         mHistoryIdx = 0;
-    }
-
-    public Automaton getAutomaton()
-    {
-        return mAutomaton;
     }
 
     public int getHistoryIdx()

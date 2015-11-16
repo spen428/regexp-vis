@@ -14,7 +14,7 @@ public class Program {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Automaton automaton = new Automaton();
-		CommandHistory history = new CommandHistory(automaton);
+		CommandHistory history = new CommandHistory();
 
 		AutomatonState start = automaton.getStartState();
 		AutomatonState b = automaton.createNewState();
