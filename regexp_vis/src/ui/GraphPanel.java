@@ -6,7 +6,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import model.Automaton;
-import model.Command;
+import model.CommandHistory;
 
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.layout.mxEdgeLabelLayout;
@@ -31,7 +31,8 @@ public class GraphPanel extends mxGraphComponent {
 		CIRCLE_LAYOUT, ORGANIC_LAYOUT, FAST_ORGANIC_LAYOUT;
 	}
 
-	private Graph graph;
+	private final Graph graph;
+	private final CommandHistory history;
 	private final mxGraphLayout vertexCircleLayout, vertexOrganicLayout,
 			vertexFastOrganicLayout, edgeLayout, edgeLabelLayout;
 
@@ -53,6 +54,7 @@ public class GraphPanel extends mxGraphComponent {
 	public GraphPanel(Graph graph) {
 		super(graph);
 		this.graph = graph;
+		this.history = new CommandHistory();
 
 		/*
 		 * A number of different vertex layout managers, that have their own
@@ -67,6 +69,18 @@ public class GraphPanel extends mxGraphComponent {
 		this.edgeLabelLayout = new mxEdgeLabelLayout(graph);
 
 		setVertexLayout(GraphLayout.CIRCLE_LAYOUT);
+	}
+
+	public Graph getGraph() {
+		return graph;
+	}
+
+	public CommandHistory getHistory() {
+		return history;
+	}
+
+	public void executeNewCommand(UICommand cmd) {
+		history.executeNewCommand(cmd);
 	}
 
 	/**
@@ -105,17 +119,8 @@ public class GraphPanel extends mxGraphComponent {
 	public void setGraph(Automaton automaton) {
 		graph.clear();
 		graph.addAutomaton(automaton);
-	}
-
-	/**
-	 * Executes the given {@link Command} on the {@link Graph} contained within
-	 * this panel.
-	 * 
-	 * @param cmd
-	 *            the {@link Command} to execute
-	 */
-	public void doCommand(Command cmd) {
-		graph.doCommand(cmd);
+		// TODO: Either remove this functionality, or implement command history
+		// for it.
 	}
 
 }
