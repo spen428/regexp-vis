@@ -10,14 +10,14 @@ import ui.GraphPanel;
  * @author sp611, pg272
  * 
  */
-public class GraphTest {
+public class GraphLayoutTest {
 
 	private static final int JFRAME_WIDTH_PX = 450;
 	private static final int JFRAME_HEIGHT_PX = 450;
 	private final JFrame frame;
 	private final GraphPanel graphPanel;
 
-	public GraphTest(Graph graph) {
+	public GraphLayoutTest(Graph graph) {
 		frame = new JFrame("Regular Language Visualiser - "
 				+ "Graph Layout Demo");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -639,20 +639,20 @@ public class GraphTest {
 	}
 
 	public static void main(String[] args) {
-		new GraphTest(graph1());
-		new GraphTest(graph2());
-		new GraphTest(graph3());
-		new GraphTest(graph4());
-		new GraphTest(graph5());
-		new GraphTest(graph6());
-		new GraphTest(graph7());
-		new GraphTest(graph8());
-		new GraphTest(graph9());
-		new GraphTest(graph10());
-		new GraphTest(graph11());
-		new GraphTest(graph12());
-		new GraphTest(graph13());
-		new GraphTest(graph14());
+		new GraphLayoutTest(graph1());
+		new GraphLayoutTest(graph2());
+		new GraphLayoutTest(graph3());
+		new GraphLayoutTest(graph4());
+		new GraphLayoutTest(graph5());
+		new GraphLayoutTest(graph6());
+		new GraphLayoutTest(graph7());
+		new GraphLayoutTest(graph8());
+		new GraphLayoutTest(graph9());
+		new GraphLayoutTest(graph10());
+		new GraphLayoutTest(graph11());
+		new GraphLayoutTest(graph12());
+		new GraphLayoutTest(graph13());
+		new GraphLayoutTest(graph14());
 	}
 
 }
