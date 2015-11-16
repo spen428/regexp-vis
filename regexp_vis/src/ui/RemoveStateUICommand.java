@@ -1,7 +1,5 @@
 package ui;
 
-import com.mxgraph.model.mxICell;
-
 /**
  * Command to remove a state and its outgoing transitions from an automaton
  * 
@@ -9,15 +7,15 @@ import com.mxgraph.model.mxICell;
  */
 public class RemoveStateUICommand extends UICommand {
 
-	private final mxICell state;
-	private mxICell[] transitions;
+	private final GraphState state;
+	private GraphTransition[] transitions;
 
-	public RemoveStateUICommand(Graph graph, mxICell state) {
+	public RemoveStateUICommand(Graph graph, GraphState state) {
 		super(graph);
 		this.state = state;
 	}
 
-	public mxICell getState() {
+	public GraphState getState() {
 		return state;
 	}
 

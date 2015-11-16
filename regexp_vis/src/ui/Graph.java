@@ -31,6 +31,17 @@ public class Graph extends mxGraph {
 	 */
 	private static final String FINAL_STATE_STYLE = null; // TODO: Unimplemented
 
+	private final HashMap<mxICell, GraphState> states;
+	private final HashMap<mxICell, GraphTransition> transitions;
+
+	private GraphState startState;
+
+	public Graph() {
+		super();
+		this.states = new HashMap<>();
+		this.transitions = new HashMap<>();
+	}
+
 	/**
 	 * Generates a stylesheet defining the default visual appearance of the
 	 * graph.
@@ -69,42 +80,44 @@ public class Graph extends mxGraph {
 
 	/**
 	 * Removes the given node and any edges connected to the node. If you do not
-	 * wish to remove the edges, use {{@link #removeState(mxICell, boolean)}.
+	 * wish to remove the edges, use {{@link #removeState(GraphState, boolean)}.
 	 * 
 	 * @param node
 	 *            the node to remove
 	 * @return an array of the edges that were removed
 	 */
-	public mxICell[] removeState(mxICell node) {
-		return removeState(node, true);
+	public GraphTransition[] removeState(GraphState state) {
+		return removeState(state, true);
 	}
 
 	/**
 	 * Removes the given node, and optionally any edges associated with the
 	 * node.
 	 * 
-	 * @param node
+	 * @param state
 	 *            the node to remove
 	 * @param removeEdges
 	 *            whether to remove edges that are connected to this node
 	 * @return an array of the edges that were removed
 	 */
-	public mxICell[] removeState(mxICell node, boolean removeEdges) {
-		ArrayList<Object> removed = new ArrayList<Object>();
+	public GraphTransition[] removeState(GraphState state, boolean removeEdges) {
+		mxICell cell = state.getState();
+		ArrayList<GraphTransition> removed = new ArrayList<GraphTransition>();
 		model.beginUpdate();
 		try {
 			if (removeEdges) {
-				int numEdges = model.getEdgeCount(node);
+				int numEdges = model.getEdgeCount(state);
 				for (int i = 0; i < numEdges; i++) {
-					mxICell edge = node.getEdgeAt(i);
-					node.remove(edge);
+					mxICell edge = cell.getEdgeAt(i);
+					cell.remove(edge);
+					removed.add((GraphTransition) transitions.remove(edge));
 				}
 			}
-			model.remove(node);
+			model.remove(state);
 		} finally {
 			model.endUpdate();
 		}
-		return (mxICell[]) removed.toArray();
+		return (GraphTransition[]) removed.toArray();
 	}
 
 	/**
@@ -250,7 +263,10 @@ public class Graph extends mxGraph {
 	 * @return true if final
 	 */
 	public boolean isFinalState(mxICell state) {
-		// TODO Auto-generated method stub
+		GraphState graphState = states.get(state);
+		if (graphState != null) {
+			return graphState.isFinal();
+		}
 		return false;
 	}
 
@@ -263,33 +279,56 @@ public class Graph extends mxGraph {
 	 *            finality to set
 	 */
 	public void setFinal(mxICell state, boolean isFinal) {
-		// TODO: Unimplemented
+		// TODO: Set final in model
+		GraphState graphState = states.get(state);
+		if (graphState != null) {
+			graphState.setFinal(isFinal);
+		}
 	}
 
-	public void removeTransition(mxICell transition) {
-		// TODO Auto-generated method stub
-
+	public void removeTransition(GraphTransition transition) {
+		// TODO Remove from model
+		transitions.remove(transition.getTransition());
 	}
 
-	public void addTransition(mxICell transition) {
-		mxGeometry g = transition.getGeometry();
-		insertEdge(getDefaultParent(), transition.getId(),
-				transition.getValue(), g.getSourcePoint(), g.getTargetPoint());
+	public void addTransition(GraphTransition transition) {
+		mxICell cell = transition.getTransition();
+		mxICell from = transition.getFrom().getState();
+		mxICell to = transition.getTo().getState();
+		insertEdge(getDefaultParent(), cell.getId(), cell.getValue(), from, to);
+		transitions.put(cell, transition);
 	}
 
-	public void addState(mxICell state) {
-		mxGeometry g = state.getGeometry();
-		insertVertex(getDefaultParent(), state.getId(), state.getValue(),
+	/**
+	 * Sets the given state to be the start state. If a start state already
+	 * exists, that state will become a non-start state.
+	 * 
+	 * @param state
+	 *            the state to set as the start state.
+	 */
+	public void setStartState(GraphState state) {
+		if (startState != null) {
+			startState.setStart(false);
+		}
+		startState = state;
+		startState.setStart(true);
+	}
+
+	// TODO: Not keeping track of start state history.
+	public void addState(GraphState state) {
+		mxICell cell = state.getState();
+		mxGeometry g = cell.getGeometry();
+		insertVertex(getDefaultParent(), cell.getId(), cell.getValue(),
 				g.getX(), g.getY(), g.getWidth(), g.getHeight(),
-				state.getStyle(), g.isRelative());
+				cell.getStyle(), g.isRelative());
+		states.put(cell, state);
 	}
 
-	public void addStateWithTransitions(mxICell state, mxICell[] transitions) {
-		// TODO Caution: I dont think that transitions store the actual states
-		// they are connected to, only the coordinates
+	public void addStateWithTransitions(GraphState state,
+			GraphTransition[] transitions) {
 		addState(state);
-		if (transitions != null && transitions.length > 0) {
-			for (mxICell t : transitions) {
+		if (transitions != null) {
+			for (GraphTransition t : transitions) {
 				addTransition(t);
 			}
 		}

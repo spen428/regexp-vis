@@ -1,7 +1,5 @@
 package ui;
 
-import com.mxgraph.model.mxICell;
-
 /**
  * Command to add a transition to an automaton
  * 
@@ -9,14 +7,14 @@ import com.mxgraph.model.mxICell;
  */
 public class AddTransitionUICommand extends UICommand {
 
-	private final mxICell transition;
+	private final GraphTransition transition;
 
-	public AddTransitionUICommand(Graph graph, mxICell transition) {
+	public AddTransitionUICommand(Graph graph, GraphTransition transition) {
 		super(graph);
 		this.transition = transition;
 	}
 
-	public mxICell getTransition() {
+	public GraphTransition getTransition() {
 		return transition;
 	}
 

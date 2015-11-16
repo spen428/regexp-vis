@@ -1,6 +1,5 @@
 package ui;
 
-import com.mxgraph.model.mxICell;
 
 /**
  * Command to add a state to an automaton
@@ -9,14 +8,14 @@ import com.mxgraph.model.mxICell;
  */
 public class AddStateUICommand extends UICommand {
 
-	private final mxICell state;
+	private final GraphState state;
 
-	public AddStateUICommand(Graph graph, mxICell state) {
+	public AddStateUICommand(Graph graph, GraphState state) {
 		super(graph);
 		this.state = state;
 	}
 
-	public mxICell getState() {
+	public GraphState getState() {
 		return state;
 	}
 

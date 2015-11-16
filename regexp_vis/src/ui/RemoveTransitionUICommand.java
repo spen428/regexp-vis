@@ -1,7 +1,5 @@
 package ui;
 
-import com.mxgraph.model.mxICell;
-
 /**
  * Command to remove a transition from an automaton
  * 
@@ -9,9 +7,9 @@ import com.mxgraph.model.mxICell;
  */
 public class RemoveTransitionUICommand extends UICommand {
 
-	private final mxICell transition;
+	private final GraphTransition transition;
 
-	public RemoveTransitionUICommand(Graph graph, mxICell transition) {
+	public RemoveTransitionUICommand(Graph graph, GraphTransition transition) {
 		super(graph);
 		this.transition = transition;
 	}
