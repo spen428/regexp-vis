@@ -6,26 +6,26 @@
 
     <property name="mainclass" value="main.Program" />
 
+    <target name="all" depends="clean, test, jar" />
+
+    <!-- BUILD -->
+
     <path id="classpath">
         <fileset dir="lib" includes="*.jar" />
     </path>
 
-    <path id="test-classpath">
-        <fileset dir="lib" includes="*.jar, test/**/*.jar" />
-    </path>
-
-    <target name="all" depends="clean, test, jar" />
-
-    <target name="clean">
-        <delete dir="bin" />
-        <delete dir="dist" />
-    </target>
-
-    <target name="build" depends="libs">
+    <target name="build">
         <mkdir dir="bin" />
         <javac srcdir="src" destdir="bin" classpathref="classpath"
             includes="**/*.java" excludes="test/**/*.java"
             includeantruntime="false" />
+    </target>
+
+    <!-- MISC -->
+
+    <target name="clean">
+        <delete dir="bin" />
+        <delete dir="dist" />
     </target>
 
     <target name="libs">
@@ -34,15 +34,7 @@
         </unjar>
     </target>
 
-    <target name="test" depends="build">
-        <unjar dest="bin">
-            <fileset dir="lib" includes="test/**/*.jar" />
-        </unjar>
-        <javac srcdir="src/test" destdir="bin" classpathref="test-classpath"
-            includes="**/*.java" includeantruntime="false" />
-    </target>
-
-    <target name="jar" depends="build">
+    <target name="jar" depends="build,libs">
         <mkdir dir="dist" />
         <jar destfile="dist/${ant.project.name}.jar" basedir="bin">
             <manifest>
@@ -53,6 +45,51 @@
 
     <target name="run">
         <java jar="dist/${ant.project.name}.jar" fork="true" />
+    </target>
+
+    <!-- TESTS -->
+
+    <path id="test-classpath">
+        <fileset dir="lib" includes="*.jar, test/**/*.jar" />
+    </path>
+
+    <target name="test" depends="build">
+        <javac srcdir="src/test" destdir="bin" classpathref="test-classpath"
+            includes="**/*.java" includeantruntime="false" />
+    </target>
+
+    <target name="runtests" depends="test">
+        <!-- Set up output directories -->
+        <tstamp>
+            <format property="timestamp" pattern="yyyy-MM-dd_HHmmss" />
+        </tstamp>
+        <property name="reportdir" location="./testreports" />
+        <property name="outdir" location="${reportdir}/${timestamp}" />
+        <mkdir dir="${reportdir}" />
+        <mkdir dir="${outdir}" />
+
+        <!-- Run JUnit tests, output results as XML -->
+        <junit printsummary="on">
+            <formatter type="xml" />
+            <classpath>
+                <fileset dir="bin" includes="**.*.class" />
+                <fileset dir="lib" includes="test/**/*.jar,test/*.jar" />
+                <pathelement location="bin" />
+            </classpath>
+            <batchtest fork="yes" todir="${outdir}">
+                <fileset dir="bin">
+                    <include name="test/**/*.class" />
+                </fileset>
+            </batchtest>
+        </junit>
+
+        <!-- Format XML output as HTML -->
+        <junitreport todir="${outdir}">
+            <fileset dir="${outdir}">
+                <include name="**/TEST-*.xml" />
+            </fileset>
+            <report format="frames" todir="${outdir}/html" />
+        </junitreport>
     </target>
 
 </project>
