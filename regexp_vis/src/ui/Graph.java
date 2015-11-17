@@ -80,33 +80,35 @@ public class Graph extends mxGraph {
 	}
 
 	/**
-	 * Removes the given node and any edges connected to the node. If you do not
-	 * wish to remove the edges, use {{@link #removeState(GraphState, boolean)}.
+	 * Removes the given state and any transitions connected to the state. If
+	 * you do not wish to remove the transitions, use
+	 * {@link #removeState(GraphState, boolean)}.
 	 * 
-	 * @param node
-	 *            the node to remove
-	 * @return an array of the edges that were removed
+	 * @param state
+	 *            the state to remove
+	 * @return an array of the transitions that were removed
 	 */
 	public GraphTransition[] removeState(GraphState state) {
 		return removeState(state, true);
 	}
 
 	/**
-	 * Removes the given node, and optionally any edges associated with the
-	 * node.
+	 * Removes the given state, and optionally any transitions associated with
+	 * that state.
 	 * 
 	 * @param state
-	 *            the node to remove
-	 * @param removeEdges
-	 *            whether to remove edges that are connected to this node
-	 * @return an array of the edges that were removed
+	 *            the state to remove
+	 * @param removeTransitions
+	 *            whether to remove transitions that are connected to this state
+	 * @return an array of the transitions that were removed
 	 */
-	public GraphTransition[] removeState(GraphState state, boolean removeEdges) {
+	public GraphTransition[] removeState(GraphState state,
+			boolean removeTransitions) {
 		mxICell cell = state.getState();
 		ArrayList<GraphTransition> removed = new ArrayList<GraphTransition>();
 		model.beginUpdate();
 		try {
-			if (removeEdges) {
+			if (removeTransitions) {
 				int numEdges = model.getEdgeCount(state);
 				for (int i = 0; i < numEdges; i++) {
 					mxICell edge = cell.getEdgeAt(i);
@@ -122,16 +124,16 @@ public class Graph extends mxGraph {
 	}
 
 	/**
-	 * Removes all edges between the two given nodes.
+	 * Removes all transitions between two states.
 	 * 
-	 * @param node1
-	 *            The starting node
-	 * @param node2
-	 *            The ending node
-	 * @return the edges that were removed
+	 * @param state1
+	 *            The starting state
+	 * @param state2
+	 *            The ending state
+	 * @return the transitions that were removed
 	 */
-	public Object[] removeEdgesBetween(mxICell node1, mxICell node2) {
-		Object[] edges = getEdgesBetween(node1, node2);
+	public Object[] removeTransitionsBetween(mxICell state1, mxICell state2) {
+		Object[] edges = getEdgesBetween(state1, state2);
 		model.beginUpdate();
 		try {
 			for (Object edge : edges) {
@@ -245,7 +247,7 @@ public class Graph extends mxGraph {
 	}
 
 	/**
-	 * Removes all vertices and edges from this graph.
+	 * Removes all nodes and edges from this graph.
 	 */
 	public void clear() {
 		getModel().beginUpdate();
