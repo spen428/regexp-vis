@@ -19,7 +19,7 @@ public final class AutomatonState {
     }
 
     /**
-     * @return The unique id for state in an automaton
+     * @return The unique id for this state in an automaton
      */
     public int getId()
     {
