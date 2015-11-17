@@ -138,6 +138,11 @@ public class GraphTest {
 	}
 
 	@Test
+	public final void testHashCode() {
+		fail("Not yet implemented"); // TODO
+	}
+	
+	@Test
 	public final void testEquals() {
 		fail("Not yet implemented"); // TODO
 	}

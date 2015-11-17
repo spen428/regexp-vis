@@ -3,9 +3,7 @@ package test.ui;
 import ui.UI;
 
 /**
- * 
  * @author sp611
- * 
  */
 public class UITest {
 

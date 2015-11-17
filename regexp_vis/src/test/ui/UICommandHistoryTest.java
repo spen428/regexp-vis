@@ -34,32 +34,31 @@ public class UICommandHistoryTest {
 	}
 
 	@Test
-	public void testGraphHistoryComplex() {
-		Graph graph = new Graph();
-		CommandHistory history = new CommandHistory();
+	public final void testGraphHistoryComplex() {
+		final Graph graph = new Graph();
+		final CommandHistory history = new CommandHistory();
 
 		// Create the states we are going to use
-		GraphState start = graph.createNewState("0");
+		final GraphState start = graph.createNewState("0");
 		graph.setStartState(start);
-		GraphState b = graph.createNewState("1");
-		GraphState c = graph.createNewState("2");
-		GraphState d = graph.createNewState("3");
-		GraphState e = graph.createNewState("4");
-		GraphState f = graph.createNewState("5");
+		final GraphState b = graph.createNewState("1");
+		final GraphState c = graph.createNewState("2");
+		final GraphState d = graph.createNewState("3");
+		final GraphState e = graph.createNewState("4");
+		final GraphState f = graph.createNewState("5");
 
 		// Create the transitions we are going to use
-		GraphTransition start_b_0 = graph.createNewTransition(start, b, "1");
+		final GraphTransition s_b_0 = graph.createNewTransition(start, b, "1");
 
-		GraphTransition b_c_0 = graph.createNewTransition(b, c, "2");
-		GraphTransition c_d_0 = graph.createNewTransition(c, d, "3");
-		GraphTransition d_e_0 = graph.createNewTransition(d, e, "4");
-		GraphTransition e_b_0 = graph.createNewTransition(e, b, "5");
-
-		GraphTransition c_f_0 = graph.createNewTransition(c, f, "!");
+		final GraphTransition b_c_0 = graph.createNewTransition(b, c, "2");
+		final GraphTransition c_d_0 = graph.createNewTransition(c, d, "3");
+		final GraphTransition d_e_0 = graph.createNewTransition(d, e, "4");
+		final GraphTransition e_b_0 = graph.createNewTransition(e, b, "5");
+		final GraphTransition c_f_0 = graph.createNewTransition(c, f, "!");
 
 		// Build the graph we want through a series of commands
 		history.executeNewCommand(new AddStateUICommand(graph, b));
-		history.executeNewCommand(new AddTransitionUICommand(graph, start_b_0));
+		history.executeNewCommand(new AddTransitionUICommand(graph, s_b_0));
 
 		history.executeNewCommand(new AddStateUICommand(graph, c));
 		history.executeNewCommand(new AddTransitionUICommand(graph, b_c_0));
