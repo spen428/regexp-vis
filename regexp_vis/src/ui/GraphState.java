@@ -19,6 +19,7 @@ public class GraphState {
 	public GraphState(mxICell state, boolean isFinal) {
 		super();
 		this.state = state;
+		this.isStart = false;
 		this.isFinal = isFinal;
 	}
 
