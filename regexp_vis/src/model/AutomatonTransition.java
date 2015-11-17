@@ -1,18 +1,28 @@
 package model;
 
 public final class AutomatonTransition {
+    private final int mId;
     private final AutomatonState mFrom;
     private final AutomatonState mTo;
 
     // TODO(mjn33): Possibly use BasicRegexp in the future
     private final Object mData;
 
-    public AutomatonTransition(AutomatonState from, AutomatonState to,
+    public AutomatonTransition(int id, AutomatonState from, AutomatonState to,
         Object data)
     {
+        mId = id;
         mFrom = from;
         mTo = to;
         mData = data;
+    }
+
+    /**
+     * @return The unique id for this transition in an automaton
+     */
+    public int getId()
+    {
+        return mId;
     }
 
     /**

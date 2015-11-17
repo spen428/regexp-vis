@@ -14,8 +14,10 @@ public class Automaton {
     // The state to start in, not stating the end state, since that
     // will be handled by isFinal() in AutomatonState
     private AutomatonState mStartState;
-    // Counter to give AutomatonStates unique IDs
+    // Counter to give AutomatonState(s) unique IDs
     private int mCounter;
+    // Counter to give AutomatonTransition(s) unique IDs
+    private int mTransCounter;
 
     public Automaton()
     {
@@ -116,7 +118,7 @@ public class Automaton {
     public AutomatonTransition createNewTransition(AutomatonState from,
         AutomatonState to, Object data)
     {
-        return new AutomatonTransition(from, to, data);
+        return new AutomatonTransition(mTransCounter++, from, to, data);
     }
 
     /**
