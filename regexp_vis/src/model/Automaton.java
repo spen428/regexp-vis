@@ -77,6 +77,65 @@ public class Automaton {
     }
 
     /**
+     * @param state The state to check
+     * @return true if this state has out-going transitions, false
+     * otherwise
+     */
+    public boolean hasOutgoingTransition(AutomatonState state)
+    {
+        LinkedList<AutomatonTransition> transitions = mGraph.get(state);
+        if (transitions == null) {
+            throw new RuntimeException(
+                "The specified state \"state\" is not part of this " +
+                "automaton.");
+        }
+
+        return !transitions.isEmpty();
+    }
+
+    /**
+     * @param state The state to check
+     * @return true if this state has in-going transitions, false
+     * otherwise
+     */
+    public boolean hasIngoingTransition(AutomatonState state)
+    {
+        for (Map.Entry<AutomatonState, LinkedList<AutomatonTransition>> e :
+            mGraph.entrySet()) {
+            LinkedList<AutomatonTransition> transitions = e.getValue();
+
+            for (AutomatonTransition t : transitions) {
+                if (t.getTo() == state) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param state The state in question
+     * @return The in-going transitions for the specified state
+     */
+    public List<AutomatonTransition> getIngoingTransition(AutomatonState state)
+    {
+        LinkedList<AutomatonTransition> ret = new LinkedList<>();
+        for (Map.Entry<AutomatonState, LinkedList<AutomatonTransition>> e :
+            mGraph.entrySet()) {
+            LinkedList<AutomatonTransition> transitions = e.getValue();
+
+            for (AutomatonTransition t : transitions) {
+                if (t.getTo() == state) {
+                    ret.add(t);
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    /**
      * @param state The state in question
      * @return The out-going transitions for the specified state, as
      * an unmodifiable list.
