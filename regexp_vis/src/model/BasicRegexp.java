@@ -19,6 +19,11 @@ public class BasicRegexp implements Cloneable {
         CHOICE
     }
 
+    /**
+     * Character used to represent epsilon / lambda / etc.
+     */
+    public static final char EPSILON_CHAR = '\0';
+
     final private ArrayList<BasicRegexp> mOperands;
     final private char mChar;
     final private RegexpOperator mOperator;
@@ -50,7 +55,7 @@ public class BasicRegexp implements Cloneable {
         }
 
         mOperands = operands;
-        mChar = '\0';
+        mChar = EPSILON_CHAR;
         mOperator = op;
     }
 
@@ -73,7 +78,7 @@ public class BasicRegexp implements Cloneable {
 
         mOperands = new ArrayList<>();
         mOperands.add(operand);
-        mChar = '\0';
+        mChar = EPSILON_CHAR;
         mOperator = op;
     }
 
