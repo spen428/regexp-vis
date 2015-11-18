@@ -10,7 +10,7 @@ package model;
  *
  * @see CommandHistory
  */
-abstract class Command {
+public abstract class Command {
     private final Automaton mAutomaton;
 
     public Command(Automaton automaton)
@@ -32,11 +32,11 @@ abstract class Command {
      * was executed for the first time. Calling undo() if the command
      * hasn't been done, or has already been "undone" is undefined.
      */
-    abstract void undo();
+    public abstract void undo();
     /**
      * This performs the command. Also used to execute the command for
      * the first time (despite the name "redo"). Calling redo() if the
      * command has already been "done" is undefined.
      */
-    abstract void redo();
+    public abstract void redo();
 }
