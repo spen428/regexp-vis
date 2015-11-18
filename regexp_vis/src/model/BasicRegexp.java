@@ -24,6 +24,13 @@ public class BasicRegexp implements Cloneable {
      */
     public static final char EPSILON_CHAR = '\0';
 
+    /**
+     * Expression used to represent epsilon / lambda / etc. Here so we
+     * don't have to keep creating new objects
+     */
+    public static final BasicRegexp EPSILON_EXPRESSION =
+        new BasicRegexp(EPSILON_CHAR, RegexpOperator.NONE);
+
     final private ArrayList<BasicRegexp> mOperands;
     final private char mChar;
     final private RegexpOperator mOperator;
