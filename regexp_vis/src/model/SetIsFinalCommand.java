@@ -29,4 +29,14 @@ public class SetIsFinalCommand extends Command {
             mState.setFinal(!mState.isFinal());
         }
     }
+
+    public boolean isDiffers()
+    {
+        return mDiffers;
+    }
+
+    public AutomatonState getState()
+    {
+        return mState;
+    }
 }

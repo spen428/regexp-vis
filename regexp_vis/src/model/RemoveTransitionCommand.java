@@ -22,4 +22,9 @@ public class RemoveTransitionCommand extends Command {
     {
         getAutomaton().addTransition(mTransition);
     }
+
+    public AutomatonTransition getTransition()
+    {
+        return mTransition;
+    }
 }
