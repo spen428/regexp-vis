@@ -109,7 +109,7 @@ public class UICommandHistoryTest {
         assertFalse(graph.containsTransition(e_b_0.getTransition()));
 
         // Test undo to after first command executed
-        history.seekIdx(1);
+        history.seekIdx(2); // +1 because of necessary SetStartStateUICommand
         assertTrue(graph.containsState(s.getState()));
         assertTrue(graph.containsState(b.getState()));
         assertFalse(graph.containsState(c.getState()));

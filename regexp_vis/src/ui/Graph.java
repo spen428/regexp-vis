@@ -129,22 +129,27 @@ public class Graph extends mxGraph {
      * @return the {@link mxCell} representing the state
      */
     mxCell setStartState(AutomatonState state) {
-        mxCell cell = states.remove(state);
-        if (cell == null) {
-            /* State doesn't exist yet, let's create it */
-            cell = addState(state);
-        }
         if (startState != null) {
             /* Must replace the old entry with the new */
             mxCell startCell = states.remove(startState);
             startCell = setStartState(startCell, false);
             states.put(startState, startCell);
         }
-        /* Must replace the old entry with the new */
-        cell = setStartState(cell, true);
-        states.put(state, cell);
-        startState = state;
-        return cell;
+        if (state != null) {
+            mxCell cell = states.remove(state);
+            if (cell == null) {
+                /* State doesn't exist yet, let's create it */
+                cell = addState(state);
+            }
+            /* Must replace the old entry with the new */
+            cell = setStartState(cell, true);
+            states.put(state, cell);
+            startState = state;
+            return cell;
+        } else {
+            startState = null;
+            return null;
+        }
     }
 
     private mxCell setStartState(mxCell cell, boolean isStart) {
