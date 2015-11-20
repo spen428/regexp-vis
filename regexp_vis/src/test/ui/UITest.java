@@ -7,9 +7,9 @@ import ui.UI;
  */
 public class UITest {
 
-	public static void main(String[] args) {
-		UI frame = new UI("Regular Language Visualiser - User Interface Demo");
-		frame.setVisible(true);
-	}
+    public static void main(String[] args) {
+        UI frame = new UI("Regular Language Visualiser - User Interface Demo");
+        frame.setVisible(true);
+    }
 
 }

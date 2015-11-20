@@ -1,5 +1,7 @@
 package ui;
 
+import model.AddTransitionCommand;
+
 /**
  * Command to add a transition to an automaton
  * 
@@ -7,23 +9,21 @@ package ui;
  */
 public class AddTransitionUICommand extends UICommand {
 
-	private final GraphTransition transition;
+    private final AddTransitionCommand ccmd;
 
-	public AddTransitionUICommand(Graph graph, GraphTransition transition) {
-		super(graph);
-		this.transition = transition;
-	}
+    public AddTransitionUICommand(Graph graph, AddTransitionCommand cmd) {
+        super(graph, cmd);
+        this.ccmd = cmd;
+    }
 
-	public GraphTransition getTransition() {
-		return transition;
-	}
+    public void redo() {
+        graph.addTransition(ccmd.getTransition());
+        cmd.redo();
+    }
 
-	public void redo() {
-		graph.addTransition(transition);
-	}
-
-	public void undo() {
-		graph.removeTransition(transition);
-	}
+    public void undo() {
+        graph.removeTransition(ccmd.getTransition());
+        cmd.undo();
+    }
 
 }

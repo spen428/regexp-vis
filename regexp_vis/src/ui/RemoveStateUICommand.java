@@ -1,5 +1,7 @@
 package ui;
 
+import model.RemoveStateCommand;
+
 /**
  * Command to remove a state and its outgoing transitions from an automaton
  * 
@@ -7,24 +9,21 @@ package ui;
  */
 public class RemoveStateUICommand extends UICommand {
 
-	private final GraphState state;
-	private GraphTransition[] transitions;
+    private final RemoveStateCommand ccmd;
 
-	public RemoveStateUICommand(Graph graph, GraphState state) {
-		super(graph);
-		this.state = state;
-	}
+    public RemoveStateUICommand(Graph graph, RemoveStateCommand cmd) {
+        super(graph, cmd);
+        this.ccmd = cmd;
+    }
 
-	public GraphState getState() {
-		return state;
-	}
+    public void redo() {
+        graph.removeState(ccmd.getState());
+        ccmd.redo();
+    }
 
-	public void redo() {
-		transitions = graph.removeState(state);
-	}
-
-	public void undo() {
-		graph.addStateWithTransitions(state, transitions);
-	}
+    public void undo() {
+        graph.addStateWithTransitions(ccmd.getState(), ccmd.getTransitions());
+        ccmd.undo();
+    }
 
 }

@@ -10,7 +10,6 @@ import model.AutomatonState;
 import model.AutomatonTransition;
 
 import com.mxgraph.model.mxCell;
-import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
@@ -18,6 +17,8 @@ import com.mxgraph.view.mxPerimeter;
 import com.mxgraph.view.mxStylesheet;
 
 /**
+ * Represents an {@link Automaton} using the JGraph graphing libraries.
+ * <p>
  * Extends {@link mxGraph}, overriding the default stylesheet.
  * 
  * @author sp611
@@ -25,384 +26,349 @@ import com.mxgraph.view.mxStylesheet;
  */
 public class Graph extends mxGraph {
 
-	private static final int VERTEX_DIAMETER_PX = 50;
+    // FIELDS //
+    private static final int VERTEX_DIAMETER_PX = 50;
+    /**
+     * A string representing the {@link mxGraph} style for start states.
+     */
+    private static final String START_STATE_STYLE = ""; // TODO: Unimplemented
+    /**
+     * A string representing the {@link mxGraph} style for final states.
+     */
+    private static final String FINAL_STATE_STYLE = ""; // TODO: Unimplemented
+    /**
+     * Maps the {@link mxCell} states to the {@link AutomatonState} states.
+     */
+    private final Map<AutomatonState, mxCell> states;
+    /**
+     * Maps the {@link mxCell} transitions to the {@link AutomatonTransition}
+     * transitions.
+     */
+    private final Map<AutomatonTransition, mxCell> transitions;
+    /**
+     * The starting state.
+     */
+    private AutomatonState startState;
+    /**
+     * The underlying {@link Automaton} that this graph represents.
+     */
+    private final Automaton automaton;
 
-	/**
-	 * A string representing the {@link mxGraph} style for final states.
-	 */
-	private static final String FINAL_STATE_STYLE = null; // TODO: Unimplemented
+    // CONSTRUCTORS //
+    public Graph() {
+        this(new Automaton());
+    }
 
-	private final HashMap<mxICell, GraphState> states;
-	private final HashMap<mxICell, GraphTransition> transitions;
+    public Graph(Automaton automaton) {
+        super();
+        this.automaton = automaton;
+        this.states = new HashMap<>();
+        this.transitions = new HashMap<>();
+    }
 
-	private GraphState startState;
+    // GETTERS //
+    public Automaton getAutomaton() {
+        return automaton;
+    }
 
-	public Graph() {
-		super();
-		this.states = new HashMap<>();
-		this.transitions = new HashMap<>();
-	}
+    public int getNumStateTransitions(AutomatonState state) {
+        mxCell cell = states.get(state);
+        return model.getEdgeCount(cell);
+    }
 
-	/**
-	 * Generates a stylesheet defining the default visual appearance of the
-	 * graph.
-	 */
-	@Override
-	protected mxStylesheet createStylesheet() {
-		// TODO: Load from external file
-		Map<String, Object> edgeStyle = new HashMap<String, Object>();
-		/* The curve shape seems to mess up the arrow heads. */
-		// edgeStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_CURVE);
-		edgeStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_CONNECTOR);
-		edgeStyle.put(mxConstants.STYLE_STROKECOLOR, "#000000");
-		edgeStyle.put(mxConstants.STYLE_FONTSTYLE, mxConstants.FONT_BOLD);
-		edgeStyle.put(mxConstants.STYLE_FONTSIZE, "12");
-		edgeStyle.put(mxConstants.STYLE_ALIGN, mxConstants.ALIGN_CENTER);
-		edgeStyle.put(mxConstants.STYLE_VERTICAL_ALIGN,
-				mxConstants.ALIGN_MIDDLE);
-		edgeStyle.put(mxConstants.STYLE_ENDARROW, mxConstants.ARROW_CLASSIC);
+    public AutomatonState getStartState() {
+        return startState;
+    }
 
-		Map<String, Object> vertexStyle = new HashMap<String, Object>();
-		vertexStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_ELLIPSE);
-		vertexStyle.put(mxConstants.STYLE_STROKECOLOR, "#000000");
-		vertexStyle.put(mxConstants.STYLE_FILLCOLOR, "#ffffff");
-		vertexStyle.put(mxConstants.STYLE_FONTSIZE, "14");
-		vertexStyle.put(mxConstants.STYLE_PERIMETER,
-				mxPerimeter.EllipsePerimeter);
-		vertexStyle.put(mxConstants.STYLE_ALIGN, mxConstants.ALIGN_CENTER);
-		vertexStyle.put(mxConstants.STYLE_VERTICAL_ALIGN,
-				mxConstants.ALIGN_MIDDLE);
+    // OVERRIDES //
 
-		mxStylesheet styleSheet = new mxStylesheet();
-		styleSheet.setDefaultEdgeStyle(edgeStyle);
-		styleSheet.setDefaultVertexStyle(vertexStyle);
-		return styleSheet;
-	}
+    /**
+     * Generates a stylesheet defining the default visual appearance of the
+     * graph.
+     */
+    @Override
+    protected mxStylesheet createStylesheet() {
+        // TODO: Load from external file
+        Map<String, Object> edgeStyle = new HashMap<String, Object>();
+        /* The curve shape seems to mess up the arrow heads. */
+        // edgeStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_CURVE);
+        edgeStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_CONNECTOR);
+        edgeStyle.put(mxConstants.STYLE_STROKECOLOR, "#000000");
+        edgeStyle.put(mxConstants.STYLE_FONTSTYLE, mxConstants.FONT_BOLD);
+        edgeStyle.put(mxConstants.STYLE_FONTSIZE, "12");
+        edgeStyle.put(mxConstants.STYLE_ALIGN, mxConstants.ALIGN_CENTER);
+        edgeStyle.put(mxConstants.STYLE_VERTICAL_ALIGN,
+                mxConstants.ALIGN_MIDDLE);
+        edgeStyle.put(mxConstants.STYLE_ENDARROW, mxConstants.ARROW_CLASSIC);
 
-	/**
-	 * Removes the given state and any transitions connected to the state. If
-	 * you do not wish to remove the transitions, use
-	 * {@link #removeState(GraphState, boolean)}.
-	 * 
-	 * @param state
-	 *            the state to remove
-	 * @return an array of the transitions that were removed
-	 */
-	public GraphTransition[] removeState(GraphState state) {
-		return removeState(state, true);
-	}
+        Map<String, Object> vertexStyle = new HashMap<String, Object>();
+        vertexStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_ELLIPSE);
+        vertexStyle.put(mxConstants.STYLE_STROKECOLOR, "#000000");
+        vertexStyle.put(mxConstants.STYLE_FILLCOLOR, "#ffffff");
+        vertexStyle.put(mxConstants.STYLE_FONTSIZE, "14");
+        vertexStyle.put(mxConstants.STYLE_PERIMETER,
+                mxPerimeter.EllipsePerimeter);
+        vertexStyle.put(mxConstants.STYLE_ALIGN, mxConstants.ALIGN_CENTER);
+        vertexStyle.put(mxConstants.STYLE_VERTICAL_ALIGN,
+                mxConstants.ALIGN_MIDDLE);
 
-	/**
-	 * Removes the given state, and optionally any transitions associated with
-	 * that state.
-	 * 
-	 * @param state
-	 *            the state to remove
-	 * @param removeTransitions
-	 *            whether to remove transitions that are connected to this state
-	 * @return an array of the transitions that were removed
-	 */
-	public GraphTransition[] removeState(GraphState state,
-			boolean removeTransitions) {
-		mxICell cell = state.getState();
-		ArrayList<GraphTransition> removed = new ArrayList<GraphTransition>();
-		model.beginUpdate();
-		try {
-			if (removeTransitions) {
-				int numEdges = model.getEdgeCount(state);
-				for (int i = 0; i < numEdges; i++) {
-					mxICell edge = cell.getEdgeAt(i);
-					cell.remove(edge);
-					removed.add((GraphTransition) transitions.remove(edge));
-				}
-			}
-			model.remove(state);
-		} finally {
-			model.endUpdate();
-		}
-		return (GraphTransition[]) removed.toArray();
-	}
+        mxStylesheet styleSheet = new mxStylesheet();
+        styleSheet.setDefaultEdgeStyle(edgeStyle);
+        styleSheet.setDefaultVertexStyle(vertexStyle);
+        return styleSheet;
+    }
 
-	/**
-	 * Removes all transitions between two states.
-	 * 
-	 * @param state1
-	 *            The starting state
-	 * @param state2
-	 *            The ending state
-	 * @return the transitions that were removed
-	 */
-	public Object[] removeTransitionsBetween(mxICell state1, mxICell state2) {
-		Object[] edges = getEdgesBetween(state1, state2);
-		model.beginUpdate();
-		try {
-			for (Object edge : edges) {
-				model.remove(edge);
-			}
-		} finally {
-			model.endUpdate();
-		}
-		return edges;
-	}
+    // STATE MANIPULATION //
 
-	/**
-	 * Adds the states and transitions from the given automaton to the graph.
-	 * 
-	 * @param automaton
-	 *            the {@link Automaton}
-	 */
-	void addAutomaton(Automaton automaton) {
-		HashMap<AutomatonState, LinkedList<AutomatonTransition>> mGraph = automaton
-				.getGraph();
-		HashMap<AutomatonState, Object> stateMapping = new HashMap<>();
-		ArrayList<AutomatonTransition> transitions = new ArrayList<>();
-		AutomatonState mStartState = automaton.getStartState();
+    /**
+     * Sets the given state to be the start state. If a start state already
+     * exists, that state will become a non-start state.
+     * 
+     * @param state
+     *            the state to set as the start state
+     * @return the {@link mxCell} representing the state
+     */
+    mxCell setStartState(AutomatonState state) {
+        mxCell cell = states.remove(state);
+        if (cell == null) {
+            /* State doesn't exist yet, let's create it */
+            cell = addState(state);
+        }
+        if (startState != null) {
+            /* Must replace the old entry with the new */
+            mxCell startCell = states.remove(startState);
+            startCell = setStartState(startCell, false);
+            states.put(startState, startCell);
+        }
+        /* Must replace the old entry with the new */
+        cell = setStartState(cell, true);
+        states.put(state, cell);
+        startState = state;
+        return cell;
+    }
 
-		getModel().beginUpdate();
-		try {
-			/* Insert states */
-			Object ss = insertAutomatonState(mStartState);
-			stateMapping.put(mStartState, ss);
-			for (AutomatonState state : mGraph.keySet()) {
-				Object obj = insertAutomatonState(state);
-				stateMapping.put(state, obj);
-			}
+    private mxCell setStartState(mxCell cell, boolean isStart) {
+        model.beginUpdate();
+        try {
+            // TODO
+        } finally {
+            model.endUpdate();
+        }
+        return cell;
+    }
 
-			/* Insert transitions */
-			for (AutomatonState state : mGraph.keySet()) {
-				for (AutomatonTransition transition : mGraph.get(state)) {
-					if (!transitions.contains(transition)) {
-						Object fromVertex = stateMapping.get(transition
-								.getFrom());
-						Object toVertex = stateMapping.get(transition.getTo());
-						insertAutomatonTransition(transition, fromVertex,
-								toVertex);
-						transitions.add(transition);
-					}
-				}
-			}
-		} finally {
-			getModel().endUpdate();
-		}
-	}
+    /**
+     * Sets the finality of the given state
+     * 
+     * @param state
+     *            the state
+     * @param isFinal
+     *            finality to set
+     * @return the {@link mxCell} representing the state
+     */
+    mxCell setFinal(AutomatonState state, boolean isFinal) {
+        mxCell cell = states.remove(state);
+        if (cell != null) {
+            /* Must replace the old entry with the new */
+            cell = setFinal(cell, isFinal);
+            states.put(state, cell);
+        }
+        return null;
+    }
 
-	/**
-	 * Insert the given {@link AutomatonTransition} into the graph by calling
-	 * {@link #insertEdge(Object, String, Object, Object, Object)}
-	 * 
-	 * @param transition
-	 *            the {@link AutomatonTransition} to insert
-	 * @param fromVertex
-	 *            the Object representing the vertex of the state the transition
-	 *            is coming from, as returned by
-	 *            {@code insertAutomatonState(AutomatonState)}
-	 * @param toVertex
-	 *            the Object representing the vertex of the state the transition
-	 *            is going to, as returned by
-	 *            {@code insertAutomatonState(AutomatonState)}
-	 * @return
-	 * @throws IllegalArgumentException
-	 *             if any parameters are {@code null}.
-	 * @see {@link #insertAutomatonState(AutomatonState)} *
-	 */
-	Object insertAutomatonTransition(AutomatonTransition transition,
-			Object fromVertex, Object toVertex) throws IllegalArgumentException {
-		if (transition == null) {
-			throw new IllegalArgumentException("transition cannot be null when"
-					+ " inserting an AutomatonTransition");
-		} else if (fromVertex == null) {
-			throw new IllegalArgumentException("fromVertex cannot be null when"
-					+ " inserting an AutomatonTransition");
-		} else if (toVertex == null) {
-			throw new IllegalArgumentException("toVertex cannot be null when"
-					+ " inserting an AutomatonTransition");
-		}
-		// String id = "transition" + transition.getId();
-		String id = null; // TODO: Swap if AutomatonTransition.getId()
-							// implemented.
-		return insertEdge(getDefaultParent(), id, transition.toString(),
-				fromVertex, toVertex);
-	}
+    mxCell setFinal(mxCell cell, boolean isFinal) {
+        model.beginUpdate();
+        try {
+            // TODO
+        } finally {
+            model.endUpdate();
+        }
+        return cell;
+    }
 
-	/**
-	 * Insert the given {@link AutomatonState} into the graph by calling
-	 * {@link #insertVertex(Object, String, Object, double, double, double, double)}
-	 * 
-	 * @param state
-	 *            the {@link AutomatonState} to insert
-	 * @return Returns the Object representing the vertex that was added to the
-	 *         graph.
-	 * @throws IllegalArgumentException
-	 *             if the <b>state</b> parameter is {@code null}.
-	 */
-	Object insertAutomatonState(AutomatonState state)
-			throws IllegalArgumentException {
-		if (state == null) {
-			throw new IllegalArgumentException("state cannot be null when"
-					+ " inserting an AutomatonState");
-		}
-		return insertVertex(getDefaultParent(), "state" + state.getId(),
-				state.toString(), 0, 0, VERTEX_DIAMETER_PX, VERTEX_DIAMETER_PX,
-				state.isFinal() ? FINAL_STATE_STYLE : null);
-	}
+    /**
+     * Adds an {@link AutomatonState} to the graph if it does not already exist.
+     * 
+     * @param state
+     *            the {@link AutomatonState} to add
+     * @return the {@link mxCell} that was added to the graph, or {@code null}
+     *         if nothing was added
+     * @throws IllegalArgumentException
+     *             if the <b>state</b> parameter is {@code null}.
+     */
+    mxCell addState(AutomatonState state) {
+        if (state == null) {
+            throw new IllegalArgumentException("state cannot be null when"
+                    + " inserting an AutomatonState");
+        } else if (states.get(state) != null) {
+            return null;
+        }
 
-	/**
-	 * Removes all nodes and edges from this graph.
-	 */
-	public void clear() {
-		getModel().beginUpdate();
-		try {
-			// TODO: Unimplemented
-		} finally {
-			getModel().endUpdate();
-		}
-	}
+        String id = "state" + state.getId();
+        String style = state.isFinal() ? FINAL_STATE_STYLE : null;
 
-	/**
-	 * Returns true if the given state is a final state.
-	 * 
-	 * @param state
-	 *            the state
-	 * @return true if final
-	 */
-	public boolean isFinalState(mxICell state) {
-		GraphState graphState = states.get(state);
-		if (graphState != null) {
-			return graphState.isFinal();
-		}
-		return false;
-	}
+        mxCell cell = null;
+        model.beginUpdate();
+        try {
+            cell = (mxCell) insertVertex(getDefaultParent(), id, id, 0, 0,
+                    VERTEX_DIAMETER_PX, VERTEX_DIAMETER_PX, style);
+            states.put(state, cell);
+        } finally {
+            model.endUpdate();
+        }
+        return cell;
+    }
 
-	/**
-	 * Sets the finality of the given state
-	 * 
-	 * @param state
-	 *            the state
-	 * @param isFinal
-	 *            finality to set
-	 */
-	public void setFinal(mxICell state, boolean isFinal) {
-		// TODO: Set final in model
-		GraphState graphState = states.get(state);
-		if (graphState != null) {
-			graphState.setFinal(isFinal);
-		}
-	}
+    boolean addStateWithTransitions(AutomatonState state,
+            LinkedList<AutomatonTransition> transitions) {
+        if (addState(state) == null) {
+            /* addState() failed so do not continue. */
+            return false;
+        }
 
-	public void removeTransition(GraphTransition transition) {
-		// TODO Remove from model
-		transitions.remove(transition.getTransition());
-	}
+        if (transitions != null) {
+            for (AutomatonTransition t : transitions) {
+                addTransition(t);
+            }
+        }
 
-	public void addTransition(GraphTransition transition) {
-		mxICell cell = transition.getTransition();
-		mxICell from = transition.getFrom().getState();
-		mxICell to = transition.getTo().getState();
-		insertEdge(getDefaultParent(), cell.getId(), cell.getValue(), from, to);
-		transitions.put(cell, transition);
-	}
+        return true;
+    }
 
-	/**
-	 * Sets the given state to be the start state. If a start state already
-	 * exists, that state will become a non-start state.
-	 * 
-	 * @param state
-	 *            the state to set as the start state.
-	 */
-	public void setStartState(GraphState state) {
-		if (startState != null) {
-			startState.setStart(false);
-		}
-		startState = state;
-		startState.setStart(true);
-	}
+    /**
+     * Removes the given state and any transitions associated with the state.
+     * <p>
+     * If you do not wish to remove the transitions, use
+     * {@link #removeState(AutomatonState, boolean)}.
+     * 
+     * @param state
+     *            the state to remove
+     * @param removeTransitions
+     *            whether to remove transitions that are connected to this state
+     * @return an array of the cells that were removed
+     */
+    mxCell[] removeState(AutomatonState state) {
+        return removeState(state, true);
+    }
 
-	// TODO: Not keeping track of start state history.
-	public void addState(GraphState state) {
-		mxICell cell = state.getState();
-		mxGeometry g = cell.getGeometry();
-		if (g == null) {
-			g = new mxGeometry(0, 0, VERTEX_DIAMETER_PX, VERTEX_DIAMETER_PX);
-		}
+    /**
+     * Removes the given state and optionally any transitions associated with
+     * the state.
+     * 
+     * @param state
+     *            the state to remove
+     * @param removeTransitions
+     *            whether to remove transitions that are connected to this state
+     * @return an array of the cells that were removed
+     */
+    mxCell[] removeState(AutomatonState state, boolean removeTransitions) {
+        mxCell cell = states.remove(state);
+        ArrayList<mxCell> removed = new ArrayList<mxCell>();
 
-		insertVertex(getDefaultParent(), cell.getId(), cell.getValue(),
-				g.getX(), g.getY(), g.getWidth(), g.getHeight(),
-				cell.getStyle(), g.isRelative());
-		states.put(cell, state);
-	}
+        model.beginUpdate();
+        try {
+            if (removeTransitions) {
+                int numEdges = model.getEdgeCount(cell);
+                for (int i = 0; i < numEdges; i++) {
+                    mxICell edge = cell.getEdgeAt(i);
+                    cell.remove(edge);
+                    removed.add(transitions.remove(edge));
+                }
+            }
+            model.remove(cell);
+        } finally {
+            model.endUpdate();
+        }
+        return removed.toArray(new mxCell[] {});
+    }
 
-	public void addStateWithTransitions(GraphState state,
-			GraphTransition[] transitions) {
-		addState(state);
-		if (transitions != null) {
-			for (GraphTransition t : transitions) {
-				addTransition(t);
-			}
-		}
-	}
+    // TRANSITION MANIPULATION //
 
-	public boolean containsState(GraphState state) {
-		return states.containsValue(state);
-	}
+    /**
+     * Insert the given {@link AutomatonTransition} into the graph by calling
+     * {@link #insertEdge(Object, String, Object, Object, Object)}
+     * 
+     * @param transition
+     *            the {@link AutomatonTransition} to insert
+     * @return the {@link mxCell} that was added to the graph, or {@code null}
+     *         if nothing was added
+     * @throws IllegalArgumentException
+     *             if any parameters are {@code null}.
+     * @see {@link #addAutomatonState(AutomatonState)}
+     */
+    mxCell addTransition(AutomatonTransition transition) {
+        if (transition == null) {
+            throw new IllegalArgumentException("transition cannot be null when"
+                    + " inserting an AutomatonTransition");
+        }
 
-	public boolean containsState(mxICell state) {
-		return states.containsKey(state);
-	}
+        mxCell from = states.get(transition.getFrom());
+        mxCell to = states.get(transition.getTo());
+        if (from == null || to == null) {
+            throw new RuntimeException("Cannot add a transition to the graph"
+                    + " before adding its associated states.");
+        }
 
-	public boolean containsTransition(GraphTransition transition) {
-		return transitions.containsValue(transition);
-	}
+        String id = "transition" + transition.getId();
+        mxCell cell = null;
 
-	public boolean containsTransition(mxICell transition) {
-		return transitions.containsKey(transition);
-	}
+        model.beginUpdate();
+        try {
+            cell = (mxCell) insertEdge(getDefaultParent(), id, id, from, to);
+            transitions.put(transition, cell);
+        } finally {
+            model.endUpdate();
+        }
+        return cell;
+    }
 
-	/**
-	 * Determine which {@link GraphTransition} are connected to a given
-	 * {@link GraphState}
-	 * 
-	 * @param state
-	 *            the {@link GraphState}
-	 * @return an {@link ArrayList} of {@link GraphTransition} that are
-	 *         connected to the given {@link GraphState}
-	 */
-	public ArrayList<GraphTransition> getStateTransitions(GraphState state) {
-		ArrayList<GraphTransition> list = new ArrayList<>();
-		for (GraphTransition t : transitions.values()) {
-			if (t.getFrom() == state || t.getTo() == state) {
-				list.add(t);
-			}
-		}
-		return list;
-	}
+    /**
+     * Removes a transition from the graph.
+     * 
+     * @param transition
+     *            the {@link AutomatonTransition} to remove
+     * @return the cell that was removed
+     */
+    mxCell removeTransition(AutomatonTransition transition) {
+        mxCell cell = null;
+        model.beginUpdate();
+        try {
+            cell = transitions.remove(transition);
+            model.remove(cell);
+        } finally {
+            model.endUpdate();
+        }
+        return cell;
+    }
 
-	/**
-	 * Creates a new {@link GraphTransition} and adds it to the {@link Graph}
-	 * 
-	 * @param from
-	 *            the {@link GraphState} that this transition is coming from
-	 * @param to
-	 *            the {@link GraphState} that this transition is going to
-	 * @param value
-	 *            a value representing the transition
-	 * @return the {@link GraphTransition} that was created
-	 */
-	public GraphTransition createNewTransition(GraphState from, GraphState to,
-			String value) {
-		mxICell transition = new mxCell(value);
-		return new GraphTransition(from, to, transition);
-	}
+    // UTILITY //
 
-	/**
-	 * Creates a new {@link GraphState} and adds it to the {@link Graph}
-	 * 
-	 * @param value
-	 *            a value representing the state
-	 * @return the {@link GraphState} that was created
-	 */
-	public GraphState createNewState(Object value) {
-		mxICell cell = new mxCell(value);
-		return new GraphState(cell);
-	}
+    public boolean containsState(AutomatonState state) {
+        return states.containsKey(state);
+    }
+
+    public boolean containsTransition(AutomatonTransition transition) {
+        return transitions.containsKey(transition);
+    }
+
+    /**
+     * Removes all nodes and edges from this graph.
+     */
+    void clear() {
+        model.beginUpdate();
+        try {
+            for (mxCell c : states.values()) {
+                model.remove(c);
+            }
+            for (mxCell c : transitions.values()) {
+                model.remove(c);
+            }
+            states.clear();
+            transitions.clear();
+            startState = null;
+        } finally {
+            model.endUpdate();
+        }
+    }
 
 }

@@ -1,5 +1,6 @@
 package ui;
 
+import model.AddStateCommand;
 
 /**
  * Command to add a state to an automaton
@@ -8,23 +9,21 @@ package ui;
  */
 public class AddStateUICommand extends UICommand {
 
-	private final GraphState state;
+    private final AddStateCommand ccmd;
 
-	public AddStateUICommand(Graph graph, GraphState state) {
-		super(graph);
-		this.state = state;
-	}
+    public AddStateUICommand(Graph graph, AddStateCommand cmd) {
+        super(graph, cmd);
+        this.ccmd = cmd;
+    }
 
-	public GraphState getState() {
-		return state;
-	}
+    public void redo() {
+        graph.addState(ccmd.getState());
+        ccmd.redo();
+    }
 
-	public void redo() {
-		graph.addState(state);
-	}
+    public void undo() {
+        graph.removeState(ccmd.getState(), false);
+        ccmd.undo();
+    }
 
-	public void undo() {
-		graph.removeState(state, false);
-	}
-	
 }
