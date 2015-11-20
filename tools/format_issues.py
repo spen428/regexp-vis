@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import json
 import textwrap
 from datetime import datetime
@@ -42,8 +44,8 @@ for issue in reversed(data):
     pretty_created_at = pretty_created_at.strftime("%d/%m/%Y %H:%M")
     print(pretty_title)
     print("-" * len(pretty_title))
-    print("*Opened by:* " + issue["author"]["name"] + " @ " + pretty_created_at)
-    print("*Assigned to:* " + issue["assignee"]["name"])
+    print("**Opened by:** " + issue["author"]["name"] + " @ " + pretty_created_at)
+    print("**Assigned to:** " + issue["assignee"]["name"])
     print("")
     for line in textwrap.wrap(issue["description"], 72):
         print(line)
