@@ -53,7 +53,7 @@
         <fileset dir="lib" includes="*.jar, test/**/*.jar" />
     </path>
 
-    <target name="test" depends="build">
+    <target name="test" depends="build,libs">
         <javac srcdir="src/test" destdir="bin" classpathref="test-classpath"
             includes="**/*.java" includeantruntime="false" />
     </target>

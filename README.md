@@ -1,4 +1,4 @@
-# Readme
+# Read-me
 This is the Git repository for the CO600 project.
 
 ## Team members
@@ -7,20 +7,18 @@ This is the Git repository for the CO600 project.
 * Parham Ghassemi <pg272@kent.ac.uk>
 * Billy Dix <wrd2@kent.ac.uk>
 
-## Project
-The project code can be found under the `regexp_vis` directory.
+## Project Structure
+The project code can be found under the `regexp_vis` directory, documentation
+under `doc`, and miscellaneous tools and scripts under `tools`.
 
-### Dependencies
-- Apache Ant
-- JDK 7+
+`regexp_vis` is further subdivided into modules. The project is
+inspired by the Model-View-Controller (MVC) architecture design
+pattern, however the main distinction currently is between the Model
+(the `model` package) and the View and Controller combined (the `ui`
+package). Accompanying unit tests are in packages `test.model` and
+`test.ui`.
 
-### Compiling and Running
-Use `ant jar` to build the project and generate an executable jar file.
-The program can then be run by executing the jar `ant run` or `java -jar dist/{jarname}.jar`
-
-## Testing
-The project includes a number of unit tests that can be compiled and run by executing the command `ant runtests`. This will generate HTML-formatted test results under the directory `testreports`.
-
-## Licences
-TODO
-
+We have also retained some demo code written to test the *Jython* programming
+language, as we initially considered using that language so that we could
+utilise libraries and syntactic sugar from both Java and Python. This demo can
+be found under the `jython_test` directory.
