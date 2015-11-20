@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
@@ -64,9 +65,20 @@ public class Graph extends mxGraph {
         this.automaton = automaton;
         this.states = new HashMap<>();
         this.transitions = new HashMap<>();
+        addAutomaton(automaton);
     }
 
     // GETTERS //
+    /**
+     * The size of this graph is defined as the total number of states and
+     * transitions it has.
+     * 
+     * @return size
+     */
+    public int getSize() {
+        return states.size() + transitions.size();
+    }
+
     public Automaton getAutomaton() {
         return automaton;
     }
@@ -128,7 +140,7 @@ public class Graph extends mxGraph {
      *            the state to set as the start state
      * @return the {@link mxCell} representing the state
      */
-    mxCell setStartState(AutomatonState state) {
+    public mxCell setStartState(AutomatonState state) {
         if (startState != null) {
             /* Must replace the old entry with the new */
             mxCell startCell = states.remove(startState);
@@ -201,7 +213,7 @@ public class Graph extends mxGraph {
      * @throws IllegalArgumentException
      *             if the <b>state</b> parameter is {@code null}.
      */
-    mxCell addState(AutomatonState state) {
+    public mxCell addState(AutomatonState state) {
         if (state == null) {
             throw new IllegalArgumentException("state cannot be null when"
                     + " inserting an AutomatonState");
@@ -301,7 +313,7 @@ public class Graph extends mxGraph {
      *             if any parameters are {@code null}.
      * @see {@link #addAutomatonState(AutomatonState)}
      */
-    mxCell addTransition(AutomatonTransition transition) {
+    public mxCell addTransition(AutomatonTransition transition) {
         if (transition == null) {
             throw new IllegalArgumentException("transition cannot be null when"
                     + " inserting an AutomatonTransition");
@@ -359,7 +371,7 @@ public class Graph extends mxGraph {
     /**
      * Removes all nodes and edges from this graph.
      */
-    void clear() {
+    public void clear() {
         model.beginUpdate();
         try {
             for (mxCell c : states.values()) {
@@ -376,4 +388,15 @@ public class Graph extends mxGraph {
         }
     }
 
+    /**
+     * Adds all of the states and transitions from the given {@link Automaton}
+     * to the graph.
+     * 
+     * @param automaton
+     *            the automaton
+     */
+    private void addAutomaton(Automaton automaton) {
+        // TODO Auto-generated method stub
+        throw new NotImplementedException();
+    }
 }
