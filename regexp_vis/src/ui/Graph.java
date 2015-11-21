@@ -57,7 +57,10 @@ public class Graph extends mxGraph {
 
     // CONSTRUCTORS //
     public Graph() {
-        this(new Automaton());
+        super();
+        this.automaton = new Automaton();
+        this.states = new HashMap<>();
+        this.transitions = new HashMap<>();
     }
 
     public Graph(Automaton automaton) {
@@ -183,7 +186,7 @@ public class Graph extends mxGraph {
      *            finality to set
      * @return the {@link mxCell} representing the state
      */
-    mxCell setFinal(AutomatonState state, boolean isFinal) {
+    public mxCell setFinal(AutomatonState state, boolean isFinal) {
         mxCell cell = states.remove(state);
         if (cell != null) {
             /* Must replace the old entry with the new */
@@ -193,7 +196,7 @@ public class Graph extends mxGraph {
         return null;
     }
 
-    mxCell setFinal(mxCell cell, boolean isFinal) {
+    private mxCell setFinal(mxCell cell, boolean isFinal) {
         model.beginUpdate();
         try {
             // TODO
@@ -264,7 +267,7 @@ public class Graph extends mxGraph {
      *            whether to remove transitions that are connected to this state
      * @return an array of the cells that were removed
      */
-    mxCell[] removeState(AutomatonState state) {
+    public mxCell[] removeState(AutomatonState state) {
         return removeState(state, true);
     }
 
@@ -278,7 +281,7 @@ public class Graph extends mxGraph {
      *            whether to remove transitions that are connected to this state
      * @return an array of the cells that were removed
      */
-    mxCell[] removeState(AutomatonState state, boolean removeTransitions) {
+    public mxCell[] removeState(AutomatonState state, boolean removeTransitions) {
         mxCell cell = states.remove(state);
         ArrayList<mxCell> removed = new ArrayList<mxCell>();
 
@@ -346,7 +349,7 @@ public class Graph extends mxGraph {
      *            the {@link AutomatonTransition} to remove
      * @return the cell that was removed
      */
-    mxCell removeTransition(AutomatonTransition transition) {
+    public mxCell removeTransition(AutomatonTransition transition) {
         mxCell cell = null;
         model.beginUpdate();
         try {

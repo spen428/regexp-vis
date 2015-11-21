@@ -23,12 +23,28 @@ public class GraphTest {
 
     @Test
     public final void testGraph() {
-        Graph graph = new Graph();
+        new Graph();
     }
 
     @Test
     public final void testGraphAutomaton() {
-        fail("Not yet implemented"); // TODO
+        Automaton automaton = new Automaton();
+        AutomatonState state0 = automaton.createNewState();
+        AutomatonState state1 = automaton.createNewState();
+        AutomatonTransition transition0 = automaton.createNewTransition(state0,
+                state1, "transition0");
+        AutomatonTransition transition1 = automaton.createNewTransition(state0,
+                state1, "transition1");
+        automaton.addTransition(transition0);
+        automaton.addTransition(transition1);
+
+        Graph graph = new Graph(automaton);
+        assertEquals(automaton, graph.getAutomaton());
+        assertEquals(4, graph.getSize());
+        assertTrue(graph.containsState(state0));
+        assertTrue(graph.containsState(state1));
+        assertTrue(graph.containsTransition(transition0));
+        assertTrue(graph.containsTransition(transition1));
     }
 
     @Test
@@ -39,7 +55,107 @@ public class GraphTest {
     }
 
     @Test
+    public final void testAddContainsRemoveState() {
+        Graph graph = new Graph();
+        AutomatonState state0 = new AutomatonState(0);
+        AutomatonState state1 = new AutomatonState(1);
+
+        graph.addState(state0);
+        assertTrue(graph.containsState(state0));
+        assertFalse(graph.containsState(state1));
+        assertFalse(graph.containsState(null));
+
+        graph.addState(state0);
+        graph.addState(null);
+
+        graph.removeState(state0);
+        assertFalse(graph.containsState(state0));
+
+        graph.removeState(state0);
+        graph.removeState(null);
+    }
+
+    @Test
+    public final void testAddContainsRemoveTransition() {
+        Graph graph = new Graph();
+        AutomatonState state0 = new AutomatonState(0);
+        AutomatonState state1 = new AutomatonState(1);
+        AutomatonTransition transition = new AutomatonTransition(0, state0,
+                state1, "transition0");
+
+        assertFalse(graph.containsTransition(transition));
+        graph.addState(state0);
+        graph.addState(state1);
+        graph.addTransition(transition);
+        assertTrue(graph.containsTransition(transition));
+        /* Try to add it when it exists */
+        graph.addTransition(transition);
+
+        graph.removeTransition(transition);
+        assertFalse(graph.containsTransition(transition));
+        /* Try to remove it when it exists */
+        graph.removeTransition(transition);
+
+        graph.addTransition(null);
+        graph.removeTransition(null);
+    }
+
+    @Test
+    public final void testAddStateWithTransitions() {
+        fail("Not yet implemented"); // TODO
+    }
+
+    @Test
+    public final void testRemoveStateWithoutTransitions() {
+        /* This should remove the state but not its transitions */
+        Graph graph = new Graph();
+        AutomatonState state0 = new AutomatonState(0);
+        AutomatonState state1 = new AutomatonState(1);
+        AutomatonTransition transition0 = new AutomatonTransition(0, state0,
+                state1, "transition0");
+        AutomatonTransition transition1 = new AutomatonTransition(0, state0,
+                state1, "transition1");
+        graph.addState(state0);
+        graph.addState(state1);
+        graph.addTransition(transition0);
+        graph.addTransition(transition1);
+
+        graph.removeState(state0, false);
+        assertFalse(graph.containsState(state0));
+        assertTrue(graph.containsState(state1));
+        assertTrue(graph.containsTransition(transition0));
+        assertTrue(graph.containsTransition(transition1));
+
+        graph.removeState(state1, false);
+        assertFalse(graph.containsState(state0));
+        assertFalse(graph.containsState(state1));
+        assertTrue(graph.containsTransition(transition0));
+        assertTrue(graph.containsTransition(transition1));
+
+        //
+
+        graph = new Graph();
+        state0 = new AutomatonState(0);
+        state1 = new AutomatonState(1);
+        transition0 = new AutomatonTransition(0, state0, state1, "transition0");
+        transition1 = new AutomatonTransition(0, state0, state1, "transition1");
+        graph.addState(state0);
+        graph.addState(state1);
+        graph.addTransition(transition0);
+        graph.addTransition(transition1);
+
+        graph.removeState(state0, true);
+        assertFalse(graph.containsState(state0));
+        assertTrue(graph.containsState(state1));
+        assertFalse(graph.containsTransition(transition0));
+        assertFalse(graph.containsTransition(transition1));
+    }
+
+    @Test
     public final void testGetNumStateTransitions() {
+        Graph graph = new Graph();
+
+        assertEquals(0, graph.getNumStateTransitions(null));
         fail("Not yet implemented"); // TODO
     }
 
@@ -67,75 +183,30 @@ public class GraphTest {
     }
 
     @Test
-    public final void testCreateStylesheet() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    @Test
-    public final void testSetFinalAutomatonStateBoolean() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    @Test
-    public final void testSetFinalMxCellBoolean() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    @Test
-    public final void testAddState() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    @Test
-    public final void testAddStateWithTransitions() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    @Test
-    public final void testRemoveStateAutomatonState() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    @Test
-    public final void testRemoveStateAutomatonStateBoolean() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    @Test
-    public final void testAddTransition() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    @Test
-    public final void testRemoveTransition() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    @Test
-    public final void testContainsState() {
+    public final void testSetFinal() {
         Graph graph = new Graph();
-        AutomatonState state0 = new AutomatonState(0);
-        AutomatonState state1 = new AutomatonState(1);
+        AutomatonState stateNf = new AutomatonState(0);
+        assertFalse(stateNf.isFinal());
 
-        graph.addState(state0);
-        assertTrue(graph.containsState(state0));
-        assertFalse(graph.containsState(state1));
-        assertFalse(graph.containsState(null));
-    }
+        graph.addState(stateNf);
+        graph.setFinal(stateNf, true);
+        assertTrue(stateNf.isFinal());
 
-    @Test
-    public final void testContainsTransition() {
-        Graph graph = new Graph();
-        AutomatonState state0 = new AutomatonState(0);
-        AutomatonState state1 = new AutomatonState(1);
-        AutomatonTransition transition = new AutomatonTransition(0, state0,
-                state1, "transition0");
+        graph.setFinal(stateNf, true);
+        assertTrue(stateNf.isFinal());
 
-        assertFalse(graph.containsTransition(transition));
-        graph.addState(state0);
-        graph.addState(state1);
-        graph.addTransition(transition);
-        assertTrue(graph.containsTransition(transition));
+        graph.setFinal(stateNf, false);
+        assertFalse(stateNf.isFinal());
+
+        AutomatonState stateF = new AutomatonState(1, true);
+        assertTrue(stateF.isFinal());
+
+        graph.addState(stateF);
+        graph.setFinal(stateF, false);
+        assertFalse(stateF.isFinal());
+
+        graph.setFinal(stateF, false);
+        assertFalse(stateF.isFinal());
     }
 
     @Test
@@ -207,11 +278,6 @@ public class GraphTest {
         assertEquals(graphB.hashCode(), graphC.hashCode());
         /* A and B contain equvilant states and transitions, should be equal */
         assertEquals(graphA.hashCode(), graphB.hashCode());
-    }
-
-    @Test
-    public final void testToString() {
-        fail("Not yet implemented"); // TODO
     }
 
 }
