@@ -137,6 +137,29 @@ public class AutomatonTest {
     }
 
     @Test
+    public void testGetStateTransitions_duplicate()
+    {
+        AutomatonTransition t1 = mAutomaton.createNewTransition(
+            mState1, mState2, new Object());
+
+        mAutomaton.addTransition(t1);
+
+        AutomatonState s = new AutomatonState(mState1.getId());
+        // Test that accessing through mState1 gives the transitions,
+        // and that accessing through "s" instead throws
+        assertEquals(mAutomaton.getStateTransitions(mState1).size(), 1);
+        assertTrue(mAutomaton.getStateTransitions(mState1).contains(t1));
+
+        boolean caught = false;
+        try {
+            mAutomaton.getStateTransitions(s);
+        } catch (RuntimeException e) {
+            caught = true;
+        }
+        assertTrue(caught);
+    }
+
+    @Test
     public void testCreateNewState()
     {
         AutomatonState state1 = mAutomaton.createNewState();
@@ -194,5 +217,54 @@ public class AutomatonTest {
         }
 
         assertTrue(caught);
+    }
+
+    @Test
+    public void testAddStateWithTransitions_duplicate()
+    {
+        AutomatonState a = mAutomaton.createNewState();
+        AutomatonState b = new AutomatonState(a.getId());
+
+        boolean caught = false;
+        try {
+            mAutomaton.addStateWithTransitions(a, new LinkedList<>());
+            // Should throw, duplicate ID
+            mAutomaton.addStateWithTransitions(b, new LinkedList<>());
+        } catch (RuntimeException e) {
+            caught = true;
+        }
+
+        assertTrue(caught);
+
+        // Test that the state was indeed not added
+        assertFalse(mAutomaton.stateExists(b));
+    }
+
+    @Test
+    public void testAddTransition_duplicate()
+    {
+        AutomatonTransition t1 = mAutomaton.createNewTransition(
+            mState1, mState2, new Object());
+
+        mAutomaton.addTransition(t1);
+
+        AutomatonState s = new AutomatonState(mState1.getId());
+        // Test that adding a transition through a duplicate state
+        // throws
+        AutomatonTransition t2 = mAutomaton.createNewTransition(
+                s, mState2, new Object());
+
+        boolean caught = false;
+        try {
+            mAutomaton.addTransition(t2);
+        } catch (RuntimeException e) {
+            caught = true;
+        }
+        assertTrue(caught);
+
+        // Test that the transition was indeed not added
+        assertEquals(mAutomaton.getStateTransitions(mState1).size(), 1);
+        assertTrue(mAutomaton.getStateTransitions(mState1).contains(t1));
+        assertFalse(mAutomaton.getStateTransitions(mState1).contains(t2));
     }
 }
