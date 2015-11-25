@@ -3,9 +3,8 @@ package model;
 import java.util.*;
 
 /**
- * Class representing a "basic" regular expression, with one top level
- * operator. A tree of these can then be used to any regular
- * expression
+ * Class representing a "basic" regular expression, with one top level operator.
+ * A tree of these can then be used to any regular expression
  *
  * @author Matthew Nicholls
  */
@@ -25,8 +24,8 @@ public class BasicRegexp implements Cloneable {
     public static final char EPSILON_CHAR = '\0';
 
     /**
-     * Expression used to represent epsilon / lambda / etc. Here so we
-     * don't have to keep creating new objects
+     * Expression used to represent epsilon / lambda / etc. Here so we don't
+     * have to keep creating new objects
      */
     public static final BasicRegexp EPSILON_EXPRESSION =
         new BasicRegexp(EPSILON_CHAR, RegexpOperator.NONE);
@@ -36,15 +35,15 @@ public class BasicRegexp implements Cloneable {
     final private RegexpOperator mOperator;
 
     /**
-     * Construct a BasicRegexp with the specified high-level operator
-     * and operands
+     * Construct a BasicRegexp with the specified high-level operator and
+     * operands
      *
      * @param operands The operands for this BasicRegexp
      * @param op The operator for this BasicRegexp, <b>cannot</b> be
      * RegexpOperator.NONE
-     * @throws IllegalArgumentException if any of the following: "op"
-     * is RegexpOperator.NONE, multiple operands are provided for a
-     * unary operator, or no operands are passed
+     * @throws IllegalArgumentException if any of the following: "op" is
+     * RegexpOperator.NONE, multiple operands are provided for a unary operator,
+     * or no operands are passed
      */
     public BasicRegexp(ArrayList<BasicRegexp> operands, RegexpOperator op)
     {
@@ -67,8 +66,8 @@ public class BasicRegexp implements Cloneable {
     }
 
     /**
-     * Construct a BasicRegexp with the specified high-level operator
-     * and single operand
+     * Construct a BasicRegexp with the specified high-level operator and single
+     * operand
      *
      * @param operand The operand for this BasicRegexp
      * @param op The operator for this BasicRegexp, <b>cannot</b> be
@@ -90,14 +89,13 @@ public class BasicRegexp implements Cloneable {
     }
 
     /**
-     * Construct a BasicRegexp with the specified high-level
-     * <b>unary</b> operator and single operand
+     * Construct a BasicRegexp with the specified high-level <b>unary</b>
+     * operator and single operand
      *
      * @param c The operand for this BasicRegexp
-     * @param op The operator for this BasicRegexp, <b>must</b> be a
-     * unary operator
-     * @throws IllegalArgumentException if "op" is not a unary
+     * @param op The operator for this BasicRegexp, <b>must</b> be a unary
      * operator
+     * @throws IllegalArgumentException if "op" is not a unary operator
      */
     public BasicRegexp(char c, RegexpOperator op)
     {
@@ -129,10 +127,9 @@ public class BasicRegexp implements Cloneable {
     }
 
     /**
-     * @return The operands for this BasicRegexp, as an unmodifiable
-     * list.
-     * @throws RuntimeException if this BasicRegexp is a single
-     * character expression
+     * @return The operands for this BasicRegexp, as an unmodifiable list.
+     * @throws RuntimeException if this BasicRegexp is a single character
+     * expression
      */
     public List<BasicRegexp> getOperands()
     {
@@ -146,8 +143,8 @@ public class BasicRegexp implements Cloneable {
 
     /**
      * @return The character for this single character expression
-     * @throws RuntimeException if this BasicRegexp isn't a single
-     * character expression
+     * @throws RuntimeException if this BasicRegexp isn't a single character
+     * expression
      */
     public char getChar()
     {
@@ -161,8 +158,7 @@ public class BasicRegexp implements Cloneable {
     }
 
     /**
-     * Performs a deep copy of this BasicRegexp, all sub expressions
-     * are copied.
+     * Performs a deep copy of this BasicRegexp, all sub expressions are copied.
      *
      * @return The cloned object
      */
@@ -182,16 +178,15 @@ public class BasicRegexp implements Cloneable {
     }
 
     /**
-     * Find the matching closing parenthesis for the parenthesis at
-     * the start of this string
+     * Find the matching closing parenthesis for the parenthesis at the start of
+     * this string
      *
-     * <b>Precondition:</b> it is assumed that "str" starts with an
-     * opening parenthesis
+     * <b>Precondition:</b> it is assumed that "str" starts with an opening
+     * parenthesis
      *
      * @param str The string in question
-     * @return the index of the matching closing parenthesis, -1
-     * otherwise if there is no matching closing parenthesis in this
-     * string
+     * @return the index of the matching closing parenthesis, -1 otherwise if
+     * there is no matching closing parenthesis in this string
      */
     private static int findMatchingParenIdx(String str)
     {
@@ -221,8 +216,7 @@ public class BasicRegexp implements Cloneable {
 
     /**
      * @param op The operator in question
-     * @return True if the specified operator is unary, false
-     * otherwise
+     * @return True if the specified operator is unary, false otherwise
      */
     public static boolean isUnaryOperator(RegexpOperator op)
     {
@@ -234,11 +228,10 @@ public class BasicRegexp implements Cloneable {
     }
 
     /**
-     * Factored out of parseRegexp, common code for processing unary
-     * operators such as PLUS, STAR and OPTION
+     * Factored out of parseRegexp, common code for processing unary operators
+     * such as PLUS, STAR and OPTION
      *
-     * @param sequenceOperands The current working list of operands in
-     * sequence
+     * @param sequenceOperands The current working list of operands in sequence
      * @param op The operator that we are processing
      * @see parseRegexp
      * @throws InvalidRegexpException in event of parse error
@@ -266,13 +259,11 @@ public class BasicRegexp implements Cloneable {
     }
 
     /**
-     * Factored out of parseRegexp, common code for processing the
-     * choice operator
+     * Factored out of parseRegexp, common code for processing the choice
+     * operator
      *
-     * @param sequenceOperands The current working list of operands in
-     * sequence
-     * @param choiceOperands The current working list of operands for
-     * choice
+     * @param sequenceOperands The current working list of operands in sequence
+     * @param choiceOperands The current working list of operands for choice
      * @see parseRegexp
      * @throws InvalidRegexpException in event of parse error
      */
@@ -296,13 +287,13 @@ public class BasicRegexp implements Cloneable {
     }
 
     /**
-     * Parse the given regular expression, outputting a tree hierarchy
-     * of BasicRegexp objects
+     * Parse the given regular expression, outputting a tree hierarchy of
+     * BasicRegexp objects
      *
      * @param str The regular expression to parse
      * @return The root BasicRegexp for the parse tree
-     * @throws InvalidRegexpException if this isn't a valid regexp (or
-     * at least one this parser doesn't support)
+     * @throws InvalidRegexpException if this isn't a valid regexp (or at least
+     * one this parser doesn't support)
      */
     public static BasicRegexp parseRegexp(String str)
         throws InvalidRegexpException
@@ -365,8 +356,8 @@ public class BasicRegexp implements Cloneable {
     }
 
     /**
-     * For debugging purposes, prints out the tree of BasicRegexp
-     * objects, formatted nicely
+     * For debugging purposes, prints out the tree of BasicRegexp objects,
+     * formatted nicely
      *
      * @param indent Current indentation
      * @param re The BasicRegexp to print out

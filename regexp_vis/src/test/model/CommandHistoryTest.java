@@ -24,7 +24,7 @@ public class CommandHistoryTest {
         // A more "complex" test, not strictly a unit test as we
         // aren't using stubs / mock objects.
         Automaton automaton = new Automaton();
-        CommandHistory history = new CommandHistory(automaton);
+        CommandHistory history = new CommandHistory();
 
         // Create the states we are going to use
         AutomatonState start = automaton.getStartState();

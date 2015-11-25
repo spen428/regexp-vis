@@ -1,16 +1,16 @@
 package model;
 
 /**
- * Command which breaks down an iteration expression (e.g. "a+" or
- * "a*") into a set of simpler transitions. For the regular
- * expression to NFA conversion process.
+ * Command which breaks down an iteration expression (e.g. "a+" or "a*") into a
+ * set of simpler transitions. For the regular expression to NFA conversion
+ * process.
  */
 public class BreakdownIterationCommand extends BreakdownCommand {
     /**
      * @param automaton The automaton for the transition
      * @param t The transition to break down
-     * @throws IllegalArgumentException if the transition expression
-     * isn't STAR or PLUS
+     * @throws IllegalArgumentException if the transition expression isn't STAR
+     * or PLUS
      */
     public BreakdownIterationCommand(Automaton automaton, AutomatonTransition t)
     {

@@ -3,8 +3,7 @@ package model;
 import java.util.*;
 
 /**
- * Command to remove a state and its outgoing transitions from an
- * automaton
+ * Command to remove a state and its outgoing transitions from an automaton
  */
 public class RemoveStateCommand extends Command {
     private final AutomatonState mState;
@@ -32,5 +31,10 @@ public class RemoveStateCommand extends Command {
     public void undo()
     {
         getAutomaton().addStateWithTransitions(mState, mTransitions);
+    }
+
+    public LinkedList<AutomatonTransition> getTransitions()
+    {
+        return mTransitions;
     }
 }

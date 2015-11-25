@@ -3,8 +3,8 @@ package model;
 import java.util.*;
 
 /**
- * Class which represents a non-deterministic finite automaton (NFA)
- * or deterministic finite automaton.
+ * Class which represents a non-deterministic finite automaton (NFA) or
+ * deterministic finite automaton.
  */
 public class Automaton {
     // Tuples would be much appreciated Java...
@@ -18,11 +18,11 @@ public class Automaton {
     }
 
     // Essentially this represents the graph, the key is the ID of the
-    // AutomatonState and the values are a pair containing the state
-    // and its out-going transitions
+    // AutomatonState and the values are a pair containing the state and its
+    // out-going transitions
     private HashMap<Integer, StateTransitionsPair> mGraph;
-    // The state to start in, not stating the end state, since that
-    // will be handled by isFinal() in AutomatonState
+    // The state to start in, not stating the end state, since that will be
+    // handled by isFinal() in AutomatonState
     private AutomatonState mStartState;
     // Counter to give AutomatonState(s) unique IDs
     private int mCounter;
@@ -45,8 +45,7 @@ public class Automaton {
     }
 
     /**
-     * For debugging purposes, prints out the current state of the
-     * Automaton.
+     * For debugging purposes, prints out the current state of the Automaton.
      */
     public void debugPrint()
     {
@@ -83,19 +82,18 @@ public class Automaton {
     public boolean stateExists(AutomatonState state)
     {
         StateTransitionsPair pair = mGraph.get(state.getId());
-        // TODO(mjn33): Maybe remove the .equals() from state, it makes most sense to do reference equality
         return pair != null && pair.mState == state;
     }
 
     /**
-     * Utility function to be used in preference to mGraph.get(),
-     * checks that StateTransitionsPair.mState == state to prevent
-     * performing operations using foreign duplicate states. See the
-     * "_duplicate" unit tests of the AutomatonTest class.
+     * Utility function to be used in preference to mGraph.get(), checks that
+     * StateTransitionsPair.mState == state to prevent performing operations
+     * using foreign duplicate states. See the "_duplicate" unit tests of the
+     * AutomatonTest class.
      *
      * @param state The state to lookup
-     * @return The corresponding StateTransitionPair for the state,
-     * null if this state doesn't exist
+     * @return The corresponding StateTransitionPair for the state, null if this
+     * state doesn't exist
      */
     private StateTransitionsPair lookupState(AutomatonState state)
     {
@@ -109,8 +107,7 @@ public class Automaton {
 
     /**
      * @param state The state to check
-     * @return true if this state has out-going transitions, false
-     * otherwise
+     * @return true if this state has out-going transitions, false otherwise
      */
     public boolean hasOutgoingTransition(AutomatonState state)
     {
@@ -126,8 +123,7 @@ public class Automaton {
 
     /**
      * @param state The state to check
-     * @return true if this state has in-going transitions, false
-     * otherwise
+     * @return true if this state has in-going transitions, false otherwise
      */
     public boolean hasIngoingTransition(AutomatonState state)
     {
@@ -180,8 +176,8 @@ public class Automaton {
 
     /**
      * @param state The state in question
-     * @return The out-going transitions for the specified state, as
-     * an unmodifiable list.
+     * @return The out-going transitions for the specified state, as an
+     * unmodifiable list.
      */
     public List<AutomatonTransition> getStateTransitions(AutomatonState state)
     {
@@ -191,15 +187,13 @@ public class Automaton {
                                        "cannot get transitions.");
         }
 
-        // Returning an unmodifiable list as the returned list really
-        // shouldn't be modified separately, change this if it becomes
-        // an issue
+        // Returning an unmodifiable list as the returned list really shouldn't
+        // be modified separately, change this if it becomes an issue
         return Collections.unmodifiableList(pair.mTransitions);
     }
 
     /**
-     * Create a new automaton state object for this Automaton, with a
-     * unique ID
+     * Create a new automaton state object for this Automaton, with a unique ID
      *
      * @return The newly created automaton state object
      */
@@ -224,8 +218,8 @@ public class Automaton {
     }
 
     /**
-     * Adds the specified state with the specified
-     * transitions. Doesn't copy the specified LinkedList.
+     * Adds the specified state with the specified transitions. Doesn't copy the
+     * specified LinkedList.
      *
      * @param state The state to add
      * @param transitions The outgoing transitions for this state
@@ -233,8 +227,7 @@ public class Automaton {
     public void addStateWithTransitions(AutomatonState state,
         LinkedList<AutomatonTransition> transitions)
     {
-        // Need to check the ID, otherwise we would overwrite the
-        // previous value
+        // Need to check the ID, otherwise we would overwrite the previous value
         if (mGraph.containsKey(state.getId())) {
             throw new RuntimeException("Attempted to insert duplicate state");
         }
@@ -249,8 +242,8 @@ public class Automaton {
      *
      * @param state The state to remove
      *
-     * @return The transitions previously associated with this state,
-     * that have also been removed
+     * @return The transitions previously associated with this state, that have
+     * also been removed
      */
     public LinkedList<AutomatonTransition> removeState(AutomatonState state)
     {

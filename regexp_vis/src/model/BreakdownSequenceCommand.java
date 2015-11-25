@@ -3,16 +3,15 @@ package model;
 import java.util.*;
 
 /**
- * Command which breaks down a sequence of expressions (e.g. "abcd")
- * into a set of simpler transitions. For the regular expression to
- * NFA conversion process.
+ * Command which breaks down a sequence of expressions (e.g. "abcd") into a set
+ * of simpler transitions. For the regular expression to NFA conversion process.
  */
 public class BreakdownSequenceCommand extends BreakdownCommand {
     /**
      * @param automaton The automaton for the transition
      * @param t The transition to break down
-     * @throws IllegalArgumentException if the transition expression 
-     * isn't SEQUENCE
+     * @throws IllegalArgumentException if the transition expression isn't
+     * SEQUENCE
      */
     public BreakdownSequenceCommand(Automaton automaton, AutomatonTransition t)
     {

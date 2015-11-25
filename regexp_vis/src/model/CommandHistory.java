@@ -3,20 +3,13 @@ package model;
 import java.util.*;
 
 public class CommandHistory {
-    private final Automaton mAutomaton;
     private final ArrayList<Command> mCommandList;
     private int mHistoryIdx;
 
-    public CommandHistory(Automaton automaton)
+    public CommandHistory()
     {
-        mAutomaton = automaton;
         mCommandList = new ArrayList<>();
         mHistoryIdx = 0;
-    }
-
-    public Automaton getAutomaton()
-    {
-        return mAutomaton;
     }
 
     public int getHistoryIdx()
@@ -58,8 +51,8 @@ public class CommandHistory {
                 "Specified history idx cannot be greater than history length");
         }
 
-        // Either one of the following loops will execute, depending
-        // on which direction we need to seek
+        // Either one of the following loops will execute, depending on which
+        // direction we need to seek
         while (idx > mHistoryIdx) {
             mCommandList.get(mHistoryIdx++).redo();
         }
