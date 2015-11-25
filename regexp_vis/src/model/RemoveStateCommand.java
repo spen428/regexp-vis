@@ -33,4 +33,9 @@ public class RemoveStateCommand extends Command {
     {
         getAutomaton().addStateWithTransitions(mState, mTransitions);
     }
+
+    public LinkedList<AutomatonTransition> getTransitions()
+    {
+        return mTransitions;
+    }
 }
