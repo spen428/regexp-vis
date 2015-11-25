@@ -263,7 +263,7 @@ public class AutomatonTest {
     }
 
     @Test
-    public void testRemoveState_nonExistant()
+    public void testRemoveState_nonExistent()
     {
         boolean caught = false;
 
@@ -340,5 +340,80 @@ public class AutomatonTest {
         assertEquals(mAutomaton.getStateTransitions(mState1).size(), 1);
         assertTrue(mAutomaton.getStateTransitions(mState1).contains(t1));
         assertFalse(mAutomaton.getStateTransitions(mState1).contains(t2));
+    }
+
+    @Test
+    public void testAddTransition_duplicateTrans()
+    {
+        AutomatonTransition t1 = mAutomaton.createNewTransition(
+                mState1, mState2, new Object());
+
+        mAutomaton.addTransition(t1);
+
+        // Test that adding a duplicate transition throws
+        boolean caught = false;
+        try {
+            mAutomaton.addTransition(t1);
+        } catch (RuntimeException e) {
+            caught = true;
+        }
+        assertTrue(caught);
+
+        // Check the transition was not added twice
+        assertEquals(mAutomaton.getStateTransitions(mState1).size(), 1);
+    }
+
+    @Test
+    public void testRemoveTransition()
+    {
+        AutomatonTransition t1 = mAutomaton.createNewTransition(
+                mState1, mState2, new Object());
+
+        mAutomaton.addTransition(t1);
+        mAutomaton.removeTransition(t1);
+
+        // Check the transition was removed
+        assertFalse(mAutomaton.getStateTransitions(mState1).contains(t1));
+    }
+
+    @Test
+    public void testRemoveTransition_nonExistentTrans()
+    {
+        AutomatonTransition t1 = mAutomaton.createNewTransition(
+                mState1, mState2, new Object());
+
+        // Test that removing a non-existent transition throws
+        boolean caught = false;
+        try {
+            mAutomaton.removeTransition(t1);
+        } catch (RuntimeException e) {
+            caught = true;
+        }
+        assertTrue(caught);
+    }
+
+    @Test
+    public void testRemoveTransition_duplicateTrans()
+    {
+        Object tmpObj = new Object();
+        AutomatonTransition t1 = mAutomaton.createNewTransition(
+                mState1, mState2, tmpObj);
+        AutomatonTransition t2 = mAutomaton.createNewTransition(
+                mState1, mState2, tmpObj);
+
+        mAutomaton.addTransition(t1);
+
+        // Test that removing via a duplicate transition throws
+        // (transition doesn't exist)
+        boolean caught = false;
+        try {
+            mAutomaton.removeTransition(t2);
+        } catch (RuntimeException e) {
+            caught = true;
+        }
+        assertTrue(caught);
+
+        // Check the transition was not removed
+        assertTrue(mAutomaton.getStateTransitions(mState1).contains(t1));
     }
 }

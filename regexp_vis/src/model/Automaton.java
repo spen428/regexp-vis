@@ -273,8 +273,6 @@ public class Automaton {
     public void addTransition(AutomatonTransition transition)
     {
         AutomatonState from = transition.getFrom();
-        AutomatonState to = transition.getTo();
-        Object data = transition.getData();
         StateTransitionsPair pair = lookupState(from);
         if (pair == null) {
             throw new RuntimeException(
@@ -283,13 +281,9 @@ public class Automaton {
         }
 
         // Check a transition doesn't already exist
-        for (AutomatonTransition t : pair.mTransitions) {
-            // FIXME(mjn33): Implement .equals()?
-            if (t.getFrom() == from && t.getTo() == to && t.getData() == data) {
-                throw new RuntimeException(
-                    "The specified transitions already exists in this " +
-                    "automaton");
-            }
+        if (pair.mTransitions.contains(transition)) {
+            throw new RuntimeException(
+                "The specified transitions already exists in this automaton");
         }
 
         pair.mTransitions.addLast(transition);
@@ -303,8 +297,6 @@ public class Automaton {
     public void removeTransition(AutomatonTransition transition)
     {
         AutomatonState from = transition.getFrom();
-        AutomatonState to = transition.getTo();
-        Object data = transition.getData();
         StateTransitionsPair pair = lookupState(from);
         if (pair == null) {
             throw new RuntimeException(
@@ -312,18 +304,10 @@ public class Automaton {
                 "cannot remove transition");
         }
 
-        // Check if transition exists and remove it if it does
-        Iterator<AutomatonTransition> it = pair.mTransitions.iterator();
-        while (it.hasNext()) {
-            AutomatonTransition t = it.next();
-            // FIXME(mjn33): Implement .equals()? Or use reference ==?
-            if (t.getFrom() == from && t.getTo() == to && t.getData() == data) {
-                it.remove();
-                return;
-            }
+        if (!pair.mTransitions.remove(transition)) {
+            // If were here, we didn't find the transition
+            throw new RuntimeException(
+                "The specified transition doesn't exist");
         }
-
-        // If were here, we didn't find the transition
-        throw new RuntimeException("The specified transition doesn't exist");
     }
 }
