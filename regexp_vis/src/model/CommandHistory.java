@@ -51,8 +51,8 @@ public class CommandHistory {
                 "Specified history idx cannot be greater than history length");
         }
 
-        // Either one of the following loops will execute, depending
-        // on which direction we need to seek
+        // Either one of the following loops will execute, depending on which
+        // direction we need to seek
         while (idx > mHistoryIdx) {
             mCommandList.get(mHistoryIdx++).redo();
         }

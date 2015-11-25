@@ -3,16 +3,15 @@ package model;
 import java.util.*;
 
 /**
- * Command which breaks down an optional expression (e.g. "a?") into a
- * set of simpler transitions. For the regular expression to NFA 
- * conversion process.
+ * Command which breaks down an optional expression (e.g. "a?") into a set of
+ * simpler transitions. For the regular expression to NFA conversion process.
  */
 public class BreakdownOptionCommand extends BreakdownCommand {
     /**
      * @param automaton The automaton for the transition
      * @param t The transition to break down
-     * @throws IllegalArgumentException if the transition expression 
-     * isn't OPTION
+     * @throws IllegalArgumentException if the transition expression isn't
+     * OPTION
      */
     public BreakdownOptionCommand(Automaton automaton, AutomatonTransition t)
     {
