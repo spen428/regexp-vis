@@ -89,6 +89,28 @@ public class AutomatonTest {
     }
 
     @Test
+    public void testHasIngoingTransition_duplicate()
+    {
+        AutomatonTransition t1 = mAutomaton.createNewTransition(
+            mState1, mState2, new Object());
+        AutomatonTransition t2 = mAutomaton.createNewTransition(
+            mState1, mState2, new Object());
+
+        mAutomaton.addTransition(t1);
+        mAutomaton.addTransition(t2);
+
+        AutomatonState s = new AutomatonState(mState2.getId());
+        // Test that querying through a duplicate state throws
+        boolean caught = false;
+        try {
+            mAutomaton.hasIngoingTransition(s);
+        } catch (RuntimeException e) {
+            caught = true;
+        }
+        assertTrue(caught);
+    }
+
+    @Test
     public void testGetIngoingTransition()
     {
         // Test that we start off with no transitions initially
@@ -110,6 +132,28 @@ public class AutomatonTest {
         assertTrue(mAutomaton.getIngoingTransition(mState2).contains(t1));
         assertEquals(mAutomaton.getIngoingTransition(mState3).size(), 1);
         assertTrue(mAutomaton.getIngoingTransition(mState3).contains(t2));
+    }
+
+    @Test
+    public void testGetIngoingTransition_duplicate()
+    {
+        AutomatonTransition t1 = mAutomaton.createNewTransition(
+            mState1, mState2, new Object());
+        AutomatonTransition t2 = mAutomaton.createNewTransition(
+            mState1, mState2, new Object());
+
+        mAutomaton.addTransition(t1);
+        mAutomaton.addTransition(t2);
+
+        AutomatonState s = new AutomatonState(mState2.getId());
+        // Test that querying through a duplicate state throws
+        boolean caught = false;
+        try {
+            mAutomaton.getIngoingTransition(s);
+        } catch (RuntimeException e) {
+            caught = true;
+        }
+        assertTrue(caught);
     }
 
     @Test
@@ -203,6 +247,19 @@ public class AutomatonTest {
         assertEquals(mAutomaton.getStartState(), startState);
         assertTrue(mAutomaton.stateExists(startState));
         assertTrue(caught);
+
+        caught = false;
+        try {
+            AutomatonState duplicate = new AutomatonState(mAutomaton.getStartState().getId());
+            mAutomaton.removeState(duplicate);
+        } catch (RuntimeException e) {
+            caught = true;
+        }
+
+        // Shouldn't be able to remove start state via a duplicate
+        assertEquals(mAutomaton.getStartState(), startState);
+        assertTrue(mAutomaton.stateExists(startState));
+        assertTrue(caught);
     }
 
     @Test
@@ -220,14 +277,31 @@ public class AutomatonTest {
     }
 
     @Test
+    public void testRemoveState_duplicate()
+    {
+        AutomatonState s = new AutomatonState(mState3.getId());
+        // Test that removing a state through a duplicate state throws
+
+        boolean caught = false;
+        try {
+            mAutomaton.removeState(s);
+        } catch (RuntimeException e) {
+            caught = true;
+        }
+        assertTrue(caught);
+        // Test actual state still exists
+        assertTrue(mAutomaton.stateExists(mState3));
+    }
+
+    @Test
     public void testAddStateWithTransitions_duplicate()
     {
         AutomatonState a = mAutomaton.createNewState();
         AutomatonState b = new AutomatonState(a.getId());
 
+        mAutomaton.addStateWithTransitions(a, new LinkedList<>());
         boolean caught = false;
         try {
-            mAutomaton.addStateWithTransitions(a, new LinkedList<>());
             // Should throw, duplicate ID
             mAutomaton.addStateWithTransitions(b, new LinkedList<>());
         } catch (RuntimeException e) {
