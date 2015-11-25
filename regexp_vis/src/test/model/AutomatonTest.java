@@ -22,9 +22,9 @@ public class AutomatonTest {
         mState2 = mAutomaton.createNewState();
         mState3 = mAutomaton.createNewState();
 
-        mAutomaton.addStateWithTransitions(mState1, new LinkedList<>());
-        mAutomaton.addStateWithTransitions(mState2, new LinkedList<>());
-        mAutomaton.addStateWithTransitions(mState3, new LinkedList<>());
+        mAutomaton.addStateWithTransitions(mState1, new LinkedList<AutomatonTransition>());
+        mAutomaton.addStateWithTransitions(mState2, new LinkedList<AutomatonTransition>());
+        mAutomaton.addStateWithTransitions(mState3, new LinkedList<AutomatonTransition>());
 
         mState3.setFinal(true);
     }
@@ -299,11 +299,11 @@ public class AutomatonTest {
         AutomatonState a = mAutomaton.createNewState();
         AutomatonState b = new AutomatonState(a.getId());
 
-        mAutomaton.addStateWithTransitions(a, new LinkedList<>());
+        mAutomaton.addStateWithTransitions(a, new LinkedList<AutomatonTransition>());
         boolean caught = false;
         try {
             // Should throw, duplicate ID
-            mAutomaton.addStateWithTransitions(b, new LinkedList<>());
+            mAutomaton.addStateWithTransitions(b, new LinkedList<AutomatonTransition>());
         } catch (RuntimeException e) {
             caught = true;
         }
