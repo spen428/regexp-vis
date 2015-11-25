@@ -44,7 +44,7 @@ public class Automaton {
         return mStartState;
     }
 
-	/**
+    /**
      * For debugging purposes, prints out the current state of the
      * Automaton.
      */
