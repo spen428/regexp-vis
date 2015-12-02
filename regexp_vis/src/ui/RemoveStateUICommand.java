@@ -16,11 +16,13 @@ public class RemoveStateUICommand extends UICommand {
         this.ccmd = cmd;
     }
 
+    @Override
     public void redo() {
         graph.removeState(ccmd.getState());
         ccmd.redo();
     }
 
+    @Override
     public void undo() {
         graph.addStateWithTransitions(ccmd.getState(), ccmd.getTransitions());
         ccmd.undo();

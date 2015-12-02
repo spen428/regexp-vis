@@ -15,6 +15,7 @@ public class SetIsFinalCommand extends Command {
         mDiffers = (state.isFinal() != isFinal);
     }
 
+    @Override
     public void redo()
     {
         // No-op if isFinal doesn't differ
@@ -23,6 +24,7 @@ public class SetIsFinalCommand extends Command {
         }
     }
 
+    @Override
     public void undo()
     {
         if (mDiffers) {

@@ -21,11 +21,13 @@ public class AddTransitionCommand extends Command {
         return mTransition;
     }
 
+    @Override
     public void redo()
     {
         getAutomaton().addTransition(mTransition);
     }
 
+    @Override
     public void undo()
     {
         getAutomaton().removeTransition(mTransition);

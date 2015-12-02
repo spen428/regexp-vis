@@ -23,11 +23,13 @@ public class RemoveStateCommand extends Command {
         return mState;
     }
 
+    @Override
     public void redo()
     {
         mTransitions = getAutomaton().removeState(mState);
     }
 
+    @Override
     public void undo()
     {
         getAutomaton().addStateWithTransitions(mState, mTransitions);

@@ -16,11 +16,13 @@ public class AddTransitionUICommand extends UICommand {
         this.ccmd = cmd;
     }
 
+    @Override
     public void redo() {
         graph.addTransition(ccmd.getTransition());
         cmd.redo();
     }
 
+    @Override
     public void undo() {
         graph.removeTransition(ccmd.getTransition());
         cmd.undo();
