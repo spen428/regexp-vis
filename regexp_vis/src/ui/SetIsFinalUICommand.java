@@ -17,6 +17,7 @@ public class SetIsFinalUICommand extends UICommand {
         this.ccmd = cmd;
     }
 
+    @Override
     public void redo() {
         if (ccmd.isDiffers()) {
             AutomatonState state = ccmd.getState();
@@ -25,6 +26,7 @@ public class SetIsFinalUICommand extends UICommand {
         }
     }
 
+    @Override
     public void undo() {
         redo();
     }

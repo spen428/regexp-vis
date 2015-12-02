@@ -22,12 +22,14 @@ public class AddStateCommand extends Command {
         return mState;
     }
 
+    @Override
     public void redo()
     {
         getAutomaton().addStateWithTransitions(mState,
             new LinkedList<AutomatonTransition>());
     }
 
+    @Override
     public void undo()
     {
         getAutomaton().removeState(mState);

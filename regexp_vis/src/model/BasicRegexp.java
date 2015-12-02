@@ -162,6 +162,7 @@ public class BasicRegexp implements Cloneable {
      *
      * @return The cloned object
      */
+    @Override
     public BasicRegexp clone()
     {
         ArrayList<BasicRegexp> newOperands = null;

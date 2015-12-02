@@ -13,11 +13,13 @@ public class RemoveTransitionCommand extends Command {
         mTransition = transition;
     }
 
+    @Override
     public void redo()
     {
         getAutomaton().removeTransition(mTransition);
     }
 
+    @Override
     public void undo()
     {
         getAutomaton().addTransition(mTransition);

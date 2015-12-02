@@ -24,11 +24,13 @@ public class SetStartStateUICommand extends UICommand {
         this.state = state;
     }
 
+    @Override
     public void redo() {
         oldStartState = graph.getStartState();
         graph.setStartState(state);
     }
 
+    @Override
     public void undo() {
         graph.setStartState(oldStartState);
     }
