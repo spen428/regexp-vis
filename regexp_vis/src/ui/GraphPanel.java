@@ -70,10 +70,6 @@ public class GraphPanel extends mxGraphComponent {
         setVertexLayout(GraphLayout.CIRCLE_LAYOUT);
     }
 
-    public Graph getGraph() {
-        return graph;
-    }
-
     public CommandHistory getHistory() {
         return history;
     }
