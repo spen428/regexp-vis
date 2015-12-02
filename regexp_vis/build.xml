@@ -90,6 +90,9 @@
             </fileset>
             <report format="frames" todir="${outdir}/html" />
         </junitreport>
+
+        <!-- Compress results into an archive file -->
+        <zip destfile="${outdir}.zip" basedir="${outdir}" />
     </target>
 
 </project>
