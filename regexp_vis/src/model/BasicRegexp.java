@@ -10,12 +10,25 @@ import java.util.*;
  */
 public class BasicRegexp implements Cloneable {
     public enum RegexpOperator {
-        NONE,
-        STAR,
-        PLUS,
-        OPTION,
-        SEQUENCE,
-        CHOICE
+        NONE(3),
+        STAR(2),
+        PLUS(2),
+        OPTION(2),
+        SEQUENCE(1),
+        CHOICE(0);
+
+        // Operator precedence, higher value, higher precedence
+        private final int mPrecedence;
+
+        private RegexpOperator(int precedence)
+        {
+            mPrecedence = precedence;
+        }
+
+        public int getPrecedence()
+        {
+            return mPrecedence;
+        }
     }
 
     /**
@@ -353,6 +366,86 @@ public class BasicRegexp implements Cloneable {
             return new BasicRegexp(sequenceOperands, RegexpOperator.SEQUENCE);
         } else {
             return null;
+        }
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        toStringBuilder(sb);
+        return sb.toString();
+    }
+
+    private void toStringBuilder(StringBuilder sb)
+    {
+        switch (mOperator) {
+        case NONE:
+            sb.append(mChar);
+            break;
+        case STAR:
+        case PLUS:
+        case OPTION: {
+            // All these operators can be treated the same, just use a
+            // different char
+            if (!isSingleChar()) {
+                RegexpOperator subExprOp = mOperands.get(0).getOperator();
+                // Check if sub-expression operator has lower precedence,
+                // in which case we need to put it in parentheses
+                if (subExprOp.getPrecedence() <
+                    getOperator().getPrecedence()) {
+                    sb.append("(");
+                    mOperands.get(0).toStringBuilder(sb);
+                    sb.append(")");
+                } else {
+                    mOperands.get(0).toStringBuilder(sb);
+                }
+            } else {
+                sb.append(mChar);
+            }
+            switch (mOperator) {
+            case STAR:
+                sb.append('*');
+                break;
+            case PLUS:
+                sb.append('+');
+                break;
+            case OPTION:
+                sb.append('?');
+                break;
+            default:
+            }
+            break;
+        }
+        case SEQUENCE:
+            for (BasicRegexp operand : mOperands) {
+                // Check if sub-expression operator has lower precedence,
+                // in which case we need to put it in parentheses
+                if (operand.getOperator().getPrecedence() <
+                    getOperator().getPrecedence()) {
+                    sb.append("(");
+                    operand.toStringBuilder(sb);
+                    sb.append(")");
+                } else {
+                    operand.toStringBuilder(sb);
+                }
+            }
+            break;
+        case CHOICE: {
+            Iterator<BasicRegexp> it = mOperands.iterator();
+            while (it.hasNext()) {
+                BasicRegexp operand = it.next();
+                // Nothing is less tightly binding than CHOICE, don't need to
+                // put anything in parentheses
+                operand.toStringBuilder(sb);
+                if (it.hasNext()) {
+                    sb.append("|");
+                }
+            }
+            break;
+        }
+        default:
+            throw new RuntimeException("BUG: Should be unreachable.");
         }
     }
 

@@ -147,6 +147,34 @@ public class BasicRegexpTest {
     }
 
     @Test
+    public void testParseRegexp_valid3()
+    {
+        boolean caught = false;
+        try {
+            // Test deeper nesting of parentheses
+            BasicRegexp.parseRegexp("ab(cd(e))ff");
+        } catch (InvalidRegexpException e) {
+            caught = true;
+        }
+
+        assertFalse(caught);
+    }
+
+    @Test
+    public void testParseRegexp_valid4()
+    {
+        boolean caught = false;
+        try {
+            // Test a unary operator on single char
+            BasicRegexp.parseRegexp("abc*def");
+        } catch (InvalidRegexpException e) {
+            caught = true;
+        }
+
+        assertFalse(caught);
+    }
+
+    @Test
     public void testParseRegexp_correctness1()
         throws InvalidRegexpException
     {
@@ -224,7 +252,47 @@ public class BasicRegexpTest {
         assertEquals(reSubExpr_4.getOperator(), BasicRegexp.RegexpOperator.NONE);
         assertTrue(reSubExpr_4.isSingleChar());
         assertEquals(reSubExpr_4.getChar(), '1');
+    }
 
-        BasicRegexp.debugPrintBasicRegexp(0, re);
+    @Test
+    public void testParseRegexp_correctness1new()
+        throws InvalidRegexpException
+    {
+        // New version of testParseRegexp_correctness1, now that
+        // BasicRegexp.toString is implemented, maybe remove the old one
+        BasicRegexp re = BasicRegexp.parseRegexp("(01|10)*1111");
+        assertEquals(re.toString(), "(01|10)*1111");
+    }
+
+    @Test
+    public void testParseRegexp_correctness2()
+        throws InvalidRegexpException
+    {
+        BasicRegexp re = BasicRegexp.parseRegexp("(01|10)*11*11*");
+        assertEquals(re.toString(), "(01|10)*11*11*");
+    }
+
+    @Test
+    public void testParseRegexp_correctness3()
+        throws InvalidRegexpException
+    {
+        BasicRegexp re = BasicRegexp.parseRegexp("(01|10)*1(1|0)1");
+        assertEquals(re.toString(), "(01|10)*1(1|0)1");
+    }
+
+    @Test
+    public void testParseRegexp_correctness4()
+        throws InvalidRegexpException
+    {
+        BasicRegexp re = BasicRegexp.parseRegexp("(01|10)**abc?+*");
+        assertEquals(re.toString(), "(01|10)**abc?+*");
+    }
+
+    @Test
+    public void testParseRegexp_correctness5()
+        throws InvalidRegexpException
+    {
+        BasicRegexp re = BasicRegexp.parseRegexp("abc?+*|abc?+*");
+        assertEquals(re.toString(), "abc?+*|abc?+*");
     }
 }
