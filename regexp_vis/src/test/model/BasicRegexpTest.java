@@ -123,7 +123,7 @@ public class BasicRegexpTest {
     {
         boolean caught = false;
         try {
-            // TODO(mjn): comments on this? Should this be invalid instead?
+            // TODO(mjn33): comments on this? Should this be invalid instead?
             BasicRegexp.parseRegexp("");
         } catch (InvalidRegexpException e) {
             caught = true;
@@ -137,7 +137,7 @@ public class BasicRegexpTest {
     {
         boolean caught = false;
         try {
-            // TODO(mjn): comments on this? Should this be invalid instead?
+            // TODO(mjn33): comments on this? Should this be invalid instead?
             BasicRegexp.parseRegexp("()");
         } catch (InvalidRegexpException e) {
             caught = true;

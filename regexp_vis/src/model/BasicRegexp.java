@@ -246,11 +246,11 @@ public class BasicRegexp implements Cloneable {
             // If the last regexp operand was just a char on its own
             if (back.isSingleChar() &&
                 back.getOperator() == RegexpOperator.NONE) {
-                back = new BasicRegexp(back.getChar(), op);
+                // Create a new expression with the char
+                sequenceOperands.add(new BasicRegexp(back.getChar(), op));
             } else {
-                BasicRegexp wrappedRegexp = new BasicRegexp(back, op);
-
-                sequenceOperands.add(wrappedRegexp);
+                // Wrap the expression in another expression
+                sequenceOperands.add(new BasicRegexp(back, op));
             }
         } else {
             throw new InvalidRegexpException(
@@ -336,6 +336,7 @@ public class BasicRegexp implements Cloneable {
                 // Ignore whitespace
                 if (!Character.isWhitespace(str.charAt(idx))) {
                     // Normal character
+                    // IDEA(mjn33): Parse e.g. '%' as epsilon
                     BasicRegexp re = new BasicRegexp(str.charAt(idx),
                         RegexpOperator.NONE);
                     sequenceOperands.add(re);
