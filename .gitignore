@@ -2,6 +2,7 @@ bin/
 dist/
 *.xml
 *.html
+*.swp
 
 # Eclipse
 .classpath
