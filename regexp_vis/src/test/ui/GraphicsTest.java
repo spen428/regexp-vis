@@ -47,7 +47,7 @@ public class GraphicsTest extends KeyAdapter implements KeyListener {
      * 
      * @return The generated {@link Graph}
      */
-    private static Graph generateTestGraph() {
+    public static Graph generateTestGraph() {
         Graph graph = new Graph();
         Object parent = graph.getDefaultParent();
 

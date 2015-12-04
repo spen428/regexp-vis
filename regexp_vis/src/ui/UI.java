@@ -10,6 +10,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import test.ui.GraphicsTest;
+
 /**
  * @author pg272
  */
@@ -18,6 +20,8 @@ public class UI extends JFrame {
     private static final int JFRAME_WIDTH_MIN_PX = 1200;
     private static final int JFRAME_HEIGHT_MIN_PX = 700;
     private static final String DEFAULT_JFRAME_TITLE = "Regular Language Visualiser";
+
+    private final GraphPanel graphPanel;
 
     public UI() {
         this(DEFAULT_JFRAME_TITLE);
@@ -31,6 +35,9 @@ public class UI extends JFrame {
      */
     public UI(String title) {
         super(title);
+        // this.graphPanel = new GraphPanel();
+        // TODO: Use the below for testing, above in production.
+        this.graphPanel = new GraphPanel(GraphicsTest.generateTestGraph());
 
         setMinimumSize(new Dimension(JFRAME_WIDTH_MIN_PX, JFRAME_HEIGHT_MIN_PX));
         setResizable(false);
@@ -39,12 +46,15 @@ public class UI extends JFrame {
         JPanel panelParent = new JPanel();
         JPanel panelEast = new JPanel();
         JPanel panelSouth = new JPanel();
+
         panelEast.setPreferredSize(new Dimension(200, 200));
         panelSouth.setPreferredSize(new Dimension(800, 100));
         panelParent.setBackground(new Color(1, 221, 25));
         panelEast.setBackground(new Color(255, 0, 255));
         panelSouth.setBackground(new Color(220, 20, 60));
+
         panelParent.setLayout(new BorderLayout());
+        panelParent.add(graphPanel, BorderLayout.CENTER);
         panelParent.add(panelEast, BorderLayout.EAST);
         panelParent.add(panelSouth, BorderLayout.SOUTH);
 
