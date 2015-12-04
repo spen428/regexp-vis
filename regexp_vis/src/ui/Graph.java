@@ -93,6 +93,16 @@ public class Graph extends mxGraph {
         return startState;
     }
 
+    public AutomatonState[] getFinalStates() {
+        ArrayList<AutomatonState> list = new ArrayList<AutomatonState>();
+        for (AutomatonState state : new ArrayList<>(states.keySet())) {
+            if (state.isFinal()) {
+                list.add(state);
+            }
+        }
+        return list.toArray(new AutomatonState[]{});
+    }
+
     /**
      * @return Returns a <b>clone</b> of the {@link AutomatonState} to
      *         {@link mxCell} HashMap that this graph uses. The graph cannot be
