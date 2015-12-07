@@ -1,10 +1,19 @@
 package ui;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import model.AddStateCommand;
+import model.AddTransitionCommand;
+import model.Automaton;
+import model.AutomatonState;
+import model.AutomatonTransition;
+import model.BasicRegexp;
 import model.CommandHistory;
 
 import com.mxgraph.layout.mxCircleLayout;
@@ -13,6 +22,7 @@ import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.mxOrganicLayout;
 import com.mxgraph.layout.mxParallelEdgeLayout;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
 
 /**
@@ -31,10 +41,11 @@ public class GraphPanel extends mxGraphComponent {
     }
 
     private final Graph graph;
-    private final CommandHistory history;
+    private CommandHistory history;
     private final mxGraphLayout vertexCircleLayout, vertexOrganicLayout,
             vertexFastOrganicLayout, edgeLayout, edgeLabelLayout;
 
+    // CONSTRUCTORS //
     /**
      * Creates a new instance of {@link GraphPanel} and attaches a new instance
      * of {@link Graph} to it.
@@ -70,18 +81,9 @@ public class GraphPanel extends mxGraphComponent {
         setVertexLayout(GraphLayout.CIRCLE_LAYOUT);
     }
 
+    // GETTERS AND SETTERS //
     public CommandHistory getHistory() {
         return history;
-    }
-
-    public void executeNewCommand(UICommand cmd) {
-        history.executeNewCommand(cmd);
-    }
-
-    public void executeNewCommands(UICommand[] cmds) {
-        for (UICommand c : cmds) {
-            history.executeNewCommand(c);
-        }
     }
 
     /**
@@ -112,6 +114,74 @@ public class GraphPanel extends mxGraphComponent {
         /* Update edges and edge labels now that the vertices have moved. */
         edgeLayout.execute(parent);
         edgeLabelLayout.execute(parent);
+    }
+
+    // OVERRIDES //
+    @Override
+    protected void installDoubleClickHandler() {
+        super.graphControl.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (isEnabled()) {
+                    if (!e.isConsumed() && isEditEvent(e)) {
+                        Object cell = getCellAt(e.getX(), e.getY(), false);
+
+                        if (cell != null && getGraph().isCellEditable(cell)) {
+                            System.out.printf("Double-clicked cell: %s %s "
+                                    + "%s%n", cell, e, e.getPoint());
+                            // TODO: eventSource.fireEvent();
+                            mxCell c = ((mxCell) cell);
+                            if (c.isEdge()) {
+                                System.out.println("Double-clicked an edge, "
+                                        + "let's break it down!");
+                                breakDown(c);
+                            }
+                        }
+                    }
+                }
+            }
+
+        });
+    }
+
+    // UTILITY //
+    public void executeNewCommand(UICommand cmd) {
+        history.executeNewCommand(cmd);
+    }
+
+    public void executeNewCommands(UICommand[] cmds) {
+        for (UICommand c : cmds) {
+            history.executeNewCommand(c);
+        }
+    }
+
+    final void breakDown(mxCell c) {
+        // TODO
+    }
+
+    /**
+     * Clear the current Graph, and create a new one that represents a regular
+     * expression that has yet to be broken down.
+     * 
+     * @param regexp
+     *            a regular expression
+     */
+    public void resetGraph(String regexp) {
+        this.graph.clear();
+        this.history = new CommandHistory();
+
+        /* Generate new automaton */
+        Automaton a = this.graph.getAutomaton();
+        AutomatonState finalState = a.createNewState();
+        AutomatonTransition transition = a.createNewTransition(
+                a.getStartState(), finalState, regexp);
+        UICommand[] cmds = new UICommand[] {
+                new AddStateUICommand(this.graph, new AddStateCommand(a,
+                        finalState)),
+                new AddTransitionUICommand(this.graph,
+                        new AddTransitionCommand(a, transition)) };
+        executeNewCommands(cmds);
+        setVertexLayout(GraphLayout.CIRCLE_LAYOUT);
     }
 
 }

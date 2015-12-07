@@ -19,9 +19,9 @@ import com.mxgraph.view.mxStylesheet;
  * Represents an {@link Automaton} using the JGraph graphing libraries.
  * <p>
  * Extends {@link mxGraph}, overriding the default stylesheet.
- *
+ * 
  * @author sp611
- *
+ * 
  */
 public class Graph extends mxGraph {
 
@@ -51,7 +51,7 @@ public class Graph extends mxGraph {
     /**
      * The underlying {@link Automaton} that this graph represents.
      */
-    private final Automaton automaton;
+    private Automaton automaton;
 
     // CONSTRUCTORS //
     public Graph() {
@@ -59,6 +59,7 @@ public class Graph extends mxGraph {
         this.automaton = new Automaton();
         this.states = new HashMap<>();
         this.transitions = new HashMap<>();
+        setStartState(this.automaton.getStartState());
     }
 
     public Graph(Automaton automaton) {
@@ -73,7 +74,7 @@ public class Graph extends mxGraph {
     /**
      * The size of this graph is defined as the total number of states and
      * transitions it has.
-     *
+     * 
      * @return size
      */
     public int getSize() {
@@ -100,7 +101,7 @@ public class Graph extends mxGraph {
                 list.add(state);
             }
         }
-        return list.toArray(new AutomatonState[]{});
+        return list.toArray(new AutomatonState[] {});
     }
 
     /**
@@ -161,7 +162,7 @@ public class Graph extends mxGraph {
     /**
      * Sets the given state to be the start state. If a start state already
      * exists, that state will become a non-start state.
-     *
+     * 
      * @param state
      *            the state to set as the start state
      * @return the {@link mxCell} representing the state
@@ -202,7 +203,7 @@ public class Graph extends mxGraph {
 
     /**
      * Sets the finality of the given state
-     *
+     * 
      * @param state
      *            the state
      * @param isFinal
@@ -232,7 +233,7 @@ public class Graph extends mxGraph {
 
     /**
      * Adds an {@link AutomatonState} to the graph if it does not already exist.
-     *
+     * 
      * @param state
      *            the {@link AutomatonState} to add
      * @return the {@link mxCell} that was added to the graph, or {@code null}
@@ -248,14 +249,14 @@ public class Graph extends mxGraph {
             return null;
         }
 
-        String id = "state" + state.getId();
+        int id = state.getId();
         String style = state.isFinal() ? FINAL_STATE_STYLE : null;
 
         mxCell cell = null;
         model.beginUpdate();
         try {
-            cell = (mxCell) insertVertex(getDefaultParent(), id, id, 0, 0,
-                    VERTEX_DIAMETER_PX, VERTEX_DIAMETER_PX, style);
+            cell = (mxCell) insertVertex(getDefaultParent(), "state" + id, id,
+                    0, 0, VERTEX_DIAMETER_PX, VERTEX_DIAMETER_PX, style);
             states.put(state, cell);
         } finally {
             model.endUpdate();
@@ -284,7 +285,7 @@ public class Graph extends mxGraph {
      * <p>
      * If you do not wish to remove the transitions, use
      * {@link #removeState(AutomatonState, boolean)}.
-     *
+     * 
      * @param state
      *            the state to remove
      * @param removeTransitions
@@ -298,7 +299,7 @@ public class Graph extends mxGraph {
     /**
      * Removes the given state and optionally any transitions associated with
      * the state.
-     *
+     * 
      * @param state
      *            the state to remove
      * @param removeTransitions
@@ -334,7 +335,7 @@ public class Graph extends mxGraph {
     /**
      * Insert the given {@link AutomatonTransition} into the graph by calling
      * {@link #insertEdge(Object, String, Object, Object, Object)}
-     *
+     * 
      * @param transition
      *            the {@link AutomatonTransition} to insert
      * @return the {@link mxCell} that was added to the graph, or {@code null}
@@ -361,7 +362,8 @@ public class Graph extends mxGraph {
 
         model.beginUpdate();
         try {
-            cell = (mxCell) insertEdge(getDefaultParent(), id, id, from, to);
+            cell = (mxCell) insertEdge(getDefaultParent(), id,
+                    transition.getData(), from, to);
             transitions.put(transition, cell);
         } finally {
             model.endUpdate();
@@ -371,7 +373,7 @@ public class Graph extends mxGraph {
 
     /**
      * Removes a transition from the graph.
-     *
+     * 
      * @param transition
      *            the {@link AutomatonTransition} to remove
      * @return the cell that was removed
@@ -399,9 +401,10 @@ public class Graph extends mxGraph {
     }
 
     /**
-     * Removes all nodes and edges from this graph.
+     * Removes all nodes and edges from this graph and resets all fields.
      */
     public void clear() {
+        /* Clear visuals */
         model.beginUpdate();
         try {
             for (mxCell c : states.values()) {
@@ -416,12 +419,18 @@ public class Graph extends mxGraph {
         } finally {
             model.endUpdate();
         }
+
+        /* Clear fields */
+        this.states.clear();
+        this.transitions.clear();
+        this.automaton = new Automaton();
+        setStartState(this.automaton.getStartState());
     }
 
     /**
      * Adds all of the states and transitions from the given {@link Automaton}
      * to the graph.
-     *
+     * 
      * @param automaton
      *            the automaton
      */
@@ -430,21 +439,14 @@ public class Graph extends mxGraph {
         // to prevent modifying internal state
 
         /*
-        HashMap<AutomatonState, LinkedList<AutomatonTransition>> mGraph = automaton
-                .getGraph();
-        AutomatonState startState = automaton.getStartState();
-        // Insert states
-        setStartState(startState);
-        for (AutomatonState state : mGraph.keySet()) {
-            addState(state);
-        }
-        // Insert transitions
-        for (AutomatonState state : mGraph.keySet()) {
-            for (AutomatonTransition transition : mGraph.get(state)) {
-                addTransition(transition);
-            }
-        }
-        */
+         * HashMap<AutomatonState, LinkedList<AutomatonTransition>> mGraph =
+         * automaton .getGraph(); AutomatonState startState =
+         * automaton.getStartState(); // Insert states
+         * setStartState(startState); for (AutomatonState state :
+         * mGraph.keySet()) { addState(state); } // Insert transitions for
+         * (AutomatonState state : mGraph.keySet()) { for (AutomatonTransition
+         * transition : mGraph.get(state)) { addTransition(transition); } }
+         */
     }
 
 }
