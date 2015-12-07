@@ -20,12 +20,7 @@ public class BasicRegexpTest {
     }
 
     // TODO(mjn33): Ideas for future tests
-    //   * (a)(b)(c)(d) ------> valid, in effect the same as abcd
-    //   * a b c d      ------> valid, in effect the same as abcd
-    //   * sdf**        ------> valid, in effect the same as sdf(f*)*
-    //   * (sdf)**      ------> valid, in effect the same as ((sdf)*)*
-    //   * (sdf)*?      ------> valid, in effect the same as ((sdf)*)?
-    //   * (sdf)*+      ------> valid, in effect the same as ((sdf)*)+
+    //pg272 fninished the rest of the test
 
     @Test
     public void testParseRegexp_invalid1()
@@ -110,13 +105,39 @@ public class BasicRegexpTest {
     {
         boolean caught = false;
         try {
-            BasicRegexp.parseRegexp("sdf(jjj))");
+            BasicRegexp.parseRegexp("(sdf)**");
         } catch (InvalidRegexpException e) {
             caught = true;
         }
 
         assertTrue(caught);
     }
+    
+    @Test
+    public void testParseRegexp_invalid8()
+    {
+        boolean caught = false;
+        try {
+            BasicRegexp.parseRegexp("(sdf)**");
+        } catch (InvalidRegexpException e) {
+            caught = true;
+        }
+
+        assertTrue(caught);
+    }
+    
+   
+	@Test
+	public void testParseRegexp_invalid9() {
+		boolean caught = false;
+		try {
+			BasicRegexp.parseRegexp("(sdf)*?");
+		} catch (InvalidRegexpException e) {
+			caught = true;
+		}
+
+		assertTrue(caught);
+	}
 
     @Test
     public void testParseRegexp_valid1()
@@ -145,6 +166,74 @@ public class BasicRegexpTest {
 
         assertFalse(caught);
     }
+    
+    @Test
+    public void testParseRegexp_valid3()
+    {
+        boolean caught = false;
+        try {
+            BasicRegexp.parseRegexp("(a)(b)(c)(d)");
+        } catch (InvalidRegexpException e) {
+            caught = true;
+        }
+
+        assertFalse(caught);
+    }
+    
+    @Test
+    public void testParseRegexp_valid4()
+    {
+        boolean caught = false;
+        try {
+            BasicRegexp.parseRegexp("a b c d");
+        } catch (InvalidRegexpException e) {
+            caught = true;
+        }
+
+        assertFalse(caught);
+    }
+    
+    @Test
+    public void testParseRegexp_valid5()
+    {
+        boolean caught = false;
+        try {
+            BasicRegexp.parseRegexp("sdf**");
+        } catch (InvalidRegexpException e) {
+            caught = true;
+        }
+
+        assertFalse(caught);
+    }
+    
+    @Test
+    public void testParseRegexp_valid6()
+    {
+        boolean caught = false;
+        try {
+            BasicRegexp.parseRegexp("sdf**");
+        } catch (InvalidRegexpException e) {
+            caught = true;
+        }
+
+        assertFalse(caught);
+    }
+    
+    
+    
+    @Test
+    public void testParseRegexp_valid7()
+    {
+        boolean caught = false;
+        try {
+            BasicRegexp.parseRegexp("(sdf)*+");
+        } catch (InvalidRegexpException e) {
+            caught = true;
+        }
+
+        assertFalse(caught);
+    }
+    
 
     @Test
     public void testParseRegexp_correctness1()
