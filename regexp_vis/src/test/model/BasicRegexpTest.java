@@ -140,26 +140,27 @@ public class BasicRegexpTest {
 	}
 
     @Test
+    public void testParseRegexp_invalid8()
+    {
+        boolean caught = false;
+        try {
+            // Invalid, Stefan's Java applet doesn't like this either, not
+            // particularly useful to allow it
+            BasicRegexp.parseRegexp("()");
+        } catch (InvalidRegexpException e) {
+            caught = true;
+        }
+
+        assertTrue(caught);
+    }
+
+    @Test
     public void testParseRegexp_valid1()
     {
         boolean caught = false;
         try {
             // TODO(mjn33): comments on this? Should this be invalid instead?
             BasicRegexp.parseRegexp("");
-        } catch (InvalidRegexpException e) {
-            caught = true;
-        }
-
-        assertFalse(caught);
-    }
-
-    @Test
-    public void testParseRegexp_valid2()
-    {
-        boolean caught = false;
-        try {
-            // TODO(mjn33): comments on this? Should this be invalid instead?
-            BasicRegexp.parseRegexp("()");
         } catch (InvalidRegexpException e) {
             caught = true;
         }

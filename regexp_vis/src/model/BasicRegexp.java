@@ -95,6 +95,11 @@ public class BasicRegexp implements Cloneable {
                 "expressions");
         }
 
+        if (!isUnaryOperator(op)) {
+            throw new IllegalArgumentException(
+                "Non-unary operators require multiple operands");
+        }
+
         mOperands = new ArrayList<>();
         mOperands.add(operand);
         mChar = EPSILON_CHAR;
@@ -326,6 +331,11 @@ public class BasicRegexp implements Cloneable {
                 }
                 parenIdx += idx; // parenIdx is relative to idx
                 BasicRegexp re = parseRegexp(str.substring(idx + 1, parenIdx));
+                if (re == null) {
+                    // Completely empty sub-expression, e.g. "()"
+                    throw new InvalidRegexpException(
+                        "Empty parentheses found");
+                }
                 sequenceOperands.add(re);
                 idx = parenIdx;
                 break;
