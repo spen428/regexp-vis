@@ -4,7 +4,9 @@ import java.util.*;
 
 /**
  * Class representing a "basic" regular expression, with one top level operator.
- * A tree of these can then be used to any regular expression
+ * A tree of these can then be used to any regular expression.
+ *
+ * BasicRegexp is designed to be immutable, similar to the Java String class.
  *
  * @author Matthew Nicholls
  */
@@ -233,6 +235,10 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
         return mChar;
     }
 
+    /**
+     * @return Whether this regular expression is nullable, i.e. its language
+     * contains the empty word
+     */
     public boolean isNullable()
     {
         switch (mOperator) {
@@ -678,6 +684,15 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
         }
     }
 
+    /**
+     * Factored out of optimiseSequence(), tests whether as an optimisation we
+     * can merge two adjacent expressions into one (and which one).
+     * @param a The first expression
+     * @param b The second expression
+     * @return -1 if these two expressions cannot be merged, otherwise returns
+     * 0 if the first expression should be removed, or 1 if the second
+     * expression should be removed
+     */
     private int couldMergeSequence(BasicRegexp a, BasicRegexp b)
     {
         int ret = -1;
@@ -832,6 +847,11 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
         }
     }
 
+    /**
+     * Creates an optimised version of this regular expression, if the
+     * expression cannot be optimised further this expression is returned.
+     * @return The optimised expression
+     */
     public BasicRegexp optimise()
     {
         // Step 1: call .optimise() on sub expressions, if a new expression is
