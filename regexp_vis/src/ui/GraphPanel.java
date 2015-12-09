@@ -41,6 +41,7 @@ public class GraphPanel extends mxGraphComponent {
     private CommandHistory history;
     private final mxGraphLayout vertexCircleLayout, vertexOrganicLayout,
             vertexFastOrganicLayout, edgeLayout, edgeLabelLayout;
+    private GraphLayout layout;
 
     // CONSTRUCTORS //
     /**
@@ -75,7 +76,8 @@ public class GraphPanel extends mxGraphComponent {
         this.edgeLayout = new mxParallelEdgeLayout(graph);
         this.edgeLabelLayout = new mxEdgeLabelLayout(graph);
 
-        setVertexLayout(GraphLayout.CIRCLE_LAYOUT);
+        this.layout = GraphLayout.CIRCLE_LAYOUT;
+        doGraphLayout();
     }
 
     // GETTERS AND SETTERS //
@@ -85,17 +87,29 @@ public class GraphPanel extends mxGraphComponent {
 
     /**
      * Switches between the automatic vertex layout types provided by JGraphX.
-     * This method automatically calls the {@code execute()} method on the
-     * chosen {@link mxGraphLayout} type, and also updates the positions of
-     * edges and edge labels after the vertices have been laid-out.
+     * This method automatically calls {@link #doGraphLayout()} to refresh the
+     * layout of the cells
      * 
      * @param layout
      *            the {@link GraphPanel.GraphLayout} to use.
+     * @see {@link #doGraphLayout()}
      */
     public void setVertexLayout(GraphLayout layout) {
+        this.layout = layout;
+        doGraphLayout();
+    }
+
+    /**
+     * Calls the {@code execute()} method for the currently selected
+     * {@link GraphLayout}, automatically repositioning the nodes, edges, and
+     * edge labels of the graph.
+     * 
+     * @see {@link mxGraphLayout#execute(Object)}
+     */
+    public void doGraphLayout() {
         Object parent = this.graph.getDefaultParent();
 
-        switch (layout) {
+        switch (this.layout) {
         default:
         case CIRCLE_LAYOUT:
             this.vertexCircleLayout.execute(parent);
@@ -169,7 +183,7 @@ public class GraphPanel extends mxGraphComponent {
                 new AddTransitionUICommand(this.graph,
                         new AddTransitionCommand(a, transition)) };
         executeNewCommands(cmds);
-        setVertexLayout(GraphLayout.CIRCLE_LAYOUT);
+        doGraphLayout();
     }
 
 }

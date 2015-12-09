@@ -50,6 +50,7 @@ public class DoubleClickHandler extends MouseAdapter {
         Command cmd = TranslationTools.createBreakdownCommand(
                 graph.getAutomaton(), graph.getTransitionFromCell(cell));
         this.graphPanel.executeNewCommand(cmd);
+        this.graphPanel.doGraphLayout();
     }
 
 }

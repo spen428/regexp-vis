@@ -23,7 +23,7 @@ public class BreakdownUICommand extends UICommand {
         /* Convert list of Command to UICommand */
         ListIterator<Command> it = cmd.getCommands().listIterator();
         while (it.hasNext()) {
-            this.commands.push(UICommand.fromCommand(graph, it.next()));
+            this.commands.add(UICommand.fromCommand(graph, it.next()));
         }
     }
 

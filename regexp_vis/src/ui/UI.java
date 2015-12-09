@@ -45,7 +45,6 @@ public class UI extends JFrame implements KeyListener {
         this.graphPanel = new GraphPanel();
 
         setMinimumSize(new Dimension(JFRAME_WIDTH_MIN_PX, JFRAME_HEIGHT_MIN_PX));
-        setResizable(false);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         /* Components */
