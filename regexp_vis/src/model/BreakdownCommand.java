@@ -32,6 +32,11 @@ public abstract class BreakdownCommand extends Command {
     {
         return mOriginalTransition;
     }
+    
+    public LinkedList<Command> getCommands()
+    {
+        return new LinkedList<Command>(mCommands);
+    }
 
     @Override
     public void undo()
