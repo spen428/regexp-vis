@@ -111,24 +111,10 @@ public class BasicRegexpTest {
         }
 
         assertTrue(caught);
-    }
-    
-    @Test
-    public void testParseRegexp_invalid8()
-    {
-        boolean caught = false;
-        try {
-            BasicRegexp.parseRegexp("(sdf)**");
-        } catch (InvalidRegexpException e) {
-            caught = true;
-        }
-
-        assertTrue(caught);
-    }
-    
+    }    
    
 	@Test
-	public void testParseRegexp_invalid9() {
+	public void testParseRegexp_invalid8() {
 		boolean caught = false;
 		try {
 			BasicRegexp.parseRegexp("(sdf)*?");
@@ -140,26 +126,27 @@ public class BasicRegexpTest {
 	}
 
     @Test
+    public void testParseRegexp_invalid9()
+    {
+        boolean caught = false;
+        try {
+            // Invalid, Stefan's Java applet doesn't like this either, not
+            // particularly useful to allow it
+            BasicRegexp.parseRegexp("()");
+        } catch (InvalidRegexpException e) {
+            caught = true;
+        }
+
+        assertTrue(caught);
+    }
+
+    @Test
     public void testParseRegexp_valid1()
     {
         boolean caught = false;
         try {
             // TODO(mjn33): comments on this? Should this be invalid instead?
             BasicRegexp.parseRegexp("");
-        } catch (InvalidRegexpException e) {
-            caught = true;
-        }
-
-        assertFalse(caught);
-    }
-
-    @Test
-    public void testParseRegexp_valid2()
-    {
-        boolean caught = false;
-        try {
-            // TODO(mjn33): comments on this? Should this be invalid instead?
-            BasicRegexp.parseRegexp("()");
         } catch (InvalidRegexpException e) {
             caught = true;
         }
@@ -204,25 +191,10 @@ public class BasicRegexpTest {
         }
 
         assertFalse(caught);
-    }
+    }    
     
     @Test
     public void testParseRegexp_valid6()
-    {
-        boolean caught = false;
-        try {
-            BasicRegexp.parseRegexp("sdf**");
-        } catch (InvalidRegexpException e) {
-            caught = true;
-        }
-
-        assertFalse(caught);
-    }
-    
-    
-    
-    @Test
-    public void testParseRegexp_valid7()
     {
         boolean caught = false;
         try {
@@ -236,7 +208,7 @@ public class BasicRegexpTest {
     
 
     @Test
-    public void testParseRegexp_valid3()
+    public void testParseRegexp_valid7()
     {
         boolean caught = false;
         try {
@@ -250,7 +222,7 @@ public class BasicRegexpTest {
     }
 
     @Test
-    public void testParseRegexp_valid4()
+    public void testParseRegexp_valid8()
     {
         boolean caught = false;
         try {
@@ -383,5 +355,174 @@ public class BasicRegexpTest {
     {
         BasicRegexp re = BasicRegexp.parseRegexp("abc?+*|abc?+*");
         assertEquals(re.toString(), "abc?+*|abc?+*");
+    }
+
+    @Test
+    public void testOptimise_1()
+        throws InvalidRegexpException
+    {
+        // Test combinations of iteration simplifying down to a single STAR
+        BasicRegexp re1 = BasicRegexp.parseRegexp("a**");
+        BasicRegexp re2 = BasicRegexp.parseRegexp("a+*");
+        BasicRegexp re3 = BasicRegexp.parseRegexp("a*+");
+        BasicRegexp re4 = BasicRegexp.parseRegexp("a*********************");
+        BasicRegexp re5 = BasicRegexp.parseRegexp("a++++++++++++++++++++*");
+        BasicRegexp re6 = BasicRegexp.parseRegexp("a????????????????????*");
+        BasicRegexp re7 = BasicRegexp.parseRegexp("a********************?");
+        BasicRegexp re8 = BasicRegexp.parseRegexp("a+?*+?*+?*");
+        BasicRegexp re9 = BasicRegexp.parseRegexp("a+?");
+        BasicRegexp re10 = BasicRegexp.parseRegexp("a?+");
+
+        assertEquals(re1.optimise().toString(), "a*");
+        assertEquals(re2.optimise().toString(), "a*");
+        assertEquals(re3.optimise().toString(), "a*");
+        assertEquals(re4.optimise().toString(), "a*");
+        assertEquals(re5.optimise().toString(), "a*");
+        assertEquals(re6.optimise().toString(), "a*");
+        assertEquals(re7.optimise().toString(), "a*");
+        assertEquals(re8.optimise().toString(), "a*");
+        assertEquals(re9.optimise().toString(), "a*");
+        assertEquals(re10.optimise().toString(), "a*");
+    }
+
+    @Test
+    public void testOptimise_2()
+        throws InvalidRegexpException
+    {
+        // Test combinations of iteration simplifying down to a single PLUS
+        BasicRegexp re1 = BasicRegexp.parseRegexp("a+++++++++++++++++++++");
+
+        assertEquals(re1.optimise().toString(), "a+");
+    }
+
+    @Test
+    public void testOptimise_3()
+        throws InvalidRegexpException
+    {
+        // Test simplifying parts of SEQUENCE
+        // Test single character expressions get simplified
+        BasicRegexp re1 = BasicRegexp.parseRegexp("a*a*");
+        BasicRegexp re2 = BasicRegexp.parseRegexp("a*a?");
+        BasicRegexp re3 = BasicRegexp.parseRegexp("a?a*");
+        BasicRegexp re4 = BasicRegexp.parseRegexp("a?a?a?a?a*");
+        BasicRegexp re5 = BasicRegexp.parseRegexp("a?a*a*a?a*a?a?a?a*a*a?a*a?");
+
+        assertEquals(re1.optimise().toString(), "a*");
+        assertEquals(re2.optimise().toString(), "a*");
+        assertEquals(re3.optimise().toString(), "a*");
+        assertEquals(re4.optimise().toString(), "a*");
+        assertEquals(re5.optimise().toString(), "a*");
+    }
+
+    @Test
+    public void testOptimise_4()
+        throws InvalidRegexpException
+    {
+        // Test simplifying parts of SEQUENCE
+        // Test complex expressions get simplified
+        BasicRegexp re1 = BasicRegexp.parseRegexp("(a|b)*(a|b)*");
+        BasicRegexp re2 = BasicRegexp.parseRegexp("(a|b)*(a|b)?");
+        BasicRegexp re3 = BasicRegexp.parseRegexp("(a|b)?(a|b)*");
+        BasicRegexp re4 = BasicRegexp.parseRegexp("(a|b)+(a|b)*");
+        BasicRegexp re5 = BasicRegexp.parseRegexp("(a|b)*(a|b)+");
+        BasicRegexp re6 = BasicRegexp.parseRegexp("(a|b)+(a|b)?");
+        BasicRegexp re7 = BasicRegexp.parseRegexp("(a|b)?(a|b)+");
+
+        assertEquals(re1.optimise().toString(), "(a|b)*");
+        assertEquals(re2.optimise().toString(), "(a|b)*");
+        assertEquals(re3.optimise().toString(), "(a|b)*");
+        assertEquals(re4.optimise().toString(), "(a|b)+");
+        assertEquals(re5.optimise().toString(), "(a|b)+");
+        assertEquals(re6.optimise().toString(), "(a|b)+");
+        assertEquals(re7.optimise().toString(), "(a|b)+");
+    }
+
+    @Test
+    public void testOptimise_5()
+        throws InvalidRegexpException
+    {
+        // Test simplifying parts of SEQUENCE
+        // Test different char prevents oversimplifying, recognise a*b* can't 
+        // be simplified to a* for example
+        BasicRegexp re1 = BasicRegexp.parseRegexp("a*b*");
+        BasicRegexp re2 = BasicRegexp.parseRegexp("a*b?");
+        BasicRegexp re3 = BasicRegexp.parseRegexp("a?b*");
+        BasicRegexp re4 = BasicRegexp.parseRegexp("a?a?b?a?a*");
+        BasicRegexp re5 = BasicRegexp.parseRegexp("a?a*a*a?a*b?a?a?a*b*a?a*a?");
+
+        assertEquals(re1.optimise().toString(), "a*b*");
+        assertEquals(re2.optimise().toString(), "a*b?");
+        assertEquals(re3.optimise().toString(), "a?b*");
+        assertEquals(re4.optimise().toString(), "a?a?b?a*");
+        assertEquals(re5.optimise().toString(), "a*b?a*b*a*");
+    }
+
+    @Test
+    public void testOptimise_6()
+        throws InvalidRegexpException
+    {
+        // Test removing duplicate parts of CHOICE, verify ordering is 
+        // maintained
+        BasicRegexp re1 = BasicRegexp.parseRegexp("a|a|b");
+        BasicRegexp re2 = BasicRegexp.parseRegexp("b|a|a");
+        BasicRegexp re3 = BasicRegexp.parseRegexp("(b|b)*|(a|a)*|a*");
+        BasicRegexp re4 = BasicRegexp.parseRegexp("(c|b|b)*|(a|a)*|a*");
+        BasicRegexp re5 = BasicRegexp.parseRegexp("a*b*|a*b*");
+
+        assertEquals(re1.optimise().toString(), "a|b");
+        assertEquals(re2.optimise().toString(), "b|a");
+        assertEquals(re3.optimise().toString(), "b*|a*");
+        assertEquals(re4.optimise().toString(), "(c|b)*|a*");
+        assertEquals(re5.optimise().toString(), "a*b*");
+    }
+
+    @Test
+    public void testOptimise_7()
+        throws InvalidRegexpException
+    {
+        // Test more complex iteration simplification, tests the optimiseStarOnSC method
+        BasicRegexp re1 = BasicRegexp.parseRegexp("(a*b*)*");
+        BasicRegexp re2 = BasicRegexp.parseRegexp("((a|d)*b*c?)*");
+        BasicRegexp re3 = BasicRegexp.parseRegexp("(abc)*");
+        BasicRegexp re4 = BasicRegexp.parseRegexp("((a*|b*)b*c*)*");
+        BasicRegexp re5 = BasicRegexp.parseRegexp("((a*b*)*b*c*)*");
+        BasicRegexp re6 = BasicRegexp.parseRegexp("((ab)*b*c*)*");
+        BasicRegexp re7 = BasicRegexp.parseRegexp("((a|b)*b*|c*)*");
+        BasicRegexp re8 = BasicRegexp.parseRegexp("((a|b)+b?|c)*");
+        BasicRegexp re9 = BasicRegexp.parseRegexp("(a*bc*)*");
+        BasicRegexp re10 = BasicRegexp.parseRegexp("((a*|b*)+b?|c)*");
+        BasicRegexp re11 = BasicRegexp.parseRegexp("(abc**)*");
+
+        assertEquals(re1.optimise().toString(), "(a|b)*");
+        assertEquals(re2.optimise().toString(), "(a|d|b|c)*");
+        assertEquals(re3.optimise().toString(), "(abc)*");
+        assertEquals(re4.optimise().toString(), "(a|b|c)*");
+        assertEquals(re5.optimise().toString(), "(a|b|c)*");
+        assertEquals(re6.optimise().toString(), "(ab|b|c)*");
+        assertEquals(re7.optimise().toString(), "(a|b|c)*");
+        assertEquals(re8.optimise().toString(), "((a|b)+b?|c)*"); // Can't optimise further
+        assertEquals(re9.optimise().toString(), "(a*bc*)*"); // Can't optimise further
+        assertEquals(re10.optimise().toString(), "(a|b|c)*");
+        assertEquals(re11.optimise().toString(), "(abc*)*");
+    }
+
+    @Test
+    public void testDebugPrintBasicRegexp()
+        throws InvalidRegexpException
+    {
+        // Can't mark methods to be ignored by EclEmma coverage tool, this test
+        // is a workaround
+        BasicRegexp re1 = BasicRegexp.parseRegexp("(01|10)*1111");
+        BasicRegexp.debugPrintBasicRegexp(0, re1);
+    }
+
+    @Test
+    public void testClone()
+        throws InvalidRegexpException
+    {
+        // Check that cloned regexps are equal
+        BasicRegexp re1 = BasicRegexp.parseRegexp("(01|10)*1111");
+        BasicRegexp cloned = re1.clone();
+        assertEquals(re1.compareTo(cloned), 0);
     }
 }
