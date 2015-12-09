@@ -48,7 +48,7 @@ public class GraphTest {
 
         Graph graph = new Graph(automaton);
         assertEquals(automaton, graph.getAutomaton());
-        assertEquals(4+1, graph.getSize()); // +1 for automaton start state
+        assertEquals(5, graph.getSize());
         assertTrue(graph.containsState(state0));
         assertTrue(graph.containsState(state1));
         assertTrue(graph.containsTransition(transition0));
@@ -219,8 +219,8 @@ public class GraphTest {
         Graph graph = new Graph();
         AutomatonState startState = new AutomatonState(0);
 
-        /* Should initialise as null */
-        assertEquals(null, graph.getStartState());
+        /* Should not initialise as null (it did previously, but that has been changed) */
+        assertNotEquals(null, graph.getStartState());
 
         /* Set start state normally */
         graph.addState(startState);
@@ -232,7 +232,7 @@ public class GraphTest {
         graph.setStartState(startState);
         assertEquals(startState, graph.getStartState());
 
-        /* Set to null */
+        /* Try to set to null */
         graph.setStartState(null);
         assertEquals(null, graph.getStartState());
     }
@@ -272,15 +272,16 @@ public class GraphTest {
         AutomatonTransition transition0 = new AutomatonTransition(0, state0,
                 state1, "transition0");
 
-        assertEquals(0, graph.getSize());
+        assertEquals(1, graph.getSize()); // Graph starts with a "start state"
         graph.addState(state0);
-        assertEquals(1, graph.getSize());
-        graph.addState(state1);
         assertEquals(2, graph.getSize());
-        graph.addTransition(transition0);
+        graph.addState(state1);
         assertEquals(3, graph.getSize());
+        graph.addTransition(transition0);
+        assertEquals(4, graph.getSize());
         graph.clear();
-        assertEquals(0, graph.getSize());
+        assertEquals(1, graph.getSize()); // When cleared, still has a
+                                          // "start state"
     }
 
 }

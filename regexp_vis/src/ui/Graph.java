@@ -54,20 +54,44 @@ public class Graph extends mxGraph {
     private Automaton automaton;
 
     // CONSTRUCTORS //
+    /**
+     * Create a new blank {@link Graph}
+     */
     public Graph() {
-        super();
-        this.automaton = new Automaton();
-        this.states = new HashMap<>();
-        this.transitions = new HashMap<>();
-        setStartState(this.automaton.getStartState());
+        this(null);
     }
 
+    /**
+     * Create a new {@link Graph} from the given {@link Automaton}
+     * 
+     * @param automaton
+     *            the {@link Automaton}
+     */
     public Graph(Automaton automaton) {
         super();
-        this.automaton = automaton;
         this.states = new HashMap<>();
         this.transitions = new HashMap<>();
-        addAutomaton(automaton);
+
+        /* Insert states and transitions from the given automaton. */
+        if (automaton != null) {
+            this.automaton = automaton;
+            // TODO: requires automaton.getGraph()
+
+            /* Insert states */
+            // for (AutomatonState state : mGraph.keySet()) {
+            // addState(state);
+            // }
+
+            /* Insert transitions */
+            // for (AutomatonState state : mGraph.keySet()) {
+            // for (AutomatonTransition transition : mGraph.get(state)) {
+            // addTransition(transition);
+            // }
+            // }
+        } else {
+            this.automaton = new Automaton();
+        }
+        setStartState(this.automaton.getStartState());
     }
 
     // GETTERS //
@@ -78,7 +102,7 @@ public class Graph extends mxGraph {
      * @return size
      */
     public int getSize() {
-        return states.size() + transitions.size();
+        return this.states.size() + this.transitions.size();
     }
 
     public Automaton getAutomaton() {
@@ -435,28 +459,6 @@ public class Graph extends mxGraph {
         this.transitions.clear();
         this.automaton = new Automaton();
         setStartState(this.automaton.getStartState());
-    }
-
-    /**
-     * Adds all of the states and transitions from the given {@link Automaton}
-     * to the graph.
-     * 
-     * @param automaton
-     *            the automaton
-     */
-    private void addAutomaton(Automaton automaton) {
-        // FIXME(mjn33): Need to implement iterator in Automaton / something
-        // to prevent modifying internal state
-
-        /*
-         * HashMap<AutomatonState, LinkedList<AutomatonTransition>> mGraph =
-         * automaton .getGraph(); AutomatonState startState =
-         * automaton.getStartState(); // Insert states
-         * setStartState(startState); for (AutomatonState state :
-         * mGraph.keySet()) { addState(state); } // Insert transitions for
-         * (AutomatonState state : mGraph.keySet()) { for (AutomatonTransition
-         * transition : mGraph.get(state)) { addTransition(transition); } }
-         */
     }
 
 }
