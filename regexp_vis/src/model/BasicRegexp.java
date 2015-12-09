@@ -579,8 +579,8 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
      * expression to
      * @return True if any optimisations were made, false otherwise
      */
-    // Simplifies a star on a SEQUENCE or CHOICE into a smaller CHOICE todo reword
-    private boolean optimiseStarOnSC(BasicRegexp re, ArrayList<BasicRegexp> optimisedOperands)
+    private boolean optimiseStarOnSC(BasicRegexp re,
+        ArrayList<BasicRegexp> optimisedOperands)
     {
         if (re.getOperator() == RegexpOperator.SEQUENCE && !re.isNullable()) {
             // Non-nullable SEQUENCE, can't progress further.
@@ -612,7 +612,8 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
                 hasOptimisedSubExpr = true;
                 break;
             case SEQUENCE:
-                hasOptimisedSubExpr = optimiseStarOnSC(operand, optimisedOperands);
+                hasOptimisedSubExpr = optimiseStarOnSC(operand,
+                    optimisedOperands);
                 break;
             case CHOICE:
                 optimiseStarOnSC(operand, optimisedOperands);
@@ -641,9 +642,11 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
         case PLUS:
         case OPTION:
             if (subExprOptimised.isSingleChar()) {
-                return new BasicRegexp(subExprOptimised.mChar, RegexpOperator.STAR);
+                return new BasicRegexp(subExprOptimised.mChar,
+                    RegexpOperator.STAR);
             } else {
-                return new BasicRegexp(subExprOptimised.mOperands.get(0), RegexpOperator.STAR);
+                return new BasicRegexp(subExprOptimised.mOperands.get(0),
+                    RegexpOperator.STAR);
             }
         case SEQUENCE:
         case CHOICE: {
@@ -699,9 +702,11 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
             return subExprOptimised;
         case OPTION:
             if (subExprOptimised.isSingleChar()) {
-                return new BasicRegexp(subExprOptimised.mChar, RegexpOperator.STAR);
+                return new BasicRegexp(subExprOptimised.mChar,
+                    RegexpOperator.STAR);
             } else {
-                return new BasicRegexp(subExprOptimised.mOperands.get(0), RegexpOperator.STAR);
+                return new BasicRegexp(subExprOptimised.mOperands.get(0),
+                    RegexpOperator.STAR);
             }
         case SEQUENCE: {
             // IDEA(mjn33): Improve optimisations, when I have the time. PLUS
@@ -714,7 +719,9 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
                 // Optimisation made on sub expression
                 return new BasicRegexp(subExprOptimised, mOperator);
             } else {
-                return new BasicRegexp(new BasicRegexp(subExprOptimised.mOperands, RegexpOperator.CHOICE), RegexpOperator.PLUS);
+                return new BasicRegexp(
+                    new BasicRegexp(subExprOptimised.mOperands,
+                        RegexpOperator.CHOICE), RegexpOperator.PLUS);
             }
         }
         case CHOICE:
@@ -743,9 +750,11 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
         } else if (subExprOptimised.getOperator() == RegexpOperator.PLUS) {
             // r+? ----> r*
             if (subExprOptimised.isSingleChar()) {
-                return new BasicRegexp(subExprOptimised.mChar, RegexpOperator.STAR);
+                return new BasicRegexp(subExprOptimised.mChar,
+                    RegexpOperator.STAR);
             } else {
-                return new BasicRegexp(subExprOptimised.mOperands.get(0), RegexpOperator.STAR);
+                return new BasicRegexp(subExprOptimised.mOperands.get(0),
+                    RegexpOperator.STAR);
             }
         } else if (subExprOptimised.getOperator() == RegexpOperator.NONE) {
             // We can always wrap single character expressions into OPTION
