@@ -509,12 +509,30 @@ public class BasicRegexpTest {
     public void testOptimise_7()
         throws InvalidRegexpException
     {
+        // Test more complex iteration simplification, tests the optimiseStarOnSC method
         BasicRegexp re1 = BasicRegexp.parseRegexp("(a*b*)*");
-        BasicRegexp re2 = BasicRegexp.parseRegexp("(a*b*c?)*");
-        System.out.println("RESULT: " + re1.optimise().toString());
+        BasicRegexp re2 = BasicRegexp.parseRegexp("((a|d)*b*c?)*");
+        BasicRegexp re3 = BasicRegexp.parseRegexp("(abc)*");
+        BasicRegexp re4 = BasicRegexp.parseRegexp("((a*|b*)b*c*)*");
+        BasicRegexp re5 = BasicRegexp.parseRegexp("((a*b*)*b*c*)*");
+        BasicRegexp re6 = BasicRegexp.parseRegexp("((ab)*b*c*)*");
+        BasicRegexp re7 = BasicRegexp.parseRegexp("((a|b)*b*|c*)*");
+        BasicRegexp re8 = BasicRegexp.parseRegexp("((a|b)+b?|c)*");
+        BasicRegexp re9 = BasicRegexp.parseRegexp("(a*bc*)*");
+        BasicRegexp re10 = BasicRegexp.parseRegexp("((a*|b*)+b?|c)*");
+        BasicRegexp re11 = BasicRegexp.parseRegexp("(abc**)*");
 
         assertEquals(re1.optimise().toString(), "(a|b)*");
-        assertEquals(re2.optimise().toString(), "(a|b|c)*");
+        assertEquals(re2.optimise().toString(), "(a|d|b|c)*");
+        assertEquals(re3.optimise().toString(), "(abc)*");
+        assertEquals(re4.optimise().toString(), "(a|b|c)*");
+        assertEquals(re5.optimise().toString(), "(a|b|c)*");
+        assertEquals(re6.optimise().toString(), "(ab|b|c)*");
+        assertEquals(re7.optimise().toString(), "(a|b|c)*");
+        assertEquals(re8.optimise().toString(), "((a|b)+b?|c)*"); // Can't optimise further
+        assertEquals(re9.optimise().toString(), "(a*bc*)*"); // Can't optimise further
+        assertEquals(re10.optimise().toString(), "(a|b|c)*");
+        assertEquals(re11.optimise().toString(), "(abc*)*");
     }
 
     @Test

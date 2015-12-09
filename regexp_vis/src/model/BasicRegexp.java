@@ -48,6 +48,7 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
     final private ArrayList<BasicRegexp> mOperands;
     final private char mChar;
     final private RegexpOperator mOperator;
+    // IDEA(mjn33): cache results from .optimise() and .isNullable()?
 
     /**
      * Construct a BasicRegexp with the specified high-level operator and
@@ -565,6 +566,64 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
         }
     }
 
+    /**
+     * optimiseStarOnSC: "Optimise STAR on SEQUENCE or CHOICE". For a STAR on a
+     * SEQUENCE or CHOICE, we can make some fancy optimisations such as:
+     * <ul>
+     *   <li> (a*b*)* &#8594; (a|b)*
+     *   <li> ((a|b)*b*)* &#8594; (a|b|b)* (can be optimised yet further)
+     *   <li> etc.
+     * </ul>
+     * @param re The regular expression to optimise
+     * @param optimisedOperands List to add the operands for the new optimised
+     * expression to
+     * @return True if any optimisations were made, false otherwise
+     */
+    // Simplifies a star on a SEQUENCE or CHOICE into a smaller CHOICE todo reword
+    private boolean optimiseStarOnSC(BasicRegexp re, ArrayList<BasicRegexp> optimisedOperands)
+    {
+        if (re.getOperator() == RegexpOperator.SEQUENCE && !re.isNullable()) {
+            // Non-nullable SEQUENCE, can't progress further.
+            optimisedOperands.add(re);
+            return false;
+        }
+        // This is a CHOICE or nullable SEQUENCE (which we can turn into a
+        // CHOICE), try to remove STARs, PLUSes and OPTIONs. Track whether we
+        // found something.
+        boolean hasOptimisedSubExpr = false;
+        for (BasicRegexp operand : re.mOperands) {
+            switch (operand.getOperator()) {
+            case NONE:
+                optimisedOperands.add(operand);
+                break;
+            case STAR:
+            case PLUS:
+            case OPTION:
+                // Remove STAR, PLUS and OPTION
+                if (operand.isSingleChar()) {
+                    optimisedOperands.add(new BasicRegexp(operand.mChar,
+                            RegexpOperator.NONE));
+                } else {
+                    BasicRegexp subExpr = operand.mOperands.get(0);
+                    // Check if by getting unwrapping this, we uncover another
+                    // CHOICE or nullable SEQUENCE
+                    optimiseStarOnSC(subExpr, optimisedOperands);
+                }
+                hasOptimisedSubExpr = true;
+                break;
+            case SEQUENCE:
+                hasOptimisedSubExpr = optimiseStarOnSC(operand, optimisedOperands);
+                break;
+            case CHOICE:
+                optimiseStarOnSC(operand, optimisedOperands);
+                hasOptimisedSubExpr = true;
+                break;
+            default:
+            }
+        }
+        return hasOptimisedSubExpr;
+    }
+
     private BasicRegexp optimiseStar()
     {
         if (isSingleChar()) {
@@ -586,26 +645,37 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
             } else {
                 return new BasicRegexp(subExprOptimised.mOperands.get(0), RegexpOperator.STAR);
             }
-        case SEQUENCE: {
-            boolean allNullable = subExprOptimised.isNullable();
-            if (!allNullable && subExpr == subExprOptimised) {
+        case SEQUENCE:
+        case CHOICE: {
+            ArrayList<BasicRegexp> optimisedOperands = new ArrayList<>();
+            boolean hasOptimisedSubExpr = optimiseStarOnSC(subExprOptimised,
+                optimisedOperands);
+            if (!hasOptimisedSubExpr && subExpr == subExprOptimised) {
                 // No optimisations made
                 return this;
-            } else if (!allNullable) {
-                // Optimisation made on sub expression
-                return new BasicRegexp(subExprOptimised, RegexpOperator.STAR);
+            } else if (!hasOptimisedSubExpr) {
+                if (subExprOptimised.getOperator() == RegexpOperator.CHOICE) {
+                    // Optimisation made on sub expression only
+                    return new BasicRegexp(subExprOptimised,
+                        RegexpOperator.STAR);
+                } else {
+                    // Couldn't make any optimisation on SEQUENCE including the
+                    // possibility of translating it into a CHOICE, however
+                    // other optimisations were made on the SEQUENCE: e.g.
+                    // (abc**)* ------> (abc*)* -------> Can't optimise further
+                    return new BasicRegexp(subExprOptimised,
+                        RegexpOperator.STAR);
+                }
             } else {
-                return new BasicRegexp(new BasicRegexp(subExprOptimised.mOperands, RegexpOperator.CHOICE), RegexpOperator.STAR);
+                // Able to optimise yet further, this optimisation may have
+                // opened up yet further optimisations, e.g. we get (a|b|b|c)*
+                // which we can translate to (a|b|c)*
+                BasicRegexp newExprOptimised = new BasicRegexp(
+                    optimisedOperands, RegexpOperator.CHOICE);
+                newExprOptimised = newExprOptimised.optimise();
+                return new BasicRegexp(newExprOptimised, RegexpOperator.STAR);
             }
         }
-        case CHOICE:
-            if (subExpr == subExprOptimised) {
-                // No optimisations made
-                return this;
-            } else {
-                // Optimisation made on sub expression
-                return new BasicRegexp(subExprOptimised, RegexpOperator.STAR);
-            }
         default:
             throw new RuntimeException("BUG: Should be unreachable.");
         }
@@ -634,6 +704,8 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
                 return new BasicRegexp(subExprOptimised.mOperands.get(0), RegexpOperator.STAR);
             }
         case SEQUENCE: {
+            // IDEA(mjn33): Improve optimisations, when I have the time. PLUS
+            // is a lower priority than STAR
             boolean allNullable = subExprOptimised.isNullable();
             if (!allNullable && subExpr == subExprOptimised) {
                 // No optimisations made
@@ -879,15 +951,14 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
         //   * r+r*  -----> r+
         //   * r*r+  -----> r+
         // Choice based optimisations (no duplicate sub expressions):
-        //   * a|b|a -----> a|b
-        //
-        // Step 3: Reconstruct if necessary, return this is no optimisation
-        // performed.
-
-        // IDEA(mjn33): Future optimisation ideas:
-        //   * (a*b*c*d*)* -----> (a|b|c|d)*
+        //   * a|b|a       -----> a|b
         //   * (a*b*c?)*   -----> (a|b|c)*
-        //   * (a*b*c*d*)+ -----> (a|b|c|d)+ if a, b, c, d all nullable
+        //
+        // Star-on-sequence-or-choice optimisations:
+        //   * (a*b*c*d*)* -----> (a|b|c|d)*
+        //
+        // Step 3: Reconstruct if necessary, return "this" is no optimisation
+        // performed.
 
         switch (mOperator) {
         case NONE:
