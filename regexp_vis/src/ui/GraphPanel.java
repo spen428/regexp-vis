@@ -21,6 +21,7 @@ import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.mxOrganicLayout;
 import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.swing.handler.mxConnectionHandler;
 
 /**
  * An extension of {@link mxGraphComponent} that JGraphX draws graphs on to.
@@ -75,9 +76,17 @@ public class GraphPanel extends mxGraphComponent {
         this.vertexFastOrganicLayout = new mxFastOrganicLayout(graph);
         this.edgeLayout = new mxParallelEdgeLayout(graph);
         this.edgeLabelLayout = new mxEdgeLabelLayout(graph);
-
         this.layout = GraphLayout.CIRCLE_LAYOUT;
         doGraphLayout();
+
+        /* Disable unwanted user actions */
+        // this.graph.setCellsBendable(false); // No idea what this does
+        this.graph.setCellsCloneable(false);
+        this.graph.setCellsDeletable(false);
+        this.graph.setCellsDisconnectable(false);
+        this.graph.setCellsEditable(false);
+        // this.graph.setCellsMovable(true);
+        this.graph.setCellsResizable(false);
     }
 
     // GETTERS AND SETTERS //
@@ -131,6 +140,11 @@ public class GraphPanel extends mxGraphComponent {
     @Override
     protected void installDoubleClickHandler() {
         super.graphControl.addMouseListener(new DoubleClickHandler(this));
+    }
+
+    @Override
+    protected mxConnectionHandler createConnectionHandler() {
+        return null;
     }
 
     // UTILITY //
