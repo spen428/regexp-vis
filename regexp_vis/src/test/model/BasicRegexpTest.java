@@ -111,24 +111,10 @@ public class BasicRegexpTest {
         }
 
         assertTrue(caught);
-    }
-    
-    @Test
-    public void testParseRegexp_invalid8()
-    {
-        boolean caught = false;
-        try {
-            BasicRegexp.parseRegexp("(sdf)**");
-        } catch (InvalidRegexpException e) {
-            caught = true;
-        }
-
-        assertTrue(caught);
-    }
-    
+    }    
    
 	@Test
-	public void testParseRegexp_invalid9() {
+	public void testParseRegexp_invalid8() {
 		boolean caught = false;
 		try {
 			BasicRegexp.parseRegexp("(sdf)*?");
@@ -140,7 +126,7 @@ public class BasicRegexpTest {
 	}
 
     @Test
-    public void testParseRegexp_invalid10()
+    public void testParseRegexp_invalid9()
     {
         boolean caught = false;
         try {
@@ -205,25 +191,10 @@ public class BasicRegexpTest {
         }
 
         assertFalse(caught);
-    }
+    }    
     
     @Test
     public void testParseRegexp_valid6()
-    {
-        boolean caught = false;
-        try {
-            BasicRegexp.parseRegexp("sdf**");
-        } catch (InvalidRegexpException e) {
-            caught = true;
-        }
-
-        assertFalse(caught);
-    }
-    
-    
-    
-    @Test
-    public void testParseRegexp_valid7()
     {
         boolean caught = false;
         try {
@@ -237,7 +208,7 @@ public class BasicRegexpTest {
     
 
     @Test
-    public void testParseRegexp_valid8()
+    public void testParseRegexp_valid7()
     {
         boolean caught = false;
         try {
@@ -251,7 +222,7 @@ public class BasicRegexpTest {
     }
 
     @Test
-    public void testParseRegexp_valid9()
+    public void testParseRegexp_valid8()
     {
         boolean caught = false;
         try {
