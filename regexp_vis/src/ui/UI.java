@@ -16,8 +16,6 @@ import javax.swing.WindowConstants;
 import model.BasicRegexp;
 import model.InvalidRegexpException;
 
-import test.ui.GraphicsTest;
-
 /**
  * @author pg272, sp611
  */
@@ -27,9 +25,7 @@ public class UI extends JFrame implements KeyListener {
     private static final int JFRAME_HEIGHT_MIN_PX = 700;
     private static final String DEFAULT_JFRAME_TITLE = "Regular Language "
             + "Visualiser";
-    private static final String LONG_STRING = "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"
-            + "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"
-            + "MMMMMMM";
+    private static final String LONG_REGEX = "(a|b)*cd+(((a*)*bcf)djka)+";
 
     private final GraphPanel graphPanel;
     private final JTextField regexpInput;
@@ -54,7 +50,7 @@ public class UI extends JFrame implements KeyListener {
 
         /* Components */
         this.regexpInput = new JTextField();
-        this.regexpInput.setText(LONG_STRING);
+        this.regexpInput.setText(LONG_REGEX);
         this.regexpInput.addKeyListener(this);
 
         /* Panels */
@@ -96,11 +92,11 @@ public class UI extends JFrame implements KeyListener {
                 try {
                     BasicRegexp re = BasicRegexp.parseRegexp(regexp);
                     BasicRegexp.debugPrintBasicRegexp(0, re);
+                    this.graphPanel.resetGraph(re);
                 } catch (InvalidRegexpException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
-                this.graphPanel.resetGraph(regexp);
                 break;
             default:
                 break;

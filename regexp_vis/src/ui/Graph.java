@@ -104,6 +104,16 @@ public class Graph extends mxGraph {
         return list.toArray(new AutomatonState[] {});
     }
 
+    public AutomatonTransition getTransitionFromCell(mxCell cell) {
+        // TODO: Inefficient
+        for (AutomatonTransition t : this.transitions.keySet()) {
+            if (this.transitions.get(t) == cell) {
+                return t;
+            }
+        }
+        return null;
+    }
+
     /**
      * @return Returns a <b>clone</b> of the {@link AutomatonState} to
      *         {@link mxCell} HashMap that this graph uses. The graph cannot be

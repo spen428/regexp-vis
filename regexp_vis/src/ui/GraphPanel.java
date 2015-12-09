@@ -1,8 +1,5 @@
 package ui;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -14,6 +11,7 @@ import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
 import model.BasicRegexp;
+import model.Command;
 import model.CommandHistory;
 
 import com.mxgraph.layout.mxCircleLayout;
@@ -22,7 +20,6 @@ import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.mxOrganicLayout;
 import com.mxgraph.layout.mxParallelEdgeLayout;
-import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
 
 /**
@@ -83,7 +80,7 @@ public class GraphPanel extends mxGraphComponent {
 
     // GETTERS AND SETTERS //
     public CommandHistory getHistory() {
-        return history;
+        return this.history;
     }
 
     /**
@@ -96,77 +93,68 @@ public class GraphPanel extends mxGraphComponent {
      *            the {@link GraphPanel.GraphLayout} to use.
      */
     public void setVertexLayout(GraphLayout layout) {
-        Object parent = graph.getDefaultParent();
+        Object parent = this.graph.getDefaultParent();
 
         switch (layout) {
         default:
         case CIRCLE_LAYOUT:
-            vertexCircleLayout.execute(parent);
+            this.vertexCircleLayout.execute(parent);
             break;
         case FAST_ORGANIC_LAYOUT:
-            vertexFastOrganicLayout.execute(parent);
+            this.vertexFastOrganicLayout.execute(parent);
             break;
         case ORGANIC_LAYOUT:
-            vertexOrganicLayout.execute(parent);
+            this.vertexOrganicLayout.execute(parent);
             break;
         }
 
         /* Update edges and edge labels now that the vertices have moved. */
-        edgeLayout.execute(parent);
-        edgeLabelLayout.execute(parent);
+        this.edgeLayout.execute(parent);
+        this.edgeLabelLayout.execute(parent);
     }
 
     // OVERRIDES //
     @Override
     protected void installDoubleClickHandler() {
-        super.graphControl.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (isEnabled()) {
-                    if (!e.isConsumed() && isEditEvent(e)) {
-                        Object cell = getCellAt(e.getX(), e.getY(), false);
-
-                        if (cell != null && getGraph().isCellEditable(cell)) {
-                            System.out.printf("Double-clicked cell: %s %s "
-                                    + "%s%n", cell, e, e.getPoint());
-                            // TODO: eventSource.fireEvent();
-                            mxCell c = ((mxCell) cell);
-                            if (c.isEdge()) {
-                                System.out.println("Double-clicked an edge, "
-                                        + "let's break it down!");
-                                breakDown(c);
-                            }
-                        }
-                    }
-                }
-            }
-
-        });
+        super.graphControl.addMouseListener(new DoubleClickHandler(this));
     }
 
     // UTILITY //
     public void executeNewCommand(UICommand cmd) {
-        history.executeNewCommand(cmd);
+        this.history.executeNewCommand(cmd);
+    }
+
+    /**
+     * Converts the given {@link Command} into a {@link UICommand} before
+     * calling {@link #executeNewCommand(UICommand)}
+     * 
+     * @param cmd
+     *            the {@link Command} to execute
+     */
+    public void executeNewCommand(Command cmd) {
+        this.executeNewCommand(UICommand.fromCommand(this.graph, cmd));
     }
 
     public void executeNewCommands(UICommand[] cmds) {
         for (UICommand c : cmds) {
-            history.executeNewCommand(c);
+            this.history.executeNewCommand(c);
         }
     }
 
-    final void breakDown(mxCell c) {
-        // TODO
+    public void executeNewCommands(Command[] cmds) {
+        for (Command c : cmds) {
+            this.executeNewCommand(c);
+        }
     }
 
     /**
      * Clear the current Graph, and create a new one that represents a regular
      * expression that has yet to be broken down.
      * 
-     * @param regexp
+     * @param re
      *            a regular expression
      */
-    public void resetGraph(String regexp) {
+    public void resetGraph(BasicRegexp re) {
         this.graph.clear();
         this.history = new CommandHistory();
 
@@ -174,7 +162,7 @@ public class GraphPanel extends mxGraphComponent {
         Automaton a = this.graph.getAutomaton();
         AutomatonState finalState = a.createNewState();
         AutomatonTransition transition = a.createNewTransition(
-                a.getStartState(), finalState, regexp);
+                a.getStartState(), finalState, re);
         UICommand[] cmds = new UICommand[] {
                 new AddStateUICommand(this.graph, new AddStateCommand(a,
                         finalState)),
