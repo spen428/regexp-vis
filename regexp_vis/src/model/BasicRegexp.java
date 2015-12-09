@@ -4,11 +4,13 @@ import java.util.*;
 
 /**
  * Class representing a "basic" regular expression, with one top level operator.
- * A tree of these can then be used to any regular expression
+ * A tree of these can then be used to any regular expression.
+ *
+ * BasicRegexp is designed to be immutable, similar to the Java String class.
  *
  * @author Matthew Nicholls
  */
-public class BasicRegexp implements Cloneable {
+public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
     public enum RegexpOperator {
         NONE(3),
         STAR(2),
@@ -46,6 +48,7 @@ public class BasicRegexp implements Cloneable {
     final private ArrayList<BasicRegexp> mOperands;
     final private char mChar;
     final private RegexpOperator mOperator;
+    // IDEA(mjn33): cache results from .optimise() and .isNullable()?
 
     /**
      * Construct a BasicRegexp with the specified high-level operator and
@@ -73,18 +76,37 @@ public class BasicRegexp implements Cloneable {
             throw new IllegalArgumentException("No operands passed");
         }
 
-        mOperands = operands;
+        // Optimisation: Check if parentheses have been use where they aren't
+        // needed, e.g.
+        //   * "abc(de)fgh"    ----> "abcdefgh"
+        //   * "a|(b|c|d)|e"   ----> "a|b|c|d|e"
+        // Note: some information on parentheses is lost in the parsing
+        // process anyway, such as "(a*)(b*)"
+        ArrayList<BasicRegexp> optimisedOperands = new ArrayList<>();
+        if (op == RegexpOperator.CHOICE || op == RegexpOperator.SEQUENCE) {
+            for (BasicRegexp operand : operands) {
+                if (operand.getOperator() == op) {
+                    // Insert all sub operands
+                    optimisedOperands.addAll(operand.getOperands());
+                } else {
+                    // Insert this as-is
+                    optimisedOperands.add(operand);
+                }
+            }
+        }
+
+        mOperands = optimisedOperands;
         mChar = EPSILON_CHAR;
         mOperator = op;
     }
 
     /**
-     * Construct a BasicRegexp with the specified high-level operator and single
-     * operand
+     * Construct a BasicRegexp with the specified high-level <b>unary</b>
+     * operator and single operand
      *
      * @param operand The operand for this BasicRegexp
      * @param op The operator for this BasicRegexp, <b>cannot</b> be
-     * RegexpOperator.NONE
+     * RegexpOperator.NONE, also <b>must</b> be a unary operator
      * @throws IllegalArgumentException if "op" is RegexpOperator.NONE
      */
     public BasicRegexp(BasicRegexp operand, RegexpOperator op)
@@ -93,6 +115,11 @@ public class BasicRegexp implements Cloneable {
             throw new IllegalArgumentException(
                 "RegexpOperator.NONE only allowed for single character " +
                 "expressions");
+        }
+
+        if (!isUnaryOperator(op)) {
+            throw new IllegalArgumentException(
+                "Non-unary operators require multiple operands");
         }
 
         mOperands = new ArrayList<>();
@@ -120,6 +147,45 @@ public class BasicRegexp implements Cloneable {
         mOperands = null;
         mChar = c;
         mOperator = op;
+    }
+
+    public int compareTo(BasicRegexp other)
+    {
+        // Compare operators first
+        int ret = mOperator.compareTo(other.mOperator);
+        if (ret != 0) {
+            return ret;
+        }
+
+        // Single character expressions come before non-single single character
+        // expressions
+        if (isSingleChar() != other.isSingleChar()) {
+            return isSingleChar() ? -1 : 1;
+        } else if (isSingleChar()) {
+            // Compare chars normally
+            return Character.compare(mChar, other.mChar);
+        } else {
+            // Compare complex expressions
+            Iterator<BasicRegexp> thisIt = mOperands.iterator();
+            Iterator<BasicRegexp> otherIt = mOperands.iterator();
+            while (thisIt.hasNext() && otherIt.hasNext()) {
+                BasicRegexp thisOperand = thisIt.next();
+                BasicRegexp otherOperand = otherIt.next();
+
+                // Return based on the first difference in operands
+                ret = thisOperand.compareTo(otherOperand);
+                if (ret != 0) {
+                    return ret;
+                }
+            }
+
+            // Shorter expressions come before longer ones
+            if (thisIt.hasNext() == otherIt.hasNext()) {
+                return 0;
+            } else {
+                return thisIt.hasNext() ? 1 : -1;
+            }
+        }
     }
 
     /**
@@ -168,6 +234,51 @@ public class BasicRegexp implements Cloneable {
         }
 
         return mChar;
+    }
+
+    /**
+     * @return Whether this regular expression is nullable, i.e. its language
+     * contains the empty word
+     */
+    public boolean isNullable()
+    {
+        switch (mOperator) {
+        case NONE:
+            // Single character, only nullable if epsilon
+            return mChar == EPSILON_CHAR;
+        case STAR:
+            // Star is always nullable
+            return true;
+        case PLUS:
+            // Plus is only nullable if the operand is nullable
+            if (isSingleChar()) {
+                return false;
+            } else {
+                return mOperands.get(0).isNullable();
+            }
+        case OPTION:
+            // Option is always nullable
+            return true;
+        case SEQUENCE:
+            for (BasicRegexp operand : mOperands) {
+                // Sequence is not nullable if any part of the sequence is not
+                // nullable
+                if (!operand.isNullable()) {
+                    return false;
+                }
+            }
+            return true;
+        case CHOICE:
+            for (BasicRegexp operand : mOperands) {
+                // Choice is nullable if any part of the choice is nullable
+                if (operand.isNullable()) {
+                    return true;
+                }
+            }
+            return false;
+        default:
+            throw new RuntimeException("BUG: Should be unreachable.");
+        }
     }
 
     /**
@@ -326,6 +437,11 @@ public class BasicRegexp implements Cloneable {
                 }
                 parenIdx += idx; // parenIdx is relative to idx
                 BasicRegexp re = parseRegexp(str.substring(idx + 1, parenIdx));
+                if (re == null) {
+                    // Completely empty sub-expression, e.g. "()"
+                    throw new InvalidRegexpException(
+                        "Empty parentheses found");
+                }
                 sequenceOperands.add(re);
                 idx = parenIdx;
                 break;
@@ -445,6 +561,427 @@ public class BasicRegexp implements Cloneable {
             }
             break;
         }
+        default:
+            throw new RuntimeException("BUG: Should be unreachable.");
+        }
+    }
+
+    /**
+     * optimiseStarOnSC: "Optimise STAR on SEQUENCE or CHOICE". For a STAR on a
+     * SEQUENCE or CHOICE, we can make some fancy optimisations such as:
+     * <ul>
+     *   <li> (a*b*)* &#8594; (a|b)*
+     *   <li> ((a|b)*b*)* &#8594; (a|b|b)* (can be optimised yet further)
+     *   <li> etc.
+     * </ul>
+     * @param re The regular expression to optimise
+     * @param optimisedOperands List to add the operands for the new optimised
+     * expression to
+     * @return True if any optimisations were made, false otherwise
+     */
+    private boolean optimiseStarOnSC(BasicRegexp re,
+        ArrayList<BasicRegexp> optimisedOperands)
+    {
+        if (re.getOperator() == RegexpOperator.SEQUENCE && !re.isNullable()) {
+            // Non-nullable SEQUENCE, can't progress further.
+            optimisedOperands.add(re);
+            return false;
+        }
+        // This is a CHOICE or nullable SEQUENCE (which we can turn into a
+        // CHOICE), try to remove STARs, PLUSes and OPTIONs. Track whether we
+        // found something.
+        boolean hasOptimisedSubExpr = false;
+        for (BasicRegexp operand : re.mOperands) {
+            switch (operand.getOperator()) {
+            case NONE:
+                optimisedOperands.add(operand);
+                break;
+            case STAR:
+            case PLUS:
+            case OPTION:
+                // Remove STAR, PLUS and OPTION
+                if (operand.isSingleChar()) {
+                    optimisedOperands.add(new BasicRegexp(operand.mChar,
+                            RegexpOperator.NONE));
+                } else {
+                    BasicRegexp subExpr = operand.mOperands.get(0);
+                    // Check if by getting unwrapping this, we uncover another
+                    // CHOICE or nullable SEQUENCE
+                    optimiseStarOnSC(subExpr, optimisedOperands);
+                }
+                hasOptimisedSubExpr = true;
+                break;
+            case SEQUENCE:
+                hasOptimisedSubExpr = optimiseStarOnSC(operand,
+                    optimisedOperands);
+                break;
+            case CHOICE:
+                optimiseStarOnSC(operand, optimisedOperands);
+                hasOptimisedSubExpr = true;
+                break;
+            default:
+            }
+        }
+        return hasOptimisedSubExpr;
+    }
+
+    private BasicRegexp optimiseStar()
+    {
+        if (isSingleChar()) {
+            return this;
+        }
+        BasicRegexp subExpr = mOperands.get(0);
+        BasicRegexp subExprOptimised = subExpr.optimise();
+        switch (subExprOptimised.getOperator()) {
+        case NONE:
+            // We can always wrap single character expressions into STAR
+            // directly
+            return new BasicRegexp(subExprOptimised.mChar, RegexpOperator.STAR);
+        case STAR:
+            return subExprOptimised;
+        case PLUS:
+        case OPTION:
+            if (subExprOptimised.isSingleChar()) {
+                return new BasicRegexp(subExprOptimised.mChar,
+                    RegexpOperator.STAR);
+            } else {
+                return new BasicRegexp(subExprOptimised.mOperands.get(0),
+                    RegexpOperator.STAR);
+            }
+        case SEQUENCE:
+        case CHOICE: {
+            ArrayList<BasicRegexp> optimisedOperands = new ArrayList<>();
+            boolean hasOptimisedSubExpr = optimiseStarOnSC(subExprOptimised,
+                optimisedOperands);
+            if (!hasOptimisedSubExpr && subExpr == subExprOptimised) {
+                // No optimisations made
+                return this;
+            } else if (!hasOptimisedSubExpr) {
+                if (subExprOptimised.getOperator() == RegexpOperator.CHOICE) {
+                    // Optimisation made on sub expression only
+                    return new BasicRegexp(subExprOptimised,
+                        RegexpOperator.STAR);
+                } else {
+                    // Couldn't make any optimisation on SEQUENCE including the
+                    // possibility of translating it into a CHOICE, however
+                    // other optimisations were made on the SEQUENCE: e.g.
+                    // (abc**)* ------> (abc*)* -------> Can't optimise further
+                    return new BasicRegexp(subExprOptimised,
+                        RegexpOperator.STAR);
+                }
+            } else {
+                // Able to optimise yet further, this optimisation may have
+                // opened up yet further optimisations, e.g. we get (a|b|b|c)*
+                // which we can translate to (a|b|c)*
+                BasicRegexp newExprOptimised = new BasicRegexp(
+                    optimisedOperands, RegexpOperator.CHOICE);
+                newExprOptimised = newExprOptimised.optimise();
+                return new BasicRegexp(newExprOptimised, RegexpOperator.STAR);
+            }
+        }
+        default:
+            throw new RuntimeException("BUG: Should be unreachable.");
+        }
+    }
+
+    private BasicRegexp optimisePlus()
+    {
+        if (isSingleChar()) {
+            return this;
+        }
+        BasicRegexp subExpr = mOperands.get(0);
+        BasicRegexp subExprOptimised = subExpr.optimise();
+        switch (subExprOptimised.getOperator()) {
+        case NONE:
+            // We can always wrap single character expressions into PLUS
+            // directly
+            return new BasicRegexp(subExprOptimised.mChar, RegexpOperator.PLUS);
+        case STAR:
+            return subExprOptimised;
+        case PLUS:
+            return subExprOptimised;
+        case OPTION:
+            if (subExprOptimised.isSingleChar()) {
+                return new BasicRegexp(subExprOptimised.mChar,
+                    RegexpOperator.STAR);
+            } else {
+                return new BasicRegexp(subExprOptimised.mOperands.get(0),
+                    RegexpOperator.STAR);
+            }
+        case SEQUENCE: {
+            // IDEA(mjn33): Improve optimisations, when I have the time. PLUS
+            // is a lower priority than STAR
+            boolean allNullable = subExprOptimised.isNullable();
+            if (!allNullable && subExpr == subExprOptimised) {
+                // No optimisations made
+                return this;
+            } else if (!allNullable) {
+                // Optimisation made on sub expression
+                return new BasicRegexp(subExprOptimised, mOperator);
+            } else {
+                return new BasicRegexp(
+                    new BasicRegexp(subExprOptimised.mOperands,
+                        RegexpOperator.CHOICE), RegexpOperator.PLUS);
+            }
+        }
+        case CHOICE:
+            if (subExpr == subExprOptimised) {
+                // No optimisations made
+                return this;
+            } else {
+                // Optimisation made on sub expression
+                return new BasicRegexp(subExprOptimised, RegexpOperator.STAR);
+            }
+        default:
+            throw new RuntimeException("BUG: Should be unreachable.");
+        }
+    }
+
+    private BasicRegexp optimiseOption()
+    {
+        if (isSingleChar()) {
+            return this;
+        }
+        BasicRegexp subExpr = mOperands.get(0);
+        BasicRegexp subExprOptimised = subExpr.optimise();
+
+        if (subExprOptimised.isNullable()) {
+            return subExprOptimised;
+        } else if (subExprOptimised.getOperator() == RegexpOperator.PLUS) {
+            // r+? ----> r*
+            if (subExprOptimised.isSingleChar()) {
+                return new BasicRegexp(subExprOptimised.mChar,
+                    RegexpOperator.STAR);
+            } else {
+                return new BasicRegexp(subExprOptimised.mOperands.get(0),
+                    RegexpOperator.STAR);
+            }
+        } else if (subExprOptimised.getOperator() == RegexpOperator.NONE) {
+            // We can always wrap single character expressions into OPTION
+            // directly
+            return new BasicRegexp(subExprOptimised.mChar, RegexpOperator.OPTION);
+        } else {
+            return this;
+        }
+    }
+
+    /**
+     * Factored out of optimiseSequence(), tests whether as an optimisation we
+     * can merge two adjacent expressions into one (and which one).
+     * @param a The first expression
+     * @param b The second expression
+     * @return -1 if these two expressions cannot be merged, otherwise returns
+     * 0 if the first expression should be removed, or 1 if the second
+     * expression should be removed
+     */
+    private int couldMergeSequence(BasicRegexp a, BasicRegexp b)
+    {
+        int ret = -1;
+        if (a.getOperator() == RegexpOperator.STAR &&
+            b.getOperator() == RegexpOperator.STAR) {
+            // r*r* ------> r*
+            ret = 1;
+        } else if (a.getOperator() == RegexpOperator.STAR &&
+                   b.getOperator() == RegexpOperator.OPTION) {
+            // r*r? ------> r*
+            ret = 1;
+        } else if (a.getOperator() == RegexpOperator.STAR &&
+                   b.getOperator() == RegexpOperator.PLUS) {
+            // r*r+ ------> r+
+            ret = 0;
+        } else if (a.getOperator() == RegexpOperator.OPTION &&
+                   b.getOperator() == RegexpOperator.STAR) {
+            // r?r* ------> r*
+            ret = 0;
+        } else if (a.getOperator() == RegexpOperator.OPTION &&
+                   b.getOperator() == RegexpOperator.PLUS) {
+            // r?r+ ------> r+
+            ret = 0;
+        } else if (a.getOperator() == RegexpOperator.PLUS &&
+                   b.getOperator() == RegexpOperator.STAR) {
+            // r+r* ------> r+
+            ret = 1;
+        } else if (a.getOperator() == RegexpOperator.PLUS &&
+                   b.getOperator() == RegexpOperator.OPTION) {
+            // r+r? ------> r+
+            ret = 1;
+        }
+
+        if (ret < 0) {
+            return ret;
+        }
+
+        if (a.isSingleChar() && b.isSingleChar()) {
+            if (a.mChar == b.mChar) {
+                return ret;
+            }
+        } else if (!a.isSingleChar() && !b.isSingleChar()) {
+            if (a.mOperands.get(0).compareTo(b.mOperands.get(0)) == 0) {
+                return ret;
+            }
+        }
+
+        return -1;
+    }
+
+    private BasicRegexp optimiseSequence()
+    {
+        // Optimise all sub expressions, track if any were *actually* optimised
+        ArrayList<BasicRegexp> optimisedOperands = new ArrayList<>();
+        boolean hasOptimisedSubExpr = false;
+        for (BasicRegexp operand : mOperands) {
+            BasicRegexp optimisedOperand = operand.optimise();
+            if (operand != optimisedOperand) {
+                hasOptimisedSubExpr = true;
+            }
+            optimisedOperands.add(optimisedOperand);
+        }
+
+        // Loop forwards through pairs
+        int i = 0;
+        while (i < optimisedOperands.size() - 1) {
+            int aIdx = i;
+            int bIdx = i + 1;
+            BasicRegexp a = optimisedOperands.get(aIdx);
+            BasicRegexp b = optimisedOperands.get(bIdx);
+
+            int which = couldMergeSequence(a, b);
+            if (which == 0) {
+                optimisedOperands.remove(aIdx);
+            } else if (which == 1) {
+                optimisedOperands.remove(bIdx);
+            } else {
+                i++;
+            }
+        }
+
+        // Loop backwards through pairs, need to loop backwards as well to
+        // simplify cases such as "a?a?a?a*" to "a*"
+        i = 0;
+        while (i < optimisedOperands.size() - 1) {
+            int aIdx = optimisedOperands.size() - 2 - i;
+            int bIdx = optimisedOperands.size() - 1 - i;
+            BasicRegexp a = optimisedOperands.get(aIdx);
+            BasicRegexp b = optimisedOperands.get(bIdx);
+
+            int which = couldMergeSequence(a, b);
+            if (which == 0) {
+                optimisedOperands.remove(aIdx);
+            } else if (which == 1) {
+                optimisedOperands.remove(bIdx);
+            } else {
+                i++;
+            }
+        }
+
+        if (optimisedOperands.size() == 1) {
+            // We simplified this SEQUENCE down to one expression, just return
+            // that expression
+            return optimisedOperands.get(0);
+        } else if (hasOptimisedSubExpr ||
+            optimisedOperands.size() < mOperands.size()) {
+            return new BasicRegexp(optimisedOperands, RegexpOperator.SEQUENCE);
+        } else {
+            return this;
+        }
+    }
+
+    private BasicRegexp optimiseChoice()
+    {
+        // Optimise all sub expressions, track if any were *actually* optimised
+        ArrayList<BasicRegexp> optimisedOperands = new ArrayList<>();
+        boolean hasOptimisedSubExpr = false;
+        for (BasicRegexp operand : mOperands) {
+            BasicRegexp optimisedOperand = operand.optimise();
+            if (operand != optimisedOperand) {
+                hasOptimisedSubExpr = true;
+            }
+            optimisedOperands.add(optimisedOperand);
+        }
+
+        // Not particularly elegant or efficient, but it is nice to maintain
+        // ordering of operands (could be confusing to users if we start
+        // reordering things)
+        for (int i = 0; i < optimisedOperands.size(); i++) {
+            BasicRegexp iExpr = optimisedOperands.get(i);
+            int j = i + 1;
+            while (j < optimisedOperands.size()) {
+                BasicRegexp jExpr = optimisedOperands.get(j);
+                if (iExpr.compareTo(jExpr) == 0) {
+                    optimisedOperands.remove(j);
+                    // Don't increment j
+                } else {
+                    j++;
+                }
+            }
+        }
+
+        if (optimisedOperands.size() == 1) {
+            // We simplified this CHOICE down to one expression, just return
+            // that expression
+            return optimisedOperands.get(0);
+        } else if (hasOptimisedSubExpr ||
+            optimisedOperands.size() < mOperands.size()) {
+            return new BasicRegexp(optimisedOperands, RegexpOperator.CHOICE);
+        } else {
+            return this;
+        }
+    }
+
+    /**
+     * Creates an optimised version of this regular expression, if the
+     * expression cannot be optimised further this expression is returned.
+     * @return The optimised expression
+     */
+    public BasicRegexp optimise()
+    {
+        // Step 1: call .optimise() on sub expressions, if a new expression is
+        // returned (i.e. we optimised it somehow) we definitely need to create
+        // a new BasicRegexp.
+        //
+        // Step 2: Check for optimisations (based on Table 1: Optimisations
+        // from Stefan's paper):
+        //   * (r*)* -----> r*
+        //   * (r+)* -----> r*
+        //   * (r?)* -----> r*
+        //
+        //   * (r*)+ -----> r*
+        //   * (r?)+ -----> r*
+        //   * (r+)+ -----> r+
+        //
+        //   * p?    -----> p (if p is nullable)
+        //
+        //   * (pq)* -----> (p|q)* (if p and q are nullable)
+        //   * (pq)+ -----> (p|q)+ (if p and q are nullable)
+        // Sequence based optimisations (any part which contains):
+        //   * r*r*  -----> r*
+        //   * r*r?  -----> r*
+        //   * r?r*  -----> r*
+        //   * r+r*  -----> r+
+        //   * r*r+  -----> r+
+        // Choice based optimisations (no duplicate sub expressions):
+        //   * a|b|a       -----> a|b
+        //   * (a*b*c?)*   -----> (a|b|c)*
+        //
+        // Star-on-sequence-or-choice optimisations:
+        //   * (a*b*c*d*)* -----> (a|b|c|d)*
+        //
+        // Step 3: Reconstruct if necessary, return "this" is no optimisation
+        // performed.
+
+        switch (mOperator) {
+        case NONE:
+            return this;
+        case STAR:
+            return optimiseStar();
+        case PLUS:
+            return optimisePlus();
+        case OPTION:
+            return optimiseOption();
+        case SEQUENCE:
+            return optimiseSequence();
+        case CHOICE:
+            return optimiseChoice();
         default:
             throw new RuntimeException("BUG: Should be unreachable.");
         }
