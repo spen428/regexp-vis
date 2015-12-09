@@ -140,7 +140,7 @@ public class BasicRegexpTest {
 	}
 
     @Test
-    public void testParseRegexp_invalid8()
+    public void testParseRegexp_invalid10()
     {
         boolean caught = false;
         try {
@@ -237,7 +237,7 @@ public class BasicRegexpTest {
     
 
     @Test
-    public void testParseRegexp_valid3()
+    public void testParseRegexp_valid8()
     {
         boolean caught = false;
         try {
@@ -251,7 +251,7 @@ public class BasicRegexpTest {
     }
 
     @Test
-    public void testParseRegexp_valid4()
+    public void testParseRegexp_valid9()
     {
         boolean caught = false;
         try {
