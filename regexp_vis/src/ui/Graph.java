@@ -2,6 +2,7 @@ package ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -445,18 +446,24 @@ public class Graph extends mxGraph {
      *            the automaton
      */
     private void addAutomaton(Automaton automaton) {
-        // FIXME(mjn33): Need to implement iterator in Automaton / something
-        // to prevent modifying internal state
-
-        /*
-         * HashMap<AutomatonState, LinkedList<AutomatonTransition>> mGraph =
-         * automaton .getGraph(); AutomatonState startState =
-         * automaton.getStartState(); // Insert states
-         * setStartState(startState); for (AutomatonState state :
-         * mGraph.keySet()) { addState(state); } // Insert transitions for
-         * (AutomatonState state : mGraph.keySet()) { for (AutomatonTransition
-         * transition : mGraph.get(state)) { addTransition(transition); } }
-         */
+        Iterator<Automaton.StateTransitionsPair> it = automaton.graphIterator();
+        AutomatonState startState = automaton.getStartState();
+        setStartState(startState);
+        // Insert states
+        while (it.hasNext()) {
+            Automaton.StateTransitionsPair pair = it.next();
+            addState(pair.getState());
+            if (pair.getState() == automaton.getStartState()) {
+                // This is the start state
+            }
+        }
+        // Insert transitions
+        while (it.hasNext()) {
+            Automaton.StateTransitionsPair pair = it.next();
+            for (AutomatonTransition t : pair.getTransitions()) {
+                addTransition(t);
+            }
+        }
     }
 
 }
