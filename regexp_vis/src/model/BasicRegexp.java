@@ -462,6 +462,9 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
             // The remaining sequence operands are part of the choice operation
             processChoiceOp(sequenceOperands, choiceOperands);
             return new BasicRegexp(choiceOperands, RegexpOperator.CHOICE);
+        } else if (sequenceOperands.size() == 1) {
+            // Don't return a sequence of a single expression
+            return sequenceOperands.get(0);
         } else if (!sequenceOperands.isEmpty()) {
             return new BasicRegexp(sequenceOperands, RegexpOperator.SEQUENCE);
         } else {
