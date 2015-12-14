@@ -105,7 +105,6 @@ public class BreakdownIterationCommand extends BreakdownCommand {
         IsolationLevel level)
     {
         super(automaton, t);
-        mCommands = new LinkedList<>();
         mIsolationLevel = level;
 
         BasicRegexp re = (BasicRegexp)t.getData();

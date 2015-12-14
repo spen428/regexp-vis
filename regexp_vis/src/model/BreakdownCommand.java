@@ -16,12 +16,13 @@ import java.util.*;
  * unsafe translations.
  */
 public abstract class BreakdownCommand extends Command {
-    protected LinkedList<Command> mCommands;
-    private AutomatonTransition mOriginalTransition;
+    protected final LinkedList<Command> mCommands;
+    private final AutomatonTransition mOriginalTransition;
 
     public BreakdownCommand(Automaton automaton, AutomatonTransition t)
     {
         super(automaton);
+        mCommands = new LinkedList<Command>();
         mOriginalTransition = t;
     }
 
@@ -33,9 +34,9 @@ public abstract class BreakdownCommand extends Command {
         return mOriginalTransition;
     }
     
-    public LinkedList<Command> getCommands()
+    public List<Command> getCommands()
     {
-        return new LinkedList<Command>(mCommands);
+        return Collections.unmodifiableList(mCommands);
     }
 
     @Override
