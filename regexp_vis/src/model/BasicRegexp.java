@@ -10,7 +10,7 @@ import java.util.*;
  *
  * @author Matthew Nicholls
  */
-public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
+public class BasicRegexp implements Comparable<BasicRegexp> {
     public enum RegexpOperator {
         NONE(3),
         STAR(2),
@@ -268,28 +268,6 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
             return false;
         default:
             throw new RuntimeException("BUG: Should be unreachable.");
-        }
-    }
-
-    /**
-     * Performs a deep copy of this BasicRegexp, all sub expressions are copied.
-     *
-     * @return The cloned object
-     */
-    @Override
-    public BasicRegexp clone()
-    {
-        ArrayList<BasicRegexp> newOperands = null;
-        // Deep copy operands if we have any
-        if (mOperands != null) {
-            newOperands = new ArrayList<>();
-            for (BasicRegexp operand : mOperands) {
-                BasicRegexp cloned = operand.clone();
-                newOperands.add(cloned);
-            }
-            return new BasicRegexp(newOperands, mOperator);
-        } else {
-            return new BasicRegexp(mChar);
         }
     }
 

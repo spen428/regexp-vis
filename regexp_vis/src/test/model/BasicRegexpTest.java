@@ -485,16 +485,6 @@ public class BasicRegexpTest {
     }
 
     @Test
-    public void testClone()
-        throws InvalidRegexpException
-    {
-        // Check that cloned regexps are equal
-        BasicRegexp re1 = BasicRegexp.parseRegexp("(01|10)*1111");
-        BasicRegexp cloned = re1.clone();
-        assertEquals(re1.compareTo(cloned), 0);
-    }
-
-    @Test
     public void testCompareTo()
         throws InvalidRegexpException
     {
