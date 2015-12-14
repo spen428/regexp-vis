@@ -493,4 +493,23 @@ public class BasicRegexpTest {
         BasicRegexp cloned = re1.clone();
         assertEquals(re1.compareTo(cloned), 0);
     }
+
+    @Test
+    public void testCompareTo()
+        throws InvalidRegexpException
+    {
+        BasicRegexp re1 = BasicRegexp.parseRegexp("(01|10)*1111");
+        BasicRegexp re2 = BasicRegexp.parseRegexp("(01|10)*1111");
+        BasicRegexp re3 = BasicRegexp.parseRegexp("((a*|b*)+b?|c)*def((g*|h*)+h?|i)*");
+        BasicRegexp re4 = BasicRegexp.parseRegexp("((a*|b*)+b?|c)*def((g*|h*)+h?|i)*");
+        BasicRegexp re5 = BasicRegexp.parseRegexp("(01|10)*111");
+
+        // Test equality, simpler
+        assertEquals(re1.compareTo(re2), 0);
+        // Test equality, more complex
+        assertEquals(re3.compareTo(re4), 0);
+        // Test ordering
+        assertTrue(re5.compareTo(re1) < 0);
+        assertTrue(re1.compareTo(re5) > 0);
+    }
 }
