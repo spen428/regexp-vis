@@ -179,7 +179,9 @@ public class BreakdownIterationCommand extends BreakdownCommand {
             start, BasicRegexp.EPSILON_EXPRESSION);
 
         mCommands.add(new AddTransitionCommand(automaton, endTrans));
-        mCommands.add(new AddTransitionCommand(automaton, epsilonSkipTrans));
+        if (epsilonSkipTrans != null) {
+            mCommands.add(new AddTransitionCommand(automaton, epsilonSkipTrans));
+        }
         mCommands.add(new AddTransitionCommand(automaton, epsilonBackwardTrans));
 
         // The transition for the subexpression itself
@@ -217,7 +219,9 @@ public class BreakdownIterationCommand extends BreakdownCommand {
             startIsolated, BasicRegexp.EPSILON_EXPRESSION);
 
         mCommands.add(new AddTransitionCommand(automaton, startTrans));
-        mCommands.add(new AddTransitionCommand(automaton, epsilonSkipTrans));
+        if (epsilonSkipTrans != null) {
+            mCommands.add(new AddTransitionCommand(automaton, epsilonSkipTrans));
+        }
         mCommands.add(new AddTransitionCommand(automaton, epsilonBackwardTrans));
 
         // The transition for the subexpression itself
@@ -261,7 +265,9 @@ public class BreakdownIterationCommand extends BreakdownCommand {
 
         mCommands.add(new AddTransitionCommand(automaton, startTrans));
         mCommands.add(new AddTransitionCommand(automaton, endTrans));
-        mCommands.add(new AddTransitionCommand(automaton, epsilonSkipTrans));
+        if (epsilonSkipTrans != null) {
+            mCommands.add(new AddTransitionCommand(automaton, epsilonSkipTrans));
+        }
         mCommands.add(new AddTransitionCommand(automaton, epsilonBackwardTrans));
 
         // The transition for the subexpression itself
