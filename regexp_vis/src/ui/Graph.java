@@ -76,15 +76,26 @@ public class Graph extends mxGraph {
         /* Insert states and transitions from the given automaton. */
         if (automaton != null) {
             this.automaton = automaton;
-            Iterator<Automaton.StateTransitionsPair> it = automaton.graphIterator();
-            AutomatonState startState = automaton.getStartState();
-            setStartState(startState);
+            Iterator<Automaton.StateTransitionsPair> it = automaton
+                    .graphIterator();
+            AutomatonState ss = automaton.getStartState();
+            setStartState(ss);
 
+            /* Insert states */
             while (it.hasNext()) {
                 Automaton.StateTransitionsPair pair = it.next();
-                if (pair.getState() != startState) {
+                if (pair.getState() != ss) {
                     addState(pair.getState());
                 }
+            }
+
+            /*
+             * Insert transitions (must be done separately as you cannot insert
+             * transitions for states that do not yet exist).
+             */
+            it = automaton.graphIterator();
+            while (it.hasNext()) {
+                Automaton.StateTransitionsPair pair = it.next();
                 for (AutomatonTransition t : pair.getTransitions()) {
                     addTransition(t);
                 }
@@ -94,7 +105,7 @@ public class Graph extends mxGraph {
         }
         setStartState(this.automaton.getStartState());
     }
- 
+
     // GETTERS //
     /**
      * The size of this graph is defined as the total number of states and
@@ -463,4 +474,3 @@ public class Graph extends mxGraph {
     }
 
 }
-
