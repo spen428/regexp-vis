@@ -149,9 +149,11 @@ public class GraphPanel extends mxGraphComponent {
 
     // UTILITY //
     public void executeNewCommand(UICommand cmd) {
-        this.history.executeNewCommand(cmd);
+        if (cmd != null) {
+            this.history.executeNewCommand(cmd);
+        }
     }
-    
+
     /**
      * Converts the given {@link Command} into a {@link UICommand} before
      * calling {@link #executeNewCommand(UICommand)}

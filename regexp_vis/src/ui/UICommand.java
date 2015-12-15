@@ -54,6 +54,8 @@ public abstract class UICommand extends Command {
                     (RemoveTransitionCommand) cmd);
         } else if (cmd instanceof SetIsFinalCommand) {
             return new SetIsFinalUICommand(graph, (SetIsFinalCommand) cmd);
+        } else if (cmd == null) {
+            return null;
         } else {
             String msg = String.format("Conversion from %s to UICommand has "
                     + "not yet been implemented.", cmd.getClass().toString());
