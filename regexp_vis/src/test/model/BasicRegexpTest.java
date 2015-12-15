@@ -19,15 +19,12 @@ public class BasicRegexpTest {
     {
     }
 
-    // TODO(mjn33): Ideas for future tests
-    //pg272 fninished the rest of the test
-
     @Test
     public void testParseRegexp_invalid1()
     {
         boolean caught = false;
         try {
-            BasicRegexp.parseRegexp("|a");
+            BasicRegexp.parseRegexp("sdf(jjj))");
         } catch (InvalidRegexpException e) {
             caught = true;
         }
@@ -40,7 +37,7 @@ public class BasicRegexpTest {
     {
         boolean caught = false;
         try {
-            BasicRegexp.parseRegexp("a|");
+            BasicRegexp.parseRegexp("|a");
         } catch (InvalidRegexpException e) {
             caught = true;
         }
@@ -53,7 +50,7 @@ public class BasicRegexpTest {
     {
         boolean caught = false;
         try {
-            BasicRegexp.parseRegexp("*");
+            BasicRegexp.parseRegexp("a|");
         } catch (InvalidRegexpException e) {
             caught = true;
         }
@@ -66,7 +63,7 @@ public class BasicRegexpTest {
     {
         boolean caught = false;
         try {
-            BasicRegexp.parseRegexp("+");
+            BasicRegexp.parseRegexp("*");
         } catch (InvalidRegexpException e) {
             caught = true;
         }
@@ -79,7 +76,7 @@ public class BasicRegexpTest {
     {
         boolean caught = false;
         try {
-            BasicRegexp.parseRegexp("?");
+            BasicRegexp.parseRegexp("+");
         } catch (InvalidRegexpException e) {
             caught = true;
         }
@@ -92,7 +89,7 @@ public class BasicRegexpTest {
     {
         boolean caught = false;
         try {
-            BasicRegexp.parseRegexp("sdf(jjj");
+            BasicRegexp.parseRegexp("?");
         } catch (InvalidRegexpException e) {
             caught = true;
         }
@@ -105,28 +102,16 @@ public class BasicRegexpTest {
     {
         boolean caught = false;
         try {
-            BasicRegexp.parseRegexp("(sdf)**");
+            BasicRegexp.parseRegexp("sdf(jjj");
         } catch (InvalidRegexpException e) {
             caught = true;
         }
 
         assertTrue(caught);
-    }    
-   
-	@Test
-	public void testParseRegexp_invalid8() {
-		boolean caught = false;
-		try {
-			BasicRegexp.parseRegexp("(sdf)*?");
-		} catch (InvalidRegexpException e) {
-			caught = true;
-		}
-
-		assertTrue(caught);
-	}
+    }
 
     @Test
-    public void testParseRegexp_invalid9()
+    public void testParseRegexp_invalid8()
     {
         boolean caught = false;
         try {
@@ -142,97 +127,80 @@ public class BasicRegexpTest {
 
     @Test
     public void testParseRegexp_valid1()
+        throws InvalidRegexpException
     {
-        boolean caught = false;
-        try {
-            // TODO(mjn33): comments on this? Should this be invalid instead?
-            BasicRegexp.parseRegexp("");
-        } catch (InvalidRegexpException e) {
-            caught = true;
-        }
-
-        assertFalse(caught);
+        // This is valid, but should return null
+        BasicRegexp re = BasicRegexp.parseRegexp("");
+        assertEquals(re, null);
+    }
+    
+    @Test
+    public void testParseRegexp_valid2()
+        throws InvalidRegexpException
+    {
+        BasicRegexp re = BasicRegexp.parseRegexp("(a)(b)(c)(d)");
+        assertEquals(re.toString(), "abcd");
     }
     
     @Test
     public void testParseRegexp_valid3()
+        throws InvalidRegexpException
     {
-        boolean caught = false;
-        try {
-            BasicRegexp.parseRegexp("(a)(b)(c)(d)");
-        } catch (InvalidRegexpException e) {
-            caught = true;
-        }
-
-        assertFalse(caught);
+        // Verify spaces are ignored
+        BasicRegexp re = BasicRegexp.parseRegexp("a b c d");
+        assertEquals(re.toString(), "abcd");
     }
     
     @Test
     public void testParseRegexp_valid4()
+        throws InvalidRegexpException
     {
-        boolean caught = false;
-        try {
-            BasicRegexp.parseRegexp("a b c d");
-        } catch (InvalidRegexpException e) {
-            caught = true;
-        }
-
-        assertFalse(caught);
-    }
-    
-    @Test
-    public void testParseRegexp_valid5()
-    {
-        boolean caught = false;
-        try {
-            BasicRegexp.parseRegexp("sdf**");
-        } catch (InvalidRegexpException e) {
-            caught = true;
-        }
-
-        assertFalse(caught);
+        BasicRegexp re = BasicRegexp.parseRegexp("sdf**");
+        assertEquals(re.toString(), "sdf**");
     }    
     
     @Test
-    public void testParseRegexp_valid6()
+    public void testParseRegexp_valid5()
+        throws InvalidRegexpException
     {
-        boolean caught = false;
-        try {
-            BasicRegexp.parseRegexp("(sdf)*+");
-        } catch (InvalidRegexpException e) {
-            caught = true;
-        }
-
-        assertFalse(caught);
+        BasicRegexp re = BasicRegexp.parseRegexp("(sdf)*+");
+        assertEquals(re.toString(), "(sdf)*+");
     }
     
 
     @Test
-    public void testParseRegexp_valid7()
+    public void testParseRegexp_valid6()
+        throws InvalidRegexpException
     {
-        boolean caught = false;
-        try {
-            // Test deeper nesting of parentheses
-            BasicRegexp.parseRegexp("ab(cd(e))ff");
-        } catch (InvalidRegexpException e) {
-            caught = true;
-        }
+        // Test deeper nesting of parentheses
+        BasicRegexp re = BasicRegexp.parseRegexp("ab(cd(e))ff");
+        assertEquals(re.toString(), "abcdeff");
+    }
 
-        assertFalse(caught);
+    @Test
+    public void testParseRegexp_valid7()
+        throws InvalidRegexpException
+    {
+        // Test a unary operator on single char, there indeed was a bug 
+        // relating to this...
+        BasicRegexp re = BasicRegexp.parseRegexp("abc*def");
+        assertEquals(re.toString(), "abc*def");
     }
 
     @Test
     public void testParseRegexp_valid8()
+        throws InvalidRegexpException
     {
-        boolean caught = false;
-        try {
-            // Test a unary operator on single char
-            BasicRegexp.parseRegexp("abc*def");
-        } catch (InvalidRegexpException e) {
-            caught = true;
-        }
+        BasicRegexp re = BasicRegexp.parseRegexp("(sdf)**");
+        assertEquals(re.toString(), "(sdf)**");
+    }
 
-        assertFalse(caught);
+    @Test
+    public void testParseRegexp_valid9()
+        throws InvalidRegexpException
+    {
+        BasicRegexp re = BasicRegexp.parseRegexp("(sdf)*?");
+        assertEquals(re.toString(), "(sdf)*?");
     }
 
     @Test

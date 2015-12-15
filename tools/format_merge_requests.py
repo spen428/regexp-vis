@@ -27,36 +27,43 @@ def make_request(what):
     request.add_header("PRIVATE-TOKEN", private_token)
     return urllib.request.urlopen(request).read().decode()
 
-process_output = make_request("/projects/97/issues")
+process_output = make_request("/projects/97/merge_requests")
 
 data = json.loads(process_output)
 
-print("Issues")
-print("======")
-print("      ")
+print("Merge Requests")
+print("==============")
+print("")
 
-for issue in reversed(data):
-    real_id = issue["id"]
-    closed_str = "[CLOSED]" if issue["state"] == "closed" else "[OPEN]"
-    pretty_title = ("## Issue #" + str(issue["iid"]) + " - " + issue["title"] +
-                    " " + closed_str)
-    pretty_created_at = datetime.strptime(issue["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
+for req in reversed(data):
+    real_id = req["id"];
+    # Python could do well with pattern matching (a la Rust)
+    status_str = {
+        "closed" : "[CLOSED]",
+        "opened" : "[OPEN]",
+        "merged" : "[MERGED]",
+    }.get(req["state"])
+    pretty_title = ("## Merge Request #" + str(req["iid"]) + " - " + req["title"] +
+                    " " + status_str)
+    pretty_created_at = datetime.strptime(req["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
     pretty_created_at = pretty_created_at.strftime("%d/%m/%Y %H:%M")
-    print(pretty_title)
+
+    print(pretty_title);
     print("-" * len(pretty_title))
-    print("**Opened by:** " + issue["author"]["name"] + " @ " + pretty_created_at)
-    if not (issue["assignee"] is None):
-        print("**Assigned to:** " + issue["assignee"]["name"])
+    print("**Opened by:** " + req["author"]["name"])
+    if not (req["assignee"] is None):
+        print("**Assigned to:** " + req["assignee"]["name"])
     else:
         print("**Assigned to:** None")
-    print("")
-    for line in textwrap.wrap(issue["description"], 80):
+    print(pretty_created_at)
+    print("");
+    for line in textwrap.wrap(req["description"], 80):
         print(line)
 
-    print("")
+    print("");
     print("### Comments")
 
-    process_output = make_request("/projects/97/issues/" + str(real_id) + "/notes")
+    process_output = make_request("/projects/97/merge_requests/" + str(real_id) + "/notes")
 
     comments_data = json.loads(process_output)
     for comment in reversed(comments_data):
