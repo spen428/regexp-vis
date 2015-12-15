@@ -2,6 +2,7 @@ package ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -30,11 +31,15 @@ public class Graph extends mxGraph {
     /**
      * A string representing the {@link mxGraph} style for start states.
      */
-    private static final String START_STATE_STYLE = ""; // TODO: Unimplemented
+    private static final String START_STATE_STYLE = "shape=hexagon;";
     /**
      * A string representing the {@link mxGraph} style for final states.
      */
-    private static final String FINAL_STATE_STYLE = ""; // TODO: Unimplemented
+    private static final String NORMAL_STATE_STYLE = "shape=ellipse;";
+    /**
+     * A string representing the {@link mxGraph} style for final states.
+     */
+    private static final String FINAL_STATE_STYLE = "shape=doubleEllipse;";
     /**
      * Maps the {@link mxCell} states to the {@link AutomatonState} states.
      */
@@ -54,20 +59,69 @@ public class Graph extends mxGraph {
     private Automaton automaton;
 
     // CONSTRUCTORS //
+    /**
+     * Create a new blank {@link Graph}
+     */
     public Graph() {
+        this(null);
+    }
+
+    /**
+     * Create a new {@link Graph} from the given {@link Automaton}
+     * 
+     * @param automaton
+     *            the {@link Automaton}
+     */
+    public Graph(Automaton automaton) {
         super();
-        this.automaton = new Automaton();
         this.states = new HashMap<>();
         this.transitions = new HashMap<>();
+
+        /* Insert states and transitions from the given automaton. */
+        if (automaton != null) {
+            this.automaton = automaton;
+            Iterator<Automaton.StateTransitionsPair> it = automaton
+                    .graphIterator();
+            AutomatonState ss = automaton.getStartState();
+            setStartState(ss);
+
+            /* Insert states */
+            while (it.hasNext()) {
+                Automaton.StateTransitionsPair pair = it.next();
+                if (pair.getState() != ss) {
+                    addState(pair.getState());
+                }
+            }
+
+            /*
+             * Insert transitions (must be done separately as you cannot insert
+             * transitions for states that do not yet exist).
+             */
+            it = automaton.graphIterator();
+            while (it.hasNext()) {
+                Automaton.StateTransitionsPair pair = it.next();
+                for (AutomatonTransition t : pair.getTransitions()) {
+                    addTransition(t);
+                }
+            }
+        } else {
+            this.automaton = new Automaton();
+        }
         setStartState(this.automaton.getStartState());
     }
 
-    public Graph(Automaton automaton) {
-        super();
-        this.automaton = automaton;
-        this.states = new HashMap<>();
-        this.transitions = new HashMap<>();
-        addAutomaton(automaton);
+    // OVERRIDES //
+    @Override
+    public boolean isCellSelectable(Object cell) {
+        // https://stackoverflow.com/questions/19847637/jgraphx-want-entire-graph-to-be-uneditable
+        if (cell != null) {
+            if (cell instanceof mxCell) {
+                if (((mxCell) cell).isEdge()) {
+                    return false;
+                }
+            }
+        }
+        return super.isCellSelectable(cell);
     }
 
     // GETTERS //
@@ -78,7 +132,7 @@ public class Graph extends mxGraph {
      * @return size
      */
     public int getSize() {
-        return states.size() + transitions.size();
+        return this.states.size() + this.transitions.size();
     }
 
     public Automaton getAutomaton() {
@@ -178,37 +232,37 @@ public class Graph extends mxGraph {
      * @return the {@link mxCell} representing the state
      */
     public mxCell setStartState(AutomatonState state) {
-        if (startState != null) {
-            /* Must replace the old entry with the new */
-            mxCell startCell = states.remove(startState);
-            startCell = setStartState(startCell, false);
-            states.put(startState, startCell);
+        if (this.startState != null) {
+            mxCell startCell = this.states.get(this.startState);
+            setCellStyle(startCell, NORMAL_STATE_STYLE);
         }
         if (state != null) {
-            mxCell cell = states.remove(state);
+            mxCell cell = this.states.get(state);
             if (cell == null) {
                 /* State doesn't exist yet, let's create it */
                 cell = addState(state);
             }
-            /* Must replace the old entry with the new */
-            cell = setStartState(cell, true);
-            states.put(state, cell);
-            startState = state;
+            setCellStyle(cell, START_STATE_STYLE);
+            this.startState = state;
             return cell;
-        } else {
-            startState = null;
-            return null;
         }
+        this.startState = null;
+        return null;
     }
 
-    private mxCell setStartState(mxCell cell, boolean isStart) {
-        model.beginUpdate();
+    /**
+     * Updates the style of the given cell.
+     * 
+     * @param cell
+     * @param style
+     */
+    private void setCellStyle(mxCell cell, String style) {
+        this.model.beginUpdate();
         try {
-            // TODO
+            this.model.setStyle(cell, style);
         } finally {
-            model.endUpdate();
+            this.model.endUpdate();
         }
-        return cell;
     }
 
     /**
@@ -221,23 +275,9 @@ public class Graph extends mxGraph {
      * @return the {@link mxCell} representing the state
      */
     public mxCell setFinal(AutomatonState state, boolean isFinal) {
-        mxCell cell = states.remove(state);
-        if (cell != null) {
-            /* Must replace the old entry with the new */
-            cell = setFinal(cell, isFinal);
-            state.setFinal(isFinal);
-            states.put(state, cell);
-        }
-        return null;
-    }
-
-    private mxCell setFinal(mxCell cell, boolean isFinal) {
-        model.beginUpdate();
-        try {
-            // TODO
-        } finally {
-            model.endUpdate();
-        }
+        mxCell cell = this.states.get(state);
+        setCellStyle(cell, isFinal ? FINAL_STATE_STYLE : NORMAL_STATE_STYLE);
+        state.setFinal(isFinal);
         return cell;
     }
 
@@ -255,21 +295,21 @@ public class Graph extends mxGraph {
         if (state == null) {
             throw new IllegalArgumentException("state cannot be null when"
                     + " inserting an AutomatonState");
-        } else if (states.get(state) != null) {
+        } else if (this.states.get(state) != null) {
             return null;
         }
 
         int id = state.getId();
-        String style = state.isFinal() ? FINAL_STATE_STYLE : null;
+        String style = state.isFinal() ? FINAL_STATE_STYLE : NORMAL_STATE_STYLE;
 
         mxCell cell = null;
-        model.beginUpdate();
+        this.model.beginUpdate();
         try {
             cell = (mxCell) insertVertex(getDefaultParent(), "state" + id, id,
                     0, 0, VERTEX_DIAMETER_PX, VERTEX_DIAMETER_PX, style);
-            states.put(state, cell);
+            this.states.put(state, cell);
         } finally {
-            model.endUpdate();
+            this.model.endUpdate();
         }
         return cell;
     }
@@ -435,28 +475,6 @@ public class Graph extends mxGraph {
         this.transitions.clear();
         this.automaton = new Automaton();
         setStartState(this.automaton.getStartState());
-    }
-
-    /**
-     * Adds all of the states and transitions from the given {@link Automaton}
-     * to the graph.
-     * 
-     * @param automaton
-     *            the automaton
-     */
-    private void addAutomaton(Automaton automaton) {
-        // FIXME(mjn33): Need to implement iterator in Automaton / something
-        // to prevent modifying internal state
-
-        /*
-         * HashMap<AutomatonState, LinkedList<AutomatonTransition>> mGraph =
-         * automaton .getGraph(); AutomatonState startState =
-         * automaton.getStartState(); // Insert states
-         * setStartState(startState); for (AutomatonState state :
-         * mGraph.keySet()) { addState(state); } // Insert transitions for
-         * (AutomatonState state : mGraph.keySet()) { for (AutomatonTransition
-         * transition : mGraph.get(state)) { addTransition(transition); } }
-         */
     }
 
 }

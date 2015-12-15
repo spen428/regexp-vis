@@ -1,5 +1,9 @@
 package model;
 
+/**
+ * Class which represents a transition from one state to another in an
+ * automaton
+ */
 public final class AutomatonTransition {
     private final int mId;
     private final AutomatonState mFrom;

@@ -10,26 +10,33 @@ import java.util.*;
  *
  * @author Matthew Nicholls
  */
-public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
+public class BasicRegexp implements Comparable<BasicRegexp> {
     public enum RegexpOperator {
-        NONE(3),
-        STAR(2),
-        PLUS(2),
-        OPTION(2),
-        SEQUENCE(1),
-        CHOICE(0);
+        NONE(3, true),
+        STAR(2, true),
+        PLUS(2, true),
+        OPTION(2, true),
+        SEQUENCE(1, false),
+        CHOICE(0, false);
 
         // Operator precedence, higher value, higher precedence
         private final int mPrecedence;
+        private final boolean mIsUnary;
 
-        private RegexpOperator(int precedence)
+        private RegexpOperator(int precedence, boolean isUnary)
         {
             mPrecedence = precedence;
+            mIsUnary = isUnary;
         }
 
         public int getPrecedence()
         {
             return mPrecedence;
+        }
+
+        public boolean isUnary()
+        {
+            return mIsUnary;
         }
     }
 
@@ -43,7 +50,7 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
      * have to keep creating new objects
      */
     public static final BasicRegexp EPSILON_EXPRESSION =
-        new BasicRegexp(EPSILON_CHAR, RegexpOperator.NONE);
+        new BasicRegexp(EPSILON_CHAR);
 
     final private ArrayList<BasicRegexp> mOperands;
     final private char mChar;
@@ -68,7 +75,7 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
                 "RegexpOperator.NONE only allowed for single character " +
                 "expressions");
         }
-        if (isUnaryOperator(op) && operands.size() > 1) {
+        if (op.isUnary() && operands.size() > 1) {
             throw new IllegalArgumentException(
                 "Multiple operands passed for a unary operator");
         }
@@ -82,8 +89,9 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
         //   * "a|(b|c|d)|e"   ----> "a|b|c|d|e"
         // Note: some information on parentheses is lost in the parsing
         // process anyway, such as "(a*)(b*)"
-        ArrayList<BasicRegexp> optimisedOperands = new ArrayList<>();
+        ArrayList<BasicRegexp> optimisedOperands;
         if (op == RegexpOperator.CHOICE || op == RegexpOperator.SEQUENCE) {
+            optimisedOperands = new ArrayList<>();
             for (BasicRegexp operand : operands) {
                 if (operand.getOperator() == op) {
                     // Insert all sub operands
@@ -93,6 +101,8 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
                     optimisedOperands.add(operand);
                 }
             }
+        } else {
+            optimisedOperands = new ArrayList<>(operands);
         }
 
         mOperands = optimisedOperands;
@@ -117,7 +127,7 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
                 "expressions");
         }
 
-        if (!isUnaryOperator(op)) {
+        if (!op.isUnary()) {
             throw new IllegalArgumentException(
                 "Non-unary operators require multiple operands");
         }
@@ -129,24 +139,15 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
     }
 
     /**
-     * Construct a BasicRegexp with the specified high-level <b>unary</b>
-     * operator and single operand
+     * Construct a single character expression BasicRegexp
      *
      * @param c The operand for this BasicRegexp
-     * @param op The operator for this BasicRegexp, <b>must</b> be a unary
-     * operator
-     * @throws IllegalArgumentException if "op" is not a unary operator
      */
-    public BasicRegexp(char c, RegexpOperator op)
+    public BasicRegexp(char c)
     {
-        if (!isUnaryOperator(op)) {
-            throw new IllegalArgumentException(
-                "Non-unary operators require multiple operands");
-        }
-
         mOperands = null;
         mChar = c;
-        mOperator = op;
+        mOperator = RegexpOperator.NONE;
     }
 
     public int compareTo(BasicRegexp other)
@@ -167,7 +168,7 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
         } else {
             // Compare complex expressions
             Iterator<BasicRegexp> thisIt = mOperands.iterator();
-            Iterator<BasicRegexp> otherIt = mOperands.iterator();
+            Iterator<BasicRegexp> otherIt = other.mOperands.iterator();
             while (thisIt.hasNext() && otherIt.hasNext()) {
                 BasicRegexp thisOperand = thisIt.next();
                 BasicRegexp otherOperand = otherIt.next();
@@ -251,11 +252,7 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
             return true;
         case PLUS:
             // Plus is only nullable if the operand is nullable
-            if (isSingleChar()) {
-                return false;
-            } else {
-                return mOperands.get(0).isNullable();
-            }
+            return mOperands.get(0).isNullable();
         case OPTION:
             // Option is always nullable
             return true;
@@ -279,27 +276,6 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
         default:
             throw new RuntimeException("BUG: Should be unreachable.");
         }
-    }
-
-    /**
-     * Performs a deep copy of this BasicRegexp, all sub expressions are copied.
-     *
-     * @return The cloned object
-     */
-    @Override
-    public BasicRegexp clone()
-    {
-        ArrayList<BasicRegexp> newOperands = null;
-        // Deep copy operands if we have any
-        if (mOperands != null) {
-            newOperands = new ArrayList<>();
-            for (BasicRegexp operand : mOperands) {
-                newOperands.add(operand.clone());
-            }
-            return new BasicRegexp(newOperands, mOperator);
-        }
-
-        return new BasicRegexp(mChar, mOperator);
     }
 
     /**
@@ -340,19 +316,6 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
     }
 
     /**
-     * @param op The operator in question
-     * @return True if the specified operator is unary, false otherwise
-     */
-    public static boolean isUnaryOperator(RegexpOperator op)
-    {
-        // Only CHOICE and SEQUENCE are not unary
-        return op == RegexpOperator.STAR ||
-               op == RegexpOperator.PLUS ||
-               op == RegexpOperator.OPTION ||
-               op == RegexpOperator.NONE;
-    }
-
-    /**
      * Factored out of parseRegexp, common code for processing unary operators
      * such as PLUS, STAR and OPTION
      *
@@ -368,15 +331,8 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
             BasicRegexp back = sequenceOperands
                     .remove(sequenceOperands.size() - 1);
 
-            // If the last regexp operand was just a char on its own
-            if (back.isSingleChar() &&
-                back.getOperator() == RegexpOperator.NONE) {
-                // Create a new expression with the char
-                sequenceOperands.add(new BasicRegexp(back.getChar(), op));
-            } else {
-                // Wrap the expression in another expression
-                sequenceOperands.add(new BasicRegexp(back, op));
-            }
+            // Wrap the expression in another expression
+            sequenceOperands.add(new BasicRegexp(back, op));
         } else {
             throw new InvalidRegexpException(
                 op.name() + " operator on empty word");
@@ -397,9 +353,9 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
     {
         if (sequenceOperands.size() > 1) {
             // Found multiple operands, they will be in sequence
-            BasicRegexp re = new BasicRegexp(new ArrayList<>(sequenceOperands),
+            // BasicRegexp clones the ArrayList
+            BasicRegexp re = new BasicRegexp(sequenceOperands,
                 RegexpOperator.SEQUENCE);
-            // BasicRegexp takes ownership of the old ArrayList
             sequenceOperands.clear();
             choiceOperands.add(re);
         } else if (!sequenceOperands.isEmpty()) {
@@ -467,8 +423,7 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
                 if (!Character.isWhitespace(str.charAt(idx))) {
                     // Normal character
                     // IDEA(mjn33): Parse e.g. '%' as epsilon
-                    BasicRegexp re = new BasicRegexp(str.charAt(idx),
-                        RegexpOperator.NONE);
+                    BasicRegexp re = new BasicRegexp(str.charAt(idx));
                     sequenceOperands.add(re);
                 }
             }
@@ -479,6 +434,9 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
             // The remaining sequence operands are part of the choice operation
             processChoiceOp(sequenceOperands, choiceOperands);
             return new BasicRegexp(choiceOperands, RegexpOperator.CHOICE);
+        } else if (sequenceOperands.size() == 1) {
+            // Don't return a sequence of a single expression
+            return sequenceOperands.get(0);
         } else if (!sequenceOperands.isEmpty()) {
             return new BasicRegexp(sequenceOperands, RegexpOperator.SEQUENCE);
         } else {
@@ -498,27 +456,27 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
     {
         switch (mOperator) {
         case NONE:
-            sb.append(mChar);
+            if (mChar == EPSILON_CHAR) {
+                // Unicode epsilon character
+                sb.append('\u03b5');
+            } else {
+                sb.append(mChar);
+            }
             break;
         case STAR:
         case PLUS:
         case OPTION: {
             // All these operators can be treated the same, just use a
             // different char
-            if (!isSingleChar()) {
-                RegexpOperator subExprOp = mOperands.get(0).getOperator();
-                // Check if sub-expression operator has lower precedence,
-                // in which case we need to put it in parentheses
-                if (subExprOp.getPrecedence() <
-                    getOperator().getPrecedence()) {
-                    sb.append("(");
-                    mOperands.get(0).toStringBuilder(sb);
-                    sb.append(")");
-                } else {
-                    mOperands.get(0).toStringBuilder(sb);
-                }
+            RegexpOperator subExprOp = mOperands.get(0).getOperator();
+            // Check if sub-expression operator has lower precedence,
+            // in which case we need to put it in parentheses
+            if (subExprOp.getPrecedence() < getOperator().getPrecedence()) {
+                sb.append("(");
+                mOperands.get(0).toStringBuilder(sb);
+                sb.append(")");
             } else {
-                sb.append(mChar);
+                mOperands.get(0).toStringBuilder(sb);
             }
             switch (mOperator) {
             case STAR:
@@ -600,15 +558,15 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
             case PLUS:
             case OPTION:
                 // Remove STAR, PLUS and OPTION
-                if (operand.isSingleChar()) {
-                    optimisedOperands.add(new BasicRegexp(operand.mChar,
-                            RegexpOperator.NONE));
+                BasicRegexp subExpr = operand.mOperands.get(0);
+                if (subExpr.isSingleChar()) {
+                    optimisedOperands.add(subExpr);
                 } else {
-                    BasicRegexp subExpr = operand.mOperands.get(0);
                     // Check if by getting unwrapping this, we uncover another
                     // CHOICE or nullable SEQUENCE
                     optimiseStarOnSC(subExpr, optimisedOperands);
                 }
+
                 hasOptimisedSubExpr = true;
                 break;
             case SEQUENCE:
@@ -627,27 +585,22 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
 
     private BasicRegexp optimiseStar()
     {
-        if (isSingleChar()) {
-            return this;
-        }
         BasicRegexp subExpr = mOperands.get(0);
         BasicRegexp subExprOptimised = subExpr.optimise();
         switch (subExprOptimised.getOperator()) {
         case NONE:
-            // We can always wrap single character expressions into STAR
-            // directly
-            return new BasicRegexp(subExprOptimised.mChar, RegexpOperator.STAR);
+            if (subExpr == subExprOptimised) {
+                // No optimisations made
+                return this;
+            } else {
+                return new BasicRegexp(subExprOptimised, RegexpOperator.STAR);
+            }
         case STAR:
             return subExprOptimised;
         case PLUS:
         case OPTION:
-            if (subExprOptimised.isSingleChar()) {
-                return new BasicRegexp(subExprOptimised.mChar,
-                    RegexpOperator.STAR);
-            } else {
-                return new BasicRegexp(subExprOptimised.mOperands.get(0),
-                    RegexpOperator.STAR);
-            }
+            return new BasicRegexp(subExprOptimised.mOperands.get(0), 
+                RegexpOperator.STAR);
         case SEQUENCE:
         case CHOICE: {
             ArrayList<BasicRegexp> optimisedOperands = new ArrayList<>();
@@ -686,28 +639,23 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
 
     private BasicRegexp optimisePlus()
     {
-        if (isSingleChar()) {
-            return this;
-        }
         BasicRegexp subExpr = mOperands.get(0);
         BasicRegexp subExprOptimised = subExpr.optimise();
         switch (subExprOptimised.getOperator()) {
         case NONE:
-            // We can always wrap single character expressions into PLUS
-            // directly
-            return new BasicRegexp(subExprOptimised.mChar, RegexpOperator.PLUS);
+            if (subExpr == subExprOptimised) {
+                // No optimisations made
+                return this;
+            } else {
+                return new BasicRegexp(subExprOptimised, RegexpOperator.PLUS);
+            }
         case STAR:
             return subExprOptimised;
         case PLUS:
             return subExprOptimised;
         case OPTION:
-            if (subExprOptimised.isSingleChar()) {
-                return new BasicRegexp(subExprOptimised.mChar,
-                    RegexpOperator.STAR);
-            } else {
-                return new BasicRegexp(subExprOptimised.mOperands.get(0),
-                    RegexpOperator.STAR);
-            }
+            return new BasicRegexp(subExprOptimised.mOperands.get(0), 
+                RegexpOperator.STAR);
         case SEQUENCE: {
             // IDEA(mjn33): Improve optimisations, when I have the time. PLUS
             // is a lower priority than STAR
@@ -739,9 +687,6 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
 
     private BasicRegexp optimiseOption()
     {
-        if (isSingleChar()) {
-            return this;
-        }
         BasicRegexp subExpr = mOperands.get(0);
         BasicRegexp subExprOptimised = subExpr.optimise();
 
@@ -749,17 +694,15 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
             return subExprOptimised;
         } else if (subExprOptimised.getOperator() == RegexpOperator.PLUS) {
             // r+? ----> r*
-            if (subExprOptimised.isSingleChar()) {
-                return new BasicRegexp(subExprOptimised.mChar,
-                    RegexpOperator.STAR);
-            } else {
-                return new BasicRegexp(subExprOptimised.mOperands.get(0),
-                    RegexpOperator.STAR);
-            }
+            return new BasicRegexp(subExprOptimised.mOperands.get(0),
+                RegexpOperator.STAR);
         } else if (subExprOptimised.getOperator() == RegexpOperator.NONE) {
-            // We can always wrap single character expressions into OPTION
-            // directly
-            return new BasicRegexp(subExprOptimised.mChar, RegexpOperator.OPTION);
+            if (subExpr == subExprOptimised) {
+                // No optimisations made
+                return this;
+            } else {
+                return new BasicRegexp(subExprOptimised, RegexpOperator.OPTION);
+            }
         } else {
             return this;
         }
@@ -811,14 +754,8 @@ public class BasicRegexp implements Cloneable, Comparable<BasicRegexp> {
             return ret;
         }
 
-        if (a.isSingleChar() && b.isSingleChar()) {
-            if (a.mChar == b.mChar) {
-                return ret;
-            }
-        } else if (!a.isSingleChar() && !b.isSingleChar()) {
-            if (a.mOperands.get(0).compareTo(b.mOperands.get(0)) == 0) {
-                return ret;
-            }
+        if (a.mOperands.get(0).compareTo(b.mOperands.get(0)) == 0) {
+            return ret;
         }
 
         return -1;

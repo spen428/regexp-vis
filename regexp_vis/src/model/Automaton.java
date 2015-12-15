@@ -7,13 +7,64 @@ import java.util.*;
  * deterministic finite automaton.
  */
 public class Automaton {
-    // Tuples would be much appreciated Java...
-    private static class StateTransitionsPair {
-        AutomatonState mState;
-        LinkedList<AutomatonTransition> mTransitions;
-        public StateTransitionsPair(AutomatonState s) {
+    public static class StateTransitionsPair {
+        private final AutomatonState mState;
+        private final LinkedList<AutomatonTransition> mTransitions;
+
+        private StateTransitionsPair(AutomatonState s)
+        {
             mState = s;
             mTransitions = new LinkedList<>();
+        }
+
+        private StateTransitionsPair(AutomatonState s,
+            LinkedList<AutomatonTransition> transitions)
+        {
+            mState = s;
+            mTransitions = transitions;
+        }
+
+        /**
+         * @return The automaton state
+         */
+        public AutomatonState getState()
+        {
+            return mState;
+        }
+
+        /**
+         * @return The transitions for this state, as an unmodifiable list
+         */
+        public List<AutomatonTransition> getTransitions()
+        {
+            return Collections.unmodifiableList(mTransitions);
+        }
+    }
+
+    private class GraphIterator implements Iterator<StateTransitionsPair>
+    {
+        private Iterator<Map.Entry<Integer, StateTransitionsPair>> mEntrySetIterator;
+
+        private GraphIterator()
+        {
+            mEntrySetIterator = mGraph.entrySet().iterator();
+        }
+
+        public boolean hasNext()
+        {
+            return mEntrySetIterator.hasNext();
+        }
+
+        public StateTransitionsPair next()
+        {
+            Map.Entry<Integer,StateTransitionsPair> entry =
+                mEntrySetIterator.next();
+            return entry.getValue();
+        }
+
+        public void remove()
+        {
+            throw new UnsupportedOperationException("remove() not supported.");
         }
     }
 
@@ -232,8 +283,7 @@ public class Automaton {
             throw new RuntimeException("Attempted to insert duplicate state");
         }
 
-        StateTransitionsPair pair = new StateTransitionsPair(state);
-        pair.mTransitions = transitions;
+        StateTransitionsPair pair = new StateTransitionsPair(state, transitions);
         mGraph.put(state.getId(), pair);
     }
 
@@ -302,5 +352,16 @@ public class Automaton {
             throw new RuntimeException(
                 "The specified transition doesn't exist");
         }
+    }
+
+    /**
+     * Provides an iterator over the graph, containing all state + transitions
+     * pairs. Modification will result in an exception being thrown.
+     *
+     * @return The iterator
+     */
+    public Iterator<StateTransitionsPair> graphIterator()
+    {
+        return new GraphIterator();
     }
 }

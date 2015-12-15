@@ -16,7 +16,6 @@ public class BreakdownSequenceCommand extends BreakdownCommand {
     public BreakdownSequenceCommand(Automaton automaton, AutomatonTransition t)
     {
         super(automaton, t);
-        mCommands = new LinkedList<>();
 
         BasicRegexp re = (BasicRegexp)t.getData();
         AutomatonState from = t.getFrom();

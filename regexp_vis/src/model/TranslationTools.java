@@ -10,9 +10,9 @@ public final class TranslationTools {
         case NONE:
             return null; // No operator to breakdown, nothing to do
         case STAR:
-            return new BreakdownIterationCommand(automaton, t);
         case PLUS:
-            return new BreakdownIterationCommand(automaton, t);
+            return new BreakdownIterationCommand(automaton, t,
+                BreakdownIterationCommand.calcBestIsolationLevel(automaton, t));
         case OPTION:
             return new BreakdownOptionCommand(automaton, t);
         case SEQUENCE:

@@ -24,22 +24,17 @@ public class DoubleClickHandler extends MouseAdapter {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (this.graphPanel.isEnabled()) {
-            if (!e.isConsumed() && this.graphPanel.isEditEvent(e)) {
-                Object cell = this.graphPanel.getCellAt(e.getX(), e.getY(),
-                        false);
+        if (!e.isConsumed() && this.graphPanel.isEditEvent(e)) {
+            Object cell = this.graphPanel.getCellAt(e.getX(), e.getY(), false);
 
-                if (cell != null
-                        && this.graphPanel.getGraph().isCellEditable(cell)) {
-                    System.out.printf("Double-clicked cell: %s %s " + "%s%n",
-                            cell, e, e.getPoint());
-                    // TODO: eventSource.fireEvent();
-                    mxCell c = ((mxCell) cell);
-                    if (c.isEdge()) {
-                        System.out.println("Double-clicked an edge, "
-                                + "let's break it down!");
-                        breakDown(c);
-                    }
+            if (cell != null) {
+                System.out.printf("Double-clicked cell: %s %s " + "%s%n", cell,
+                        e, e.getPoint());
+                mxCell c = ((mxCell) cell);
+                if (c.isEdge()) {
+                    System.out.println("Double-clicked an edge, "
+                            + "let's break it down!");
+                    breakDown(c);
                 }
             }
         }
@@ -50,6 +45,7 @@ public class DoubleClickHandler extends MouseAdapter {
         Command cmd = TranslationTools.createBreakdownCommand(
                 graph.getAutomaton(), graph.getTransitionFromCell(cell));
         this.graphPanel.executeNewCommand(cmd);
+        this.graphPanel.doGraphLayout();
     }
 
 }
