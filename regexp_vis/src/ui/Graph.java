@@ -31,11 +31,15 @@ public class Graph extends mxGraph {
     /**
      * A string representing the {@link mxGraph} style for start states.
      */
-    private static final String START_STATE_STYLE = ""; // TODO: Unimplemented
+    private static final String START_STATE_STYLE = "shape=hexagon;";
     /**
      * A string representing the {@link mxGraph} style for final states.
      */
-    private static final String FINAL_STATE_STYLE = ""; // TODO: Unimplemented
+    private static final String NORMAL_STATE_STYLE = "shape=ellipse;";
+    /**
+     * A string representing the {@link mxGraph} style for final states.
+     */
+    private static final String FINAL_STATE_STYLE = "shape=doubleEllipse;";
     /**
      * Maps the {@link mxCell} states to the {@link AutomatonState} states.
      */
@@ -228,47 +232,37 @@ public class Graph extends mxGraph {
      * @return the {@link mxCell} representing the state
      */
     public mxCell setStartState(AutomatonState state) {
-        if (startState != null) {
-            /* Must replace the old entry with the new */
-            mxCell startCell = states.remove(startState);
-            startCell = setStartState(startCell, false);
-            states.put(startState, startCell);
+        if (this.startState != null) {
+            mxCell startCell = this.states.get(this.startState);
+            setCellStyle(startCell, NORMAL_STATE_STYLE);
         }
         if (state != null) {
-            mxCell cell = states.remove(state);
+            mxCell cell = this.states.get(state);
             if (cell == null) {
                 /* State doesn't exist yet, let's create it */
                 cell = addState(state);
             }
-            /* Must replace the old entry with the new */
-            cell = setStartState(cell, true);
-            states.put(state, cell);
-            startState = state;
+            setCellStyle(cell, START_STATE_STYLE);
+            this.startState = state;
             return cell;
-        } else {
-            startState = null;
-            return null;
         }
+        this.startState = null;
+        return null;
     }
 
     /**
-     * Sets the visual style of a given cell to that of a start state.
+     * Updates the style of the given cell.
      * 
      * @param cell
-     *            the cell to modify
-     * @param isStart
-     *            whether to style the cell as a start state (true) or
-     *            intermediate state (false)
-     * @return the modified cell
+     * @param style
      */
-    private mxCell setStartState(mxCell cell, boolean isStart) {
-        model.beginUpdate();
+    private void setCellStyle(mxCell cell, String style) {
+        this.model.beginUpdate();
         try {
-            // TODO
+            this.model.setStyle(cell, style);
         } finally {
-            model.endUpdate();
+            this.model.endUpdate();
         }
-        return cell;
     }
 
     /**
@@ -281,33 +275,9 @@ public class Graph extends mxGraph {
      * @return the {@link mxCell} representing the state
      */
     public mxCell setFinal(AutomatonState state, boolean isFinal) {
-        mxCell cell = states.remove(state);
-        if (cell != null) {
-            /* Must replace the old entry with the new */
-            cell = setFinal(cell, isFinal);
-            state.setFinal(isFinal);
-            states.put(state, cell);
-        }
-        return null;
-    }
-
-    /**
-     * Sets the visual style of a given cell to that of a final state.
-     * 
-     * @param cell
-     *            the cell to modify
-     * @param isFinal
-     *            whether to style the cell as a final state (true) or
-     *            intermediate state (false)
-     * @return the modified cell
-     */
-    private mxCell setFinal(mxCell cell, boolean isFinal) {
-        model.beginUpdate();
-        try {
-            // TODO
-        } finally {
-            model.endUpdate();
-        }
+        mxCell cell = this.states.get(state);
+        setCellStyle(cell, isFinal ? FINAL_STATE_STYLE : NORMAL_STATE_STYLE);
+        state.setFinal(isFinal);
         return cell;
     }
 
@@ -325,21 +295,21 @@ public class Graph extends mxGraph {
         if (state == null) {
             throw new IllegalArgumentException("state cannot be null when"
                     + " inserting an AutomatonState");
-        } else if (states.get(state) != null) {
+        } else if (this.states.get(state) != null) {
             return null;
         }
 
         int id = state.getId();
-        String style = state.isFinal() ? FINAL_STATE_STYLE : null;
+        String style = state.isFinal() ? FINAL_STATE_STYLE : NORMAL_STATE_STYLE;
 
         mxCell cell = null;
-        model.beginUpdate();
+        this.model.beginUpdate();
         try {
             cell = (mxCell) insertVertex(getDefaultParent(), "state" + id, id,
                     0, 0, VERTEX_DIAMETER_PX, VERTEX_DIAMETER_PX, style);
-            states.put(state, cell);
+            this.states.put(state, cell);
         } finally {
-            model.endUpdate();
+            this.model.endUpdate();
         }
         return cell;
     }

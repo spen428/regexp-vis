@@ -191,6 +191,7 @@ public class GraphPanel extends mxGraphComponent {
         /* Generate new automaton */
         Automaton a = this.graph.getAutomaton();
         AutomatonState finalState = a.createNewState();
+        finalState.setFinal(true);
         AutomatonTransition transition = a.createNewTransition(
                 a.getStartState(), finalState, re);
         UICommand[] cmds = new UICommand[] {
