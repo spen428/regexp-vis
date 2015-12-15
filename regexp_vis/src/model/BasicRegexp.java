@@ -12,24 +12,31 @@ import java.util.*;
  */
 public class BasicRegexp implements Comparable<BasicRegexp> {
     public enum RegexpOperator {
-        NONE(3),
-        STAR(2),
-        PLUS(2),
-        OPTION(2),
-        SEQUENCE(1),
-        CHOICE(0);
+        NONE(3, true),
+        STAR(2, true),
+        PLUS(2, true),
+        OPTION(2, true),
+        SEQUENCE(1, false),
+        CHOICE(0, false);
 
         // Operator precedence, higher value, higher precedence
         private final int mPrecedence;
+        private final boolean mIsUnary;
 
-        private RegexpOperator(int precedence)
+        private RegexpOperator(int precedence, boolean isUnary)
         {
             mPrecedence = precedence;
+            mIsUnary = isUnary;
         }
 
         public int getPrecedence()
         {
             return mPrecedence;
+        }
+
+        public boolean isUnary()
+        {
+            return mIsUnary;
         }
     }
 
@@ -68,7 +75,7 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
                 "RegexpOperator.NONE only allowed for single character " +
                 "expressions");
         }
-        if (isUnaryOperator(op) && operands.size() > 1) {
+        if (op.isUnary() && operands.size() > 1) {
             throw new IllegalArgumentException(
                 "Multiple operands passed for a unary operator");
         }
@@ -120,7 +127,7 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
                 "expressions");
         }
 
-        if (!isUnaryOperator(op)) {
+        if (!op.isUnary()) {
             throw new IllegalArgumentException(
                 "Non-unary operators require multiple operands");
         }
@@ -306,19 +313,6 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         }
 
         return -1; // No matching parenthesis found
-    }
-
-    /**
-     * @param op The operator in question
-     * @return True if the specified operator is unary, false otherwise
-     */
-    public static boolean isUnaryOperator(RegexpOperator op)
-    {
-        // Only CHOICE and SEQUENCE are not unary
-        return op == RegexpOperator.STAR ||
-               op == RegexpOperator.PLUS ||
-               op == RegexpOperator.OPTION ||
-               op == RegexpOperator.NONE;
     }
 
     /**
