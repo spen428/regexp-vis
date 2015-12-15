@@ -97,9 +97,12 @@ public class BreakdownIterationCommand extends BreakdownCommand {
 
     /**
      * @param automaton The automaton for the transition
-     * @param t The transition to break down
+     * @param t the transition to break down
+     * @param level the desired IsolationLevel for this breakdown operation
      * @throws IllegalArgumentException if the transition expression isn't STAR
      * or PLUS
+     * @throws IllegalArgumentException if the desired isolation level would
+     * not result in a correct translation
      */
     public BreakdownIterationCommand(Automaton automaton, AutomatonTransition t,
         IsolationLevel level)
@@ -140,6 +143,10 @@ public class BreakdownIterationCommand extends BreakdownCommand {
         }
     }
 
+    /**
+     * @return The isolation level of this breakdown operation
+     * @see IsolationLevel
+     */
     public IsolationLevel getIsolationLevel()
     {
         return mIsolationLevel;
