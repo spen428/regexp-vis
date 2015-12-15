@@ -2,6 +2,7 @@ package ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -75,25 +76,25 @@ public class Graph extends mxGraph {
         /* Insert states and transitions from the given automaton. */
         if (automaton != null) {
             this.automaton = automaton;
-            // TODO: requires automaton.getGraph()
+            Iterator<Automaton.StateTransitionsPair> it = automaton.graphIterator();
+            AutomatonState startState = automaton.getStartState();
+            setStartState(startState);
 
-            /* Insert states */
-            // for (AutomatonState state : mGraph.keySet()) {
-            // addState(state);
-            // }
-
-            /* Insert transitions */
-            // for (AutomatonState state : mGraph.keySet()) {
-            // for (AutomatonTransition transition : mGraph.get(state)) {
-            // addTransition(transition);
-            // }
-            // }
+            while (it.hasNext()) {
+                Automaton.StateTransitionsPair pair = it.next();
+                if (pair.getState() != startState) {
+                    addState(pair.getState());
+                }
+                for (AutomatonTransition t : pair.getTransitions()) {
+                    addTransition(t);
+                }
+            }
         } else {
             this.automaton = new Automaton();
         }
         setStartState(this.automaton.getStartState());
     }
-
+ 
     // GETTERS //
     /**
      * The size of this graph is defined as the total number of states and
@@ -462,3 +463,4 @@ public class Graph extends mxGraph {
     }
 
 }
+
