@@ -108,6 +108,14 @@ public class Graph extends mxGraph {
             this.automaton = new Automaton();
         }
         setStartState(this.automaton.getStartState());
+
+        /* Disable unwanted user actions */
+        // this.graph.setCellsBendable(false);
+        setCellsCloneable(false);
+        setCellsDeletable(false);
+        setCellsDisconnectable(false);
+        setCellsEditable(false);
+        setCellsResizable(false);
     }
 
     // OVERRIDES //

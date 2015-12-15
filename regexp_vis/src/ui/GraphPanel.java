@@ -78,15 +78,6 @@ public class GraphPanel extends mxGraphComponent {
         this.edgeLabelLayout = new mxEdgeLabelLayout(graph);
         this.layout = GraphLayout.CIRCLE_LAYOUT;
         doGraphLayout();
-
-        /* Disable unwanted user actions */
-        // this.graph.setCellsBendable(false); // No idea what this does
-        this.graph.setCellsCloneable(false);
-        this.graph.setCellsDeletable(false);
-        this.graph.setCellsDisconnectable(false);
-        this.graph.setCellsEditable(false);
-        // this.graph.setCellsMovable(true);
-        this.graph.setCellsResizable(false);
     }
 
     // GETTERS AND SETTERS //
