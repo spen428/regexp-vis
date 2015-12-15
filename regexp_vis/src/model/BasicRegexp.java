@@ -456,7 +456,12 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
     {
         switch (mOperator) {
         case NONE:
-            sb.append(mChar);
+            if (mChar == EPSILON_CHAR) {
+                // Unicode epsilon character
+                sb.append('\u03b5');
+            } else {
+                sb.append(mChar);
+            }
             break;
         case STAR:
         case PLUS:
