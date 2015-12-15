@@ -12,16 +12,17 @@ import java.util.*;
  * <i>Note:</i> for the translation process, these commands should be executed
  * before any more are queued. Translating operations such as iteration can be
  * "unsafe" / incorrect if they are not "isolated". See "Regular Expressions - a
- * Graphical User Interface" by Stefan Khars for an explaination of safe and
+ * Graphical User Interface" by Stefan Khars for an explanation of safe and
  * unsafe translations.
  */
 public abstract class BreakdownCommand extends Command {
-    protected LinkedList<Command> mCommands;
-    private AutomatonTransition mOriginalTransition;
+    protected final LinkedList<Command> mCommands;
+    private final AutomatonTransition mOriginalTransition;
 
     public BreakdownCommand(Automaton automaton, AutomatonTransition t)
     {
         super(automaton);
+        mCommands = new LinkedList<Command>();
         mOriginalTransition = t;
     }
 
@@ -33,9 +34,13 @@ public abstract class BreakdownCommand extends Command {
         return mOriginalTransition;
     }
     
-    public LinkedList<Command> getCommands()
+    /**
+     * @return the list of commands which this command executes, as an
+     * unmodifiable list
+     */
+    public List<Command> getCommands()
     {
-        return new LinkedList<Command>(mCommands);
+        return Collections.unmodifiableList(mCommands);
     }
 
     @Override

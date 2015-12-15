@@ -1,7 +1,5 @@
 package model;
 
-import java.util.*;
-
 /**
  * Command which breaks down a choice of expressions (e.g. "a|b|c|d") into a set
  * of simpler transitions. For the regular expression to NFA conversion process.
@@ -16,7 +14,6 @@ public class BreakdownChoiceCommand extends BreakdownCommand {
     public BreakdownChoiceCommand(Automaton automaton, AutomatonTransition t)
     {
         super(automaton, t);
-        mCommands = new LinkedList<>();
 
         BasicRegexp re = (BasicRegexp)t.getData();
         AutomatonState from = t.getFrom();
