@@ -19,7 +19,7 @@ public class BreakdownChoiceCommand extends BreakdownCommand {
         AutomatonState from = t.getFrom();
         AutomatonState to = t.getTo();
 
-        if (re.getOperator() != BasicRegexp.RegexpOperator.OPTION) {
+        if (re.getOperator() != BasicRegexp.RegexpOperator.CHOICE) {
             throw new IllegalArgumentException(
                 "BreakdownChoiceCommand must be passed a CHOICE " +
                 "transition (e.g. \"a|b|c\")");
