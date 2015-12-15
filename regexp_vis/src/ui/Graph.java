@@ -106,6 +106,20 @@ public class Graph extends mxGraph {
         setStartState(this.automaton.getStartState());
     }
 
+    // OVERRIDES //
+    @Override
+    public boolean isCellSelectable(Object cell) {
+        // https://stackoverflow.com/questions/19847637/jgraphx-want-entire-graph-to-be-uneditable
+        if (cell != null) {
+            if (cell instanceof mxCell) {
+                if (((mxCell) cell).isEdge()) {
+                    return false;
+                }
+            }
+        }
+        return super.isCellSelectable(cell);
+    }
+
     // GETTERS //
     /**
      * The size of this graph is defined as the total number of states and
@@ -237,6 +251,16 @@ public class Graph extends mxGraph {
         }
     }
 
+    /**
+     * Sets the visual style of a given cell to that of a start state.
+     * 
+     * @param cell
+     *            the cell to modify
+     * @param isStart
+     *            whether to style the cell as a start state (true) or
+     *            intermediate state (false)
+     * @return the modified cell
+     */
     private mxCell setStartState(mxCell cell, boolean isStart) {
         model.beginUpdate();
         try {
@@ -267,6 +291,16 @@ public class Graph extends mxGraph {
         return null;
     }
 
+    /**
+     * Sets the visual style of a given cell to that of a final state.
+     * 
+     * @param cell
+     *            the cell to modify
+     * @param isFinal
+     *            whether to style the cell as a final state (true) or
+     *            intermediate state (false)
+     * @return the modified cell
+     */
     private mxCell setFinal(mxCell cell, boolean isFinal) {
         model.beginUpdate();
         try {

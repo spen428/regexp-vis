@@ -151,7 +151,7 @@ public class GraphPanel extends mxGraphComponent {
     public void executeNewCommand(UICommand cmd) {
         this.history.executeNewCommand(cmd);
     }
-
+    
     /**
      * Converts the given {@link Command} into a {@link UICommand} before
      * calling {@link #executeNewCommand(UICommand)}
