@@ -123,13 +123,14 @@ public class Graph extends mxGraph {
         setStartState(this.automaton.getStartState());
 
         /* Disable unwanted user actions */
-        //setCellsBendable(false);
+        // setCellsBendable(false);
         setCellsCloneable(false);
         setCellsDeletable(false);
         setCellsDisconnectable(false);
         setCellsEditable(false);
         setCellsResizable(false);
         setSplitEnabled(false);
+        // setKeepEdgesInBackground(true);
     }
 
     // OVERRIDES //
@@ -181,7 +182,7 @@ public class Graph extends mxGraph {
     }
 
     public AutomatonTransition getTransitionFromCell(mxCell cell) {
-        TransitionWrapper wrap = (TransitionWrapper)cell.getValue();
+        TransitionWrapper wrap = (TransitionWrapper) cell.getValue();
         return wrap.transition;
     }
 
@@ -323,7 +324,8 @@ public class Graph extends mxGraph {
         this.model.beginUpdate();
         try {
             cell = (mxCell) insertVertex(getDefaultParent(), "state" + id, id,
-                    0, 0, VERTEX_DIAMETER_PX, VERTEX_DIAMETER_PX, style);
+                    getOrigin().getX(), getOrigin().getY(), VERTEX_DIAMETER_PX,
+                    VERTEX_DIAMETER_PX, style);
             this.states.put(state, cell);
         } finally {
             this.model.endUpdate();
