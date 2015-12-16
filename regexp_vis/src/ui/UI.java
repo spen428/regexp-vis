@@ -9,6 +9,7 @@ import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
@@ -93,8 +94,7 @@ public class UI extends JFrame implements KeyListener {
                     BasicRegexp.debugPrintBasicRegexp(0, re);
                     this.graphPanel.resetGraph(re);
                 } catch (InvalidRegexpException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "Error: invalid regexp entered. Details:\n\n" + e1.getMessage());
                 }
                 break;
             default:
