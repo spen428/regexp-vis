@@ -26,6 +26,19 @@ import com.mxgraph.view.mxStylesheet;
  */
 public class Graph extends mxGraph {
 
+    private static class TransitionWrapper {
+        public AutomatonTransition transition;
+
+        public TransitionWrapper(AutomatonTransition t) {
+            transition = t;
+        }
+
+        @Override
+        public String toString() {
+            return transition.getData().toString();
+        }
+    }
+
     // FIELDS //
     private static final int VERTEX_DIAMETER_PX = 50;
     /**
@@ -110,7 +123,7 @@ public class Graph extends mxGraph {
         setStartState(this.automaton.getStartState());
 
         /* Disable unwanted user actions */
-        // this.graph.setCellsBendable(false);
+        //setCellsBendable(false);
         setCellsCloneable(false);
         setCellsDeletable(false);
         setCellsDisconnectable(false);
@@ -167,13 +180,8 @@ public class Graph extends mxGraph {
     }
 
     public AutomatonTransition getTransitionFromCell(mxCell cell) {
-        // TODO: Inefficient
-        for (AutomatonTransition t : this.transitions.keySet()) {
-            if (this.transitions.get(t) == cell) {
-                return t;
-            }
-        }
-        return null;
+        TransitionWrapper wrap = (TransitionWrapper)cell.getValue();
+        return wrap.transition;
     }
 
     /**
@@ -207,7 +215,7 @@ public class Graph extends mxGraph {
         edgeStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_CONNECTOR);
         edgeStyle.put(mxConstants.STYLE_STROKECOLOR, "#000000");
         edgeStyle.put(mxConstants.STYLE_FONTSTYLE, mxConstants.FONT_BOLD);
-        edgeStyle.put(mxConstants.STYLE_FONTSIZE, "12");
+        edgeStyle.put(mxConstants.STYLE_FONTSIZE, "16");
         edgeStyle.put(mxConstants.STYLE_ALIGN, mxConstants.ALIGN_CENTER);
         edgeStyle.put(mxConstants.STYLE_VERTICAL_ALIGN,
                 mxConstants.ALIGN_MIDDLE);
@@ -421,7 +429,7 @@ public class Graph extends mxGraph {
         model.beginUpdate();
         try {
             cell = (mxCell) insertEdge(getDefaultParent(), id,
-                    transition.getData(), from, to);
+                    new TransitionWrapper(transition), from, to);
             transitions.put(transition, cell);
         } finally {
             model.endUpdate();
