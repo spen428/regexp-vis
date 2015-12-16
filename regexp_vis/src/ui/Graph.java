@@ -129,6 +129,7 @@ public class Graph extends mxGraph {
         setCellsDisconnectable(false);
         setCellsEditable(false);
         setCellsResizable(false);
+        setSplitEnabled(false);
     }
 
     // OVERRIDES //

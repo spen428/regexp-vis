@@ -90,6 +90,14 @@ public class GraphPanel extends mxGraphComponent {
         this.edgeLabelLayout = new mxEdgeLabelLayout(graph);
         this.layout = GraphLayout.CIRCLE_LAYOUT;
         this.graph.addListener(mxEvent.CELLS_MOVED, translationHandler);
+        this.graph.addListener(mxEvent.SPLIT_EDGE, new mxIEventListener() {
+
+            @Override
+            public void invoke(Object sender, mxEventObject evt) {
+                System.out.println(evt.getName());
+
+            }
+        });
         doGraphLayout();
     }
 
@@ -125,19 +133,19 @@ public class GraphPanel extends mxGraphComponent {
         switch (this.layout) {
         default:
         case CIRCLE_LAYOUT:
-            //this.vertexCircleLayout.execute(parent);
+            // this.vertexCircleLayout.execute(parent);
             break;
         case FAST_ORGANIC_LAYOUT:
-            //this.vertexFastOrganicLayout.execute(parent);
+            // this.vertexFastOrganicLayout.execute(parent);
             break;
         case ORGANIC_LAYOUT:
-            //this.vertexOrganicLayout.execute(parent);
+            // this.vertexOrganicLayout.execute(parent);
             break;
         }
 
         /* Update edges and edge labels now that the vertices have moved. */
         this.edgeLayout.execute(parent);
-        this.edgeLabelLayout.execute(parent);
+        // this.edgeLabelLayout.execute(parent);
     }
 
     // OVERRIDES //
