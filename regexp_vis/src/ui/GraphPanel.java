@@ -22,6 +22,9 @@ import com.mxgraph.layout.mxOrganicLayout;
 import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.handler.mxConnectionHandler;
+import com.mxgraph.util.mxEvent;
+import com.mxgraph.util.mxEventObject;
+import com.mxgraph.util.mxEventSource.mxIEventListener;
 
 /**
  * An extension of {@link mxGraphComponent} that JGraphX draws graphs on to.
@@ -37,6 +40,15 @@ public class GraphPanel extends mxGraphComponent {
     public enum GraphLayout {
         CIRCLE_LAYOUT, ORGANIC_LAYOUT, FAST_ORGANIC_LAYOUT;
     }
+
+    private mxIEventListener translationHandler = new mxIEventListener() {
+
+        @Override
+        public void invoke(Object sender, mxEventObject evt) {
+            doGraphLayout();
+        }
+
+    };
 
     private final Graph graph;
     private CommandHistory history;
@@ -77,6 +89,7 @@ public class GraphPanel extends mxGraphComponent {
         this.edgeLayout = new mxParallelEdgeLayout(graph);
         this.edgeLabelLayout = new mxEdgeLabelLayout(graph);
         this.layout = GraphLayout.CIRCLE_LAYOUT;
+        this.graph.addListener(mxEvent.CELLS_MOVED, translationHandler);
         doGraphLayout();
     }
 
@@ -112,13 +125,13 @@ public class GraphPanel extends mxGraphComponent {
         switch (this.layout) {
         default:
         case CIRCLE_LAYOUT:
-            this.vertexCircleLayout.execute(parent);
+            //this.vertexCircleLayout.execute(parent);
             break;
         case FAST_ORGANIC_LAYOUT:
-            this.vertexFastOrganicLayout.execute(parent);
+            //this.vertexFastOrganicLayout.execute(parent);
             break;
         case ORGANIC_LAYOUT:
-            this.vertexOrganicLayout.execute(parent);
+            //this.vertexOrganicLayout.execute(parent);
             break;
         }
 
