@@ -1,11 +1,22 @@
 package controller;
 
+import java.util.LinkedList;
+
+import javax.swing.JOptionPane;
+
+import model.Automaton;
+import model.AutomatonState;
+import model.AutomatonTransition;
+import model.BasicRegexp;
+import model.InvalidRegexpException;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
@@ -19,7 +30,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
+import view.GraphEdge;
 import view.GraphNode;
 
 public class RegexpVisApp extends Application {
@@ -32,18 +45,10 @@ public class RegexpVisApp extends Application {
     private static final String HISTORY_LIST_HIDE_TEXT = "Hide History List";
     private static final String HISTORY_LIST_SHOW_TEXT = "Show History List";
 
+    private GraphCanvasFX mCanvas;
+
     @Override
     public void start(Stage stage) {
-        Button btn = new Button();
-        btn.setText("Say 'Hello World'");
-        btn.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-                System.out.println("Hello World!");
-            }
-        });
-
         final VBox root = new VBox();
         final HBox canvasContainer = new HBox();
         final ListView<String> historyList = new ListView<>();
@@ -89,17 +94,14 @@ public class RegexpVisApp extends Application {
 
         menuBar.getMenus().addAll(menuFile, menuEdit, menuView, menuHelp);
         root.getChildren().addAll(menuBar);
-        // root.getChildren().add(btn);
-
-        // Group group = new Group();
 
         // Graph canvas
-        GraphCanvasFX c = new GraphCanvasFX();
+        mCanvas = new GraphCanvasFX();
         VBox.setVgrow(canvasContainer, javafx.scene.layout.Priority.ALWAYS);
-        VBox.setVgrow(c, javafx.scene.layout.Priority.ALWAYS);
+        VBox.setVgrow(mCanvas, javafx.scene.layout.Priority.ALWAYS);
         HBox.setHgrow(canvasContainer, javafx.scene.layout.Priority.ALWAYS);
-        HBox.setHgrow(c, javafx.scene.layout.Priority.ALWAYS);
-        canvasContainer.getChildren().add(c);
+        HBox.setHgrow(mCanvas, javafx.scene.layout.Priority.ALWAYS);
+        canvasContainer.getChildren().add(mCanvas);
 
         // History list also part of the canvas container
         for (int i = 0; i < 33; i++) {
@@ -110,7 +112,7 @@ public class RegexpVisApp extends Application {
         canvasContainer.getChildren().add(historyList);
 
         root.getChildren().add(canvasContainer);
-        c.requestFocus(); // Pulls focus away from the text field
+        mCanvas.requestFocus(); // Pulls focus away from the text field
 
         // Control panel containing buttons and text input box
         VBox controlPanel = new VBox();
@@ -155,6 +157,7 @@ public class RegexpVisApp extends Application {
             @Override
             public void handle(KeyEvent event) {
                 if (event.getCode() == KeyCode.ENTER) {
+                    onEnteredRegexp(textField.getText());
                     String input = textField.getText().trim();
                     if (!input.isEmpty()) {
                         System.out.printf("Entered regexp: %s%n", input);
@@ -163,27 +166,60 @@ public class RegexpVisApp extends Application {
             }
         });
 
-        GraphNode n1 = c.addNode(0, 10.0, 10.0);
-        GraphNode n2 = c.addNode(1, 30.0, 10.0);
-        c.setNodeUseStartStyle(n1, true);
-        c.setNodeUseFinalStyle(n2, true);
-        c.addEdge(0, n1, n2, "sometext1");
-        //c.addEdge(1, n1, n2, "sometext2");
-        c.addEdge(2, n2, n1, "sometext3");
-        c.addEdge(3, n2, n1, "sometext4");
-        c.addEdge(4, n1, n1, "loop1");
-        c.addEdge(5, n1, n1, "loop2");
-        c.addEdge(6, n1, n1, "loop3");
-        c.setWidth(100);
-        c.setHeight(100);
-        // c.widthProperty().bind(canvasContainer.widthProperty());
-        // c.heightProperty().bind(canvasContainer.heightProperty());
-        // c.widthProperty().addListener(o -> c.doRepaint());
-        c.doRedraw();
+        mCanvas.setOnEdgeClicked(new EventHandler<GraphCanvasEvent>() {
+            @Override
+            public void handle(GraphCanvasEvent event) {
+                MouseEvent mouseEvent = event.getMouseEvent();
+                if (mouseEvent.getClickCount() == 2) {
+                    onEdgeDoubleClicked(event);
+                }
+            }
+        });
 
         stage.setTitle("Hello World!");
         stage.setScene(scene);
         stage.show();
+    }
+
+    private void onEnteredRegexp(String text)
+    {
+        text = text.trim();
+        System.out.printf("Entered: %s%n", text);
+        if (text.isEmpty()) {
+            // TODO: message user about empty text field
+            System.out.printf("Entered regexp: %s%n", text);
+            return;
+        }
+
+        BasicRegexp re = null;
+        try {
+            re = BasicRegexp.parseRegexp(text);
+            //BasicRegexp.debugPrintBasicRegexp(0, re);
+        } catch (InvalidRegexpException e1) {
+            Alert alert = new Alert(AlertType.ERROR,
+                    "Error: invalid regexp entered. Details: \n\n"
+                            + e1.getMessage());
+            alert.showAndWait();
+            return;
+        }
+
+        mCanvas.removeAllNodes();
+        Automaton automaton = new Automaton();
+        AutomatonState startState = automaton.getStartState();
+        AutomatonState finalState = automaton.createNewState();
+        AutomatonTransition trans = automaton.createNewTransition(startState, finalState, re);
+        finalState.setFinal(true);
+        automaton.addStateWithTransitions(finalState, new LinkedList<>());
+        automaton.addTransition(trans);
+
+        GraphNode startNode = mCanvas.addNode(startState.getId(), 50.0, 50.0);
+        GraphNode endNode = mCanvas.addNode(finalState.getId(), mCanvas.getWidth() - 50.0, mCanvas.getHeight() - 50.0);
+        GraphEdge edge = mCanvas.addEdge(trans.getId(), startNode, endNode, re.toString());
+    }
+
+    private void onEdgeDoubleClicked(GraphCanvasEvent event)
+    {
+
     }
 
     public static void main(String[] args) {

@@ -1,7 +1,9 @@
 package controller;
 
 import model.AddStateCommand;
+import model.AutomatonState;
 import view.GraphCanvasFX;
+import view.GraphNode;
 
 /**
  * Command to add a state to an automaton
@@ -10,21 +12,33 @@ import view.GraphCanvasFX;
  */
 public class AddStateUICommand extends UICommand {
     private final AddStateCommand ccmd;
+    private double x;
+    private double y;
 
-    public AddStateUICommand(GraphCanvasFX graph, AddStateCommand cmd) {
+    public AddStateUICommand(GraphCanvasFX graph, AddStateCommand cmd,
+            double x, double y)
+    {
         super(graph, cmd);
         this.ccmd = cmd;
+        this.x = x;
+        this.y = y;
     }
 
     @Override
     public void redo() {
-        graph.addState(ccmd.getState());
+        graph.addNode(ccmd.getState().getId(), x, y);
         ccmd.redo();
     }
 
     @Override
     public void undo() {
-        graph.removeState(ccmd.getState(), false);
+        AutomatonState state = ccmd.getState();
+        GraphNode node = graph.lookupNode(state.getId());
+        // Update coordinates so we restore the node to the position it was 
+        // before in redo()
+        x = node.getX();
+        y = node.getY();
+        graph.removeNode(state.getId());
         ccmd.undo();
     }
 

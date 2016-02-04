@@ -254,6 +254,11 @@ public final class GraphCanvasFX extends Canvas {
         edge.mTextHeight = -1.0;
     }
 
+    public void removeAllNodes()
+    {
+        mGraph.clear();
+    }
+
     public void removeNode(int id)
     {
         NodeEdgePair pair = mGraph.get(id);

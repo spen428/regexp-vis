@@ -25,4 +25,18 @@ public class GraphCanvasEvent extends Event {
         mTargetEdge = targetEdge;
     }
 
+    public MouseEvent getMouseEvent()
+    {
+        return mMouseEvent;
+    }
+
+    public GraphNode getTargetNode()
+    {
+        return mTargetNode;
+    }
+
+    public GraphEdge getTargetEdge()
+    {
+        return mTargetEdge;
+    }
 }
