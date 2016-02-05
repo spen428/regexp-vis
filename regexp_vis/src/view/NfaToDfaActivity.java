@@ -1,29 +1,49 @@
 package view;
 
-import javafx.event.Event;
+/**
+ * 
+ * @author sp611
+ * 
+ */
+public class NfaToDfaActivity extends Activity<GraphCanvasEvent> {
 
-public class NfaToDfaActivity implements Activity {
+    public NfaToDfaActivity(GraphCanvasFX canvas) {
+        super(canvas);
+        // TODO Auto-generated constructor stub
+    }
 
     @Override
-    public void processEvent(Event event) {
+    public void processEvent(GraphCanvasEvent event) {
         // TODO Auto-generated method stub
 
     }
 
-    public class RemoveNonDeterminismActivity implements Activity {
+    public class RemoveEpsilonTransitionsActivity
+            extends Activity<GraphCanvasEvent> {
+
+        public RemoveEpsilonTransitionsActivity(GraphCanvasFX canvas) {
+            super(canvas);
+            // TODO Auto-generated constructor stub
+        }
 
         @Override
-        public void processEvent(Event event) {
+        public void processEvent(GraphCanvasEvent event) {
             // TODO Auto-generated method stub
 
         }
 
     }
 
-    public class RemoveEpsilonTransitionsActivity implements Activity {
+    public class RemoveNonDeterminismActivity
+            extends Activity<GraphCanvasEvent> {
+
+        public RemoveNonDeterminismActivity(GraphCanvasFX canvas) {
+            super(canvas);
+            // TODO Auto-generated constructor stub
+        }
 
         @Override
-        public void processEvent(Event event) {
+        public void processEvent(GraphCanvasEvent event) {
             // TODO Auto-generated method stub
 
         }

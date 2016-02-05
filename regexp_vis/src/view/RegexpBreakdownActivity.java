@@ -1,16 +1,19 @@
 package view;
 
-import javafx.event.Event;
-
 /**
  * 
  * @author sp611
  *
  */
-public class RegexpBreakdownActivity implements Activity {
+public class RegexpBreakdownActivity extends Activity<GraphCanvasEvent> {
+
+    public RegexpBreakdownActivity(GraphCanvasFX canvas) {
+        super(canvas);
+        // TODO Auto-generated constructor stub
+    }
 
     @Override
-    public void processEvent(Event event) {
+    public void processEvent(GraphCanvasEvent event) {
         // TODO Auto-generated method stub
 
     }

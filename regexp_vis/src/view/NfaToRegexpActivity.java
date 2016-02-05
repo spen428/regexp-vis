@@ -1,11 +1,14 @@
 package view;
 
-import javafx.event.Event;
+public class NfaToRegexpActivity extends Activity<GraphCanvasEvent> {
 
-public class NfaToRegexpActivity implements Activity {
+    public NfaToRegexpActivity(GraphCanvasFX canvas) {
+        super(canvas);
+        // TODO Auto-generated constructor stub
+    }
 
     @Override
-    public void processEvent(Event event) {
+    public void processEvent(GraphCanvasEvent event) {
         // TODO Auto-generated method stub
 
     }

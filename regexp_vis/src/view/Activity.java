@@ -7,8 +7,15 @@ import javafx.event.Event;
  * @author sp611
  *
  */
-public interface Activity<T extends Event> {
+public abstract class Activity<T extends Event> {
 
-    public void processEvent(T event);
+    protected final GraphCanvasFX canvas;
+
+    public Activity(GraphCanvasFX canvas) {
+        super();
+        this.canvas = canvas;
+    }
+
+    public abstract void processEvent(T event);
 
 }
