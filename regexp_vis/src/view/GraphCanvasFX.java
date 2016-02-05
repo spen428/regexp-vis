@@ -34,9 +34,9 @@ public final class GraphCanvasFX extends Canvas {
         final ArrayList<GraphEdge> mLoopedEdges;
 
         NodeEdgePair(GraphNode node) {
-            mNode = node;
-            mEdges = new ArrayList<GraphEdge>();
-            mLoopedEdges = new ArrayList<GraphEdge>();
+            this.mNode = node;
+            this.mEdges = new ArrayList<>();
+            this.mLoopedEdges = new ArrayList<>();
         }
     }
 
@@ -117,15 +117,15 @@ public final class GraphCanvasFX extends Canvas {
         super();
         // /mNodes = new ArrayList<>();
         // mEdges = new ArrayList<>();
-        mGraph = new HashMap<Integer, NodeEdgePair>();
-        mGC = getGraphicsContext2D();
-        mLabelFont = Font.font("Consolas", 16.0);
-        mNodeFont = Font.font("Consolas", 16.0);
-        mEdgeLabelColour = Color.BLACK;
-        mEdgeLineColour = Color.BLACK;
-        mNodeBackgroundColour = Color.WHITE;
-        mNodeBorderColour = Color.BLACK;
-        mNodeTextColour = Color.BLACK;
+        this.mGraph = new HashMap<>();
+        this.mGC = getGraphicsContext2D();
+        this.mLabelFont = Font.font("Consolas", 16.0);
+        this.mNodeFont = Font.font("Consolas", 16.0);
+        this.mEdgeLabelColour = Color.BLACK;
+        this.mEdgeLineColour = Color.BLACK;
+        this.mNodeBackgroundColour = Color.WHITE;
+        this.mNodeBorderColour = Color.BLACK;
+        this.mNodeTextColour = Color.BLACK;
 
         // Delegate event handling to class methods
         setOnMouseDragged(new EventHandler<MouseEvent>() {
@@ -161,20 +161,20 @@ public final class GraphCanvasFX extends Canvas {
     // convention as JavaFX's Node class
 
     public final void setOnNodeClicked(EventHandler<GraphCanvasEvent> handler) {
-        mNodeClickedHandler = handler;
+        this.mNodeClickedHandler = handler;
     }
 
     public final void setOnEdgeClicked(EventHandler<GraphCanvasEvent> handler) {
-        mEdgeClickedHandler = handler;
+        this.mEdgeClickedHandler = handler;
     }
 
     public final void setOnBackgroundClicked(
             EventHandler<GraphCanvasEvent> handler) {
-        mBackgroundClickedHandler = handler;
+        this.mBackgroundClickedHandler = handler;
     }
 
     public GraphNode lookupNode(int id) {
-        NodeEdgePair pair = mGraph.get(id);
+        NodeEdgePair pair = this.mGraph.get(id);
         if (pair == null) {
             return null;
         } else {
@@ -185,7 +185,7 @@ public final class GraphCanvasFX extends Canvas {
     public GraphEdge lookupEdge(int id) {
         // TODO: Not too efficient, my be a good idea to store the edges in a
         // map as well
-        for (NodeEdgePair pair : mGraph.values()) {
+        for (NodeEdgePair pair : this.mGraph.values()) {
             for (GraphEdge e : pair.mEdges) {
                 if (e.mId == id) {
                     return e;
@@ -202,7 +202,7 @@ public final class GraphCanvasFX extends Canvas {
 
     public GraphNode addNode(int id, double x, double y) {
         // Need to check the ID, otherwise we would overwrite the previous value
-        if (mGraph.containsKey(id)) {
+        if (this.mGraph.containsKey(id)) {
             throw new RuntimeException("Node ID already exists");
         }
 
@@ -217,7 +217,7 @@ public final class GraphCanvasFX extends Canvas {
 
         GraphNode n = new GraphNode(id, x, y, radius, false, false);
         NodeEdgePair pair = new NodeEdgePair(n);
-        mGraph.put(id, pair);
+        this.mGraph.put(id, pair);
 
         // TODO: be smarter about this (do minimum amount of layout
         // recalculation necessary)
@@ -244,20 +244,21 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     public void removeAllNodes() {
-        mGraph.clear();
+        this.mGraph.clear();
     }
 
     public void removeNode(int id) {
-        NodeEdgePair pair = mGraph.get(id);
+        NodeEdgePair pair = this.mGraph.get(id);
         if (pair == null) {
             throw new RuntimeException("Node ID doesn't exist");
         }
 
-        mGraph.remove(id);
+        this.mGraph.remove(id);
     }
 
-    public GraphEdge addEdge(int id, GraphNode from, GraphNode to, String text) {
-        NodeEdgePair pair = mGraph.get(from.mId);
+    public GraphEdge addEdge(int id, GraphNode from, GraphNode to,
+            String text) {
+        NodeEdgePair pair = this.mGraph.get(from.mId);
         if (pair == null) {
             throw new RuntimeException("Node ID doesn't exist");
         }
@@ -289,7 +290,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     public void removeEdge(int id) {
-        NodeEdgePair pair = mGraph.get(id);
+        NodeEdgePair pair = this.mGraph.get(id);
         if (pair == null) {
             throw new RuntimeException("Node ID doesn't exist");
         }
@@ -375,8 +376,8 @@ public final class GraphCanvasFX extends Canvas {
             return;
         }
 
-        double invVecLength = 1 / GraphUtils.vecLength(S_E_gradientVecX,
-                S_E_gradientVecY);
+        double invVecLength = 1
+                / GraphUtils.vecLength(S_E_gradientVecX, S_E_gradientVecY);
         S_E_gradientVecX *= invVecLength;
         S_E_gradientVecY *= invVecLength;
 
@@ -434,8 +435,8 @@ public final class GraphCanvasFX extends Canvas {
         double S_E_gradientVecY = y2 - y1;
         // Normalise to get a unit vector (so it is easy to move a given
         // distance along the line)
-        double invVecLength = 1 / GraphUtils.vecLength(S_E_gradientVecX,
-                S_E_gradientVecY);
+        double invVecLength = 1
+                / GraphUtils.vecLength(S_E_gradientVecX, S_E_gradientVecY);
         S_E_gradientVecX *= invVecLength;
         S_E_gradientVecY *= invVecLength;
         double G_C_gradientVecX = -S_E_gradientVecY;
@@ -457,15 +458,15 @@ public final class GraphCanvasFX extends Canvas {
             tmpGradientX = y1 - y2;
             tmpGradientY = x2 - x1;
         }
-        double[] results = GraphUtils.calcCircleIntersectionPoints(radius, x1
-                - circleX, y1 - circleY, from.mRadius);
+        double[] results = GraphUtils.calcCircleIntersectionPoints(radius,
+                x1 - circleX, y1 - circleY, from.mRadius);
         results = GraphUtils.filterArcIntersectionPoint(results, x1 - circleX,
                 y1 - circleY, x2 - circleX, y2 - circleY, tmpGradientX,
                 tmpGradientY);
         double newX1, newY1;
         if (results == null) {
-            System.out
-                    .println("DEBUG: couldn't draw arc, probably too little distance (1)");
+            System.out.println(
+                    "DEBUG: couldn't draw arc, probably too little distance (1)");
             return;
         } else {
             newX1 = results[0] + circleX;
@@ -481,13 +482,13 @@ public final class GraphCanvasFX extends Canvas {
         }
         results = GraphUtils.calcCircleIntersectionPoints(radius, x2 - circleX,
                 y2 - circleY, to.mRadius);
-        results = GraphUtils.filterArcIntersectionPoint(results, newX1
-                - circleX, newY1 - circleY, x2 - circleX, y2 - circleY,
+        results = GraphUtils.filterArcIntersectionPoint(results,
+                newX1 - circleX, newY1 - circleY, x2 - circleX, y2 - circleY,
                 tmpGradientX, tmpGradientY);
         double newX2, newY2;
         if (results == null) {
-            System.out
-                    .println("DEBUG: couldn't draw arc, probably too little distance (2)");
+            System.out.println(
+                    "DEBUG: couldn't draw arc, probably too little distance (2)");
             return;
         } else {
             newX2 = results[0] + circleX;
@@ -501,15 +502,15 @@ public final class GraphCanvasFX extends Canvas {
             tmpGradientX = newY1 - newY2;
             tmpGradientY = newX2 - newX1;
         }
-        results = GraphUtils.calcCircleIntersectionPoints(radius, newX2
-                - circleX, newY2 - circleY, ARROW_LENGTH);
-        results = GraphUtils.filterArcIntersectionPoint(results, newX1
-                - circleX, newY1 - circleY, newX2 - circleX, newY2 - circleY,
-                tmpGradientX, tmpGradientY);
+        results = GraphUtils.calcCircleIntersectionPoints(radius,
+                newX2 - circleX, newY2 - circleY, ARROW_LENGTH);
+        results = GraphUtils.filterArcIntersectionPoint(results,
+                newX1 - circleX, newY1 - circleY, newX2 - circleX,
+                newY2 - circleY, tmpGradientX, tmpGradientY);
         double arrowX, arrowY;
         if (results == null) {
-            System.out
-                    .println("DEBUG: couldn't draw arc, probably too little distance (3)");
+            System.out.println(
+                    "DEBUG: couldn't draw arc, probably too little distance (3)");
             return;
         } else {
             arrowX = results[0] + circleX;
@@ -517,17 +518,17 @@ public final class GraphCanvasFX extends Canvas {
         }
 
         // Draw label
-        double textX = midPointX - (absHeight + TEXT_POS_HEIGHT)
-                * G_C_gradientVecX;
-        double textY = midPointY - (absHeight + TEXT_POS_HEIGHT)
-                * G_C_gradientVecY;
+        double textX = midPointX
+                - (absHeight + TEXT_POS_HEIGHT) * G_C_gradientVecX;
+        double textY = midPointY
+                - (absHeight + TEXT_POS_HEIGHT) * G_C_gradientVecY;
         updateEdgeLabelHitTestData(edge, textX, textY, S_E_gradientVecX,
                 S_E_gradientVecY, G_C_gradientVecX, G_C_gradientVecY);
 
-        double startAngle = GraphUtils.calcAngleOnCircle(newX1 - circleX, newY1
-                - circleY, radius);
-        double endAngle = GraphUtils.calcAngleOnCircle(arrowX - circleX, arrowY
-                - circleY, radius);
+        double startAngle = GraphUtils.calcAngleOnCircle(newX1 - circleX,
+                newY1 - circleY, radius);
+        double endAngle = GraphUtils.calcAngleOnCircle(arrowX - circleX,
+                arrowY - circleY, radius);
         double arcExtent = GraphUtils.arcCalcArcExtent(startAngle, endAngle);
 
         edge.mArrowBaseX = arrowX;
@@ -553,8 +554,8 @@ public final class GraphCanvasFX extends Canvas {
 
     private void updateEdgesLoopedLayoutData(GraphNode n,
             ArrayList<GraphEdge> edges) {
-        double maxRadius = n.mRadius + ARC_LOOP_BASE_DISTANCE + ARC_GAP_SIZE
-                * (edges.size() - 1);
+        double maxRadius = n.mRadius + ARC_LOOP_BASE_DISTANCE
+                + ARC_GAP_SIZE * (edges.size() - 1);
 
         double[] results = GraphUtils.vectorsAround(n.mLoopDirVecX,
                 n.mLoopDirVecY, ARC_LOOP_COS_HALF_ANGLE);
@@ -587,10 +588,10 @@ public final class GraphCanvasFX extends Canvas {
                                       // n.mLoopDirNormalVecY, 1);
         double tmpRadius = n.mRadius + ARC_LOOP_BASE_DISTANCE;
         for (GraphEdge edge : edges) {
-            double textX = n.mX + (tmpRadius + TEXT_POS_HEIGHT)
-                    * n.mLoopDirVecX;
-            double textY = n.mY + (tmpRadius + TEXT_POS_HEIGHT)
-                    * n.mLoopDirVecY;
+            double textX = n.mX
+                    + (tmpRadius + TEXT_POS_HEIGHT) * n.mLoopDirVecX;
+            double textY = n.mY
+                    + (tmpRadius + TEXT_POS_HEIGHT) * n.mLoopDirVecY;
 
             edge.mIsLine = false;
             edge.mIsRendered = true;
@@ -637,8 +638,8 @@ public final class GraphCanvasFX extends Canvas {
 
         double height = (count - 1) * ARC_GAP_SIZE * 0.5;
         double length = GraphUtils.vecLength(n2.mX - n1.mX, n2.mY - n1.mY);
-        double textAngle = GraphUtils.calcTextAngle(n2.mX - n1.mX, n2.mY
-                - n1.mY, length);
+        double textAngle = GraphUtils.calcTextAngle(n2.mX - n1.mX,
+                n2.mY - n1.mY, length);
         int i = 0;
 
         for (GraphEdge e : pair1.mEdges) {
@@ -646,7 +647,8 @@ public final class GraphCanvasFX extends Canvas {
                 continue;
             }
             if (i != midEdgeIdx) {
-                updateEdgeArcLayoutData(e, height - i * ARC_GAP_SIZE, textAngle);
+                updateEdgeArcLayoutData(e, height - i * ARC_GAP_SIZE,
+                        textAngle);
                 // /drawArcEdge(e, height - k * ARC_GAP_SIZE);
             } else {
                 updateEdgeLineLayoutData(e, textAngle);
@@ -673,14 +675,14 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     private void updateAllLayoutData() {
-        for (NodeEdgePair pair : mGraph.values()) {
+        for (NodeEdgePair pair : this.mGraph.values()) {
             GraphNode n = pair.mNode;
             // drawNode(n);
 
             updateEdgesLoopedLayoutData(n, pair.mLoopedEdges);
         }
 
-        Object[] tmpPairs = mGraph.values().toArray();
+        Object[] tmpPairs = this.mGraph.values().toArray();
 
         for (int i = 0; i < tmpPairs.length; i++) {
             for (int j = i + 1; j < tmpPairs.length; j++) {
@@ -691,47 +693,48 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     private void drawEdgeLine(GraphEdge edge) {
-        mGC.setFill(mEdgeLabelColour);
-        mGC.setFontSmoothingType(FontSmoothingType.LCD);
-        mGC.setFont(mLabelFont);
-        mGC.setTextAlign(TextAlignment.CENTER);
-        mGC.setTextBaseline(VPos.CENTER);
+        this.mGC.setFill(this.mEdgeLabelColour);
+        this.mGC.setFontSmoothingType(FontSmoothingType.LCD);
+        this.mGC.setFont(this.mLabelFont);
+        this.mGC.setTextAlign(TextAlignment.CENTER);
+        this.mGC.setTextBaseline(VPos.CENTER);
 
-        GraphUtils.setGcRotation(mGC, -edge.mTextAngle, edge.mTextX,
+        GraphUtils.setGcRotation(this.mGC, -edge.mTextAngle, edge.mTextX,
                 edge.mTextY);
-        mGC.fillText(edge.mText, edge.mTextX, edge.mTextY);
+        this.mGC.fillText(edge.mText, edge.mTextX, edge.mTextY);
         // Turn off rotation, identity transformation
-        mGC.setTransform(new Affine());
+        this.mGC.setTransform(new Affine());
 
-        mGC.setStroke(mEdgeLineColour);
-        mGC.setFill(mEdgeLineColour);
-        mGC.strokeLine(edge.mStartPointX, edge.mStartPointY, edge.mArrowBaseX,
-                edge.mArrowBaseY);
+        this.mGC.setStroke(this.mEdgeLineColour);
+        this.mGC.setFill(this.mEdgeLineColour);
+        this.mGC.strokeLine(edge.mStartPointX, edge.mStartPointY,
+                edge.mArrowBaseX, edge.mArrowBaseY);
 
-        GraphUtils.fillArrowHead(mGC, edge.mArrowBaseX, edge.mArrowBaseY,
+        GraphUtils.fillArrowHead(this.mGC, edge.mArrowBaseX, edge.mArrowBaseY,
                 edge.mArrowTipX, edge.mArrowTipY, ARROW_WIDTH);
     }
 
     private void drawEdgeArc(GraphEdge edge) {
-        mGC.setFill(mEdgeLabelColour);
-        mGC.setFontSmoothingType(FontSmoothingType.LCD);
-        mGC.setFont(mLabelFont);
-        mGC.setTextAlign(TextAlignment.CENTER);
-        mGC.setTextBaseline(VPos.CENTER);
+        this.mGC.setFill(this.mEdgeLabelColour);
+        this.mGC.setFontSmoothingType(FontSmoothingType.LCD);
+        this.mGC.setFont(this.mLabelFont);
+        this.mGC.setTextAlign(TextAlignment.CENTER);
+        this.mGC.setTextBaseline(VPos.CENTER);
 
-        GraphUtils.setGcRotation(mGC, -edge.mTextAngle, edge.mTextX,
+        GraphUtils.setGcRotation(this.mGC, -edge.mTextAngle, edge.mTextX,
                 edge.mTextY);
-        mGC.fillText(edge.mText, edge.mTextX, edge.mTextY);
+        this.mGC.fillText(edge.mText, edge.mTextX, edge.mTextY);
         // Turn off rotation, identity transformation
-        mGC.setTransform(new Affine());
+        this.mGC.setTransform(new Affine());
 
-        mGC.setStroke(mEdgeLineColour);
-        mGC.setFill(mEdgeLineColour);
-        mGC.strokeArc(edge.mArcCenterX - edge.mArcRadius, edge.mArcCenterY
-                - edge.mArcRadius, edge.mArcRadius * 2, edge.mArcRadius * 2,
-                edge.mArcStartAngle, edge.mArcExtent, ArcType.OPEN);
+        this.mGC.setStroke(this.mEdgeLineColour);
+        this.mGC.setFill(this.mEdgeLineColour);
+        this.mGC.strokeArc(edge.mArcCenterX - edge.mArcRadius,
+                edge.mArcCenterY - edge.mArcRadius, edge.mArcRadius * 2,
+                edge.mArcRadius * 2, edge.mArcStartAngle, edge.mArcExtent,
+                ArcType.OPEN);
 
-        GraphUtils.fillArrowHead(mGC, edge.mArrowBaseX, edge.mArrowBaseY,
+        GraphUtils.fillArrowHead(this.mGC, edge.mArrowBaseX, edge.mArrowBaseY,
                 edge.mArrowTipX, edge.mArrowTipY, ARROW_WIDTH);
     }
 
@@ -752,48 +755,49 @@ public final class GraphCanvasFX extends Canvas {
             return;
         }
 
-        mGC.setStroke(mEdgeLineColour);
-        mGC.strokeLine(n.mStartLineX1, n.mStartLineY1, n.mStartLineX2,
+        this.mGC.setStroke(this.mEdgeLineColour);
+        this.mGC.strokeLine(n.mStartLineX1, n.mStartLineY1, n.mStartLineX2,
                 n.mStartLineY2);
-        mGC.strokeLine(n.mEndLineX1, n.mEndLineY1, n.mEndLineX2, n.mEndLineY2);
+        this.mGC.strokeLine(n.mEndLineX1, n.mEndLineY1, n.mEndLineX2,
+                n.mEndLineY2);
 
         for (GraphEdge edge : edges) {
-            mGC.strokeArc(n.mX - edge.mArcRadius, n.mY - edge.mArcRadius,
+            this.mGC.strokeArc(n.mX - edge.mArcRadius, n.mY - edge.mArcRadius,
                     edge.mArcRadius * 2, edge.mArcRadius * 2, n.mStartAngle,
                     n.mArcExtent, ArcType.OPEN);
         }
 
-        mGC.setFill(mEdgeLabelColour);
-        mGC.setFontSmoothingType(FontSmoothingType.LCD);
-        mGC.setFont(mLabelFont);
-        mGC.setTextAlign(TextAlignment.CENTER);
-        mGC.setTextBaseline(VPos.CENTER);
+        this.mGC.setFill(this.mEdgeLabelColour);
+        this.mGC.setFontSmoothingType(FontSmoothingType.LCD);
+        this.mGC.setFont(this.mLabelFont);
+        this.mGC.setTextAlign(TextAlignment.CENTER);
+        this.mGC.setTextBaseline(VPos.CENTER);
 
         double loopDirNormalVecX = -n.mLoopDirVecY;
         double loopDirNormalVecY = n.mLoopDirVecX;
 
         for (GraphEdge edge : edges) {
-            GraphUtils.setGcRotation(mGC, -edge.mTextAngle, edge.mTextX,
+            GraphUtils.setGcRotation(this.mGC, -edge.mTextAngle, edge.mTextX,
                     edge.mTextY);
-            mGC.fillText(edge.mText, edge.mTextX, edge.mTextY);
+            this.mGC.fillText(edge.mText, edge.mTextX, edge.mTextY);
             updateEdgeLabelHitTestData(edge, edge.mTextX, edge.mTextY,
                     loopDirNormalVecX, loopDirNormalVecY, n.mLoopDirVecX,
                     n.mLoopDirVecY);
         }
 
-        mGC.setTransform(new Affine());
+        this.mGC.setTransform(new Affine());
     }
 
     void drawNode(GraphNode n) {
-        mGC.setFill(mNodeBackgroundColour);
-        mGC.setStroke(mNodeBorderColour);
+        this.mGC.setFill(this.mNodeBackgroundColour);
+        this.mGC.setStroke(this.mNodeBorderColour);
 
-        GraphUtils.fillCircleCentred(mGC, n.mX, n.mY, n.mRadius);
-        GraphUtils.strokeCircleCentred(mGC, n.mX, n.mY, n.mRadius);
+        GraphUtils.fillCircleCentred(this.mGC, n.mX, n.mY, n.mRadius);
+        GraphUtils.strokeCircleCentred(this.mGC, n.mX, n.mY, n.mRadius);
 
         if (n.mUseFinalStateStyle) {
-            GraphUtils.strokeCircleCentred(mGC, n.mX, n.mY, n.mRadius
-                    - FINAL_STATE_BORDER_GAP);
+            GraphUtils.strokeCircleCentred(this.mGC, n.mX, n.mY,
+                    n.mRadius - FINAL_STATE_BORDER_GAP);
         }
 
         if (n.mUseStartStateStyle) {
@@ -802,19 +806,19 @@ public final class GraphCanvasFX extends Canvas {
             double arrowBaseX = n.mX - n.mRadius - ARROW_LENGTH;
             double arrowTipX = n.mX - n.mRadius;
 
-            mGC.setFill(mEdgeLabelColour);
-            mGC.setStroke(mEdgeLabelColour);
-            mGC.strokeLine(startX, n.mY, arrowBaseX, n.mY);
-            GraphUtils.fillArrowHead(mGC, arrowBaseX, n.mY, arrowTipX, n.mY,
-                    ARROW_WIDTH);
+            this.mGC.setFill(this.mEdgeLabelColour);
+            this.mGC.setStroke(this.mEdgeLabelColour);
+            this.mGC.strokeLine(startX, n.mY, arrowBaseX, n.mY);
+            GraphUtils.fillArrowHead(this.mGC, arrowBaseX, n.mY, arrowTipX,
+                    n.mY, ARROW_WIDTH);
         }
 
-        mGC.setFill(mNodeTextColour);
-        mGC.setFontSmoothingType(FontSmoothingType.LCD);
-        mGC.setFont(mNodeFont);
-        mGC.setTextAlign(TextAlignment.CENTER);
-        mGC.setTextBaseline(VPos.CENTER);
-        mGC.fillText(Integer.toString(n.mId), n.mX, n.mY);
+        this.mGC.setFill(this.mNodeTextColour);
+        this.mGC.setFontSmoothingType(FontSmoothingType.LCD);
+        this.mGC.setFont(this.mNodeFont);
+        this.mGC.setTextAlign(TextAlignment.CENTER);
+        this.mGC.setTextBaseline(VPos.CENTER);
+        this.mGC.fillText(Integer.toString(n.mId), n.mX, n.mY);
     }
 
     private void updateEdgeLabelHitTestData(GraphEdge edge, double textX,
@@ -823,7 +827,7 @@ public final class GraphCanvasFX extends Canvas {
         if (edge.mTextWidth < 0.0) {
             // http://stackoverflow.com/a/13020490
             Text text = new Text(edge.mText);
-            text.setFont(mLabelFont);
+            text.setFont(this.mLabelFont);
             new Scene(new Group(text));
 
             text.applyCss();
@@ -865,27 +869,28 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     private void onMouseDragged(MouseEvent event) {
-        if (mDragNode != null) {
-            double newX = (event.getX() - mDownX) + mDragOrigX;
-            double newY = (event.getY() - mDownY) + mDragOrigY;
+        if (this.mDragNode != null) {
+            double newX = (event.getX() - this.mDownX) + this.mDragOrigX;
+            double newY = (event.getY() - this.mDownY) + this.mDragOrigY;
 
             // Prevent user dragging the node outside the canvas, preventing
             // them from ever dragging it again
-            newX = Math.min(getWidth() - mDragNode.mRadius, newX);
-            newX = Math.max(mDragNode.mRadius, newX);
-            newY = Math.min(getHeight() - mDragNode.mRadius, newY);
-            newY = Math.max(mDragNode.mRadius, newY);
+            newX = Math.min(getWidth() - this.mDragNode.mRadius, newX);
+            newX = Math.max(this.mDragNode.mRadius, newX);
+            newY = Math.min(getHeight() - this.mDragNode.mRadius, newY);
+            newY = Math.max(this.mDragNode.mRadius, newY);
 
-            mDragNode.mX = newX;
-            mDragNode.mY = newY;
-        } else if (mDragEdge != null && mDragEdge.mFrom == mDragEdge.mTo) {
+            this.mDragNode.mX = newX;
+            this.mDragNode.mY = newY;
+        } else if (this.mDragEdge != null
+                && this.mDragEdge.mFrom == this.mDragEdge.mTo) {
             // Trying to drag a looped edge, update loop direction vector
             System.out.println("Dragging edge");
-            GraphNode n = mDragEdge.mFrom;
+            GraphNode n = this.mDragEdge.mFrom;
             n.mLoopDirVecX = event.getX() - n.mX;
             n.mLoopDirVecY = event.getY() - n.mY;
-            double invVecLength = 1 / GraphUtils.vecLength(n.mLoopDirVecX,
-                    n.mLoopDirVecY);
+            double invVecLength = 1
+                    / GraphUtils.vecLength(n.mLoopDirVecX, n.mLoopDirVecY);
             n.mLoopDirVecX *= invVecLength;
             n.mLoopDirVecY *= invVecLength;
         }
@@ -901,38 +906,38 @@ public final class GraphCanvasFX extends Canvas {
             // Left-click to drag
             return;
         }
-        
+
         this.requestFocus();
 
-        mDownX = event.getX();
-        mDownY = event.getY();
+        this.mDownX = event.getX();
+        this.mDownY = event.getY();
 
         // Check for a hit on a node first, they take preference
-        GraphNode n = findNodeHit(mDownX, mDownY);
-        GraphEdge e = findEdgeLabelHit(mDownX, mDownY);
+        GraphNode n = findNodeHit(this.mDownX, this.mDownY);
+        GraphEdge e = findEdgeLabelHit(this.mDownX, this.mDownY);
         if (n != null) {
-            mDragNode = n;
-            mDragOrigX = n.mX;
-            mDragOrigY = n.mY;
-            if (mNodeClickedHandler != null) {
-                mNodeClickedHandler
+            this.mDragNode = n;
+            this.mDragOrigX = n.mX;
+            this.mDragOrigY = n.mY;
+            if (this.mNodeClickedHandler != null) {
+                this.mNodeClickedHandler
                         .handle(new GraphCanvasEvent(event, n, null));
             }
             // System.out.println("onMousePressed, hit NODE " + n);
         } else if (e != null) {
-            mDragEdge = e;
+            this.mDragEdge = e;
             System.out.println("onMousePressed, hit EDGE " + e
                     + " label text = \"" + e.mText + "\"");
-            if (mEdgeClickedHandler != null) {
-                mEdgeClickedHandler
+            if (this.mEdgeClickedHandler != null) {
+                this.mEdgeClickedHandler
                         .handle(new GraphCanvasEvent(event, null, e));
             }
         } else {
             // System.out.println("onMousePressed, X = " + event.getX() +
             // ", Y = " + event.getY());
-            if (mBackgroundClickedHandler != null) {
-                mNodeClickedHandler.handle(new GraphCanvasEvent(event, null,
-                        null));
+            if (this.mBackgroundClickedHandler != null) {
+                this.mNodeClickedHandler
+                        .handle(new GraphCanvasEvent(event, null, null));
             }
         }
 
@@ -943,10 +948,10 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     private void onMouseReleased(MouseEvent event) {
-        System.out.println("onMouseUp, X = " + event.getX() + ", Y = "
-                + event.getY());
-        mDragNode = null;
-        mDragEdge = null;
+        System.out.println(
+                "onMouseUp, X = " + event.getX() + ", Y = " + event.getY());
+        this.mDragNode = null;
+        this.mDragEdge = null;
 
         // TODO: be smarter about this (do minimum amount of layout
         // recalculation necessary)
@@ -960,7 +965,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     private GraphNode findNodeHit(double x, double y) {
-        for (NodeEdgePair pair : mGraph.values()) {
+        for (NodeEdgePair pair : this.mGraph.values()) {
             if (nodeHitTest(pair.mNode, x, y)) {
                 return pair.mNode;
             }
@@ -969,14 +974,14 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     private GraphEdge findEdgeLabelHit(double x, double y) {
-        for (NodeEdgePair pair : mGraph.values()) {
+        for (NodeEdgePair pair : this.mGraph.values()) {
             for (GraphEdge e : pair.mLoopedEdges) {
-                if (edgeLabelHitTest(e, mDownX, mDownY)) {
+                if (edgeLabelHitTest(e, this.mDownX, this.mDownY)) {
                     return e;
                 }
             }
             for (GraphEdge e : pair.mEdges) {
-                if (edgeLabelHitTest(e, mDownX, mDownY)) {
+                if (edgeLabelHitTest(e, this.mDownX, this.mDownY)) {
                     return e;
                 }
             }
@@ -988,9 +993,8 @@ public final class GraphCanvasFX extends Canvas {
         double distSqr = (x - n.mX) * (x - n.mX) + (y - n.mY) * (y - n.mY);
         if (distSqr <= n.mRadius * n.mRadius) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -1028,26 +1032,26 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     public void doRedraw() {
-        mGC.clearRect(0, 0, getWidth(), getHeight());
-        mGC.setFill(Color.WHITE);
-        mGC.setStroke(Color.BLACK);
+        this.mGC.clearRect(0, 0, getWidth(), getHeight());
+        this.mGC.setFill(Color.WHITE);
+        this.mGC.setStroke(Color.BLACK);
 
         // TODO: document: remember, drawing coordinates has the origin in the
         // top left corner, with y increasing going downward, the maths in
         // places accounts for this (where it matters)
 
         // Draw nodes first
-        for (NodeEdgePair pair : mGraph.values()) {
+        for (NodeEdgePair pair : this.mGraph.values()) {
             drawNode(pair.mNode);
         }
 
         // Draw looped edges
-        for (NodeEdgePair pair : mGraph.values()) {
+        for (NodeEdgePair pair : this.mGraph.values()) {
             drawEdgesLooped(pair.mNode, pair.mLoopedEdges);
         }
 
         // Draw edges
-        for (NodeEdgePair pair : mGraph.values()) {
+        for (NodeEdgePair pair : this.mGraph.values()) {
             for (GraphEdge e : pair.mEdges) {
                 drawEdge(e);
             }

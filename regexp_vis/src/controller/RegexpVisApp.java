@@ -37,7 +37,7 @@ public class RegexpVisApp {
     private static final String TEXTFIELD_PROMPT = "Type a regular expression and press Enter.";
 
     private GraphCanvasFX mCanvas;
-    private Activity currentActivity;
+    private Activity<GraphCanvasEvent> currentActivity;
     private Automaton automaton;
 
     /* Keep track of enter key to prevent submitting regexp multiple times. */
@@ -63,6 +63,7 @@ public class RegexpVisApp {
         menuEdit.getItems().addAll(new MenuItem("Undo"), new MenuItem("Redo"),
                 menuEditBlah, new MenuItem("Preferences..."));
         menuEditBlah.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
             public void handle(ActionEvent t) {
                 System.out.println("Hello World!11");
             }
@@ -91,12 +92,12 @@ public class RegexpVisApp {
         root.getChildren().addAll(menuBar);
 
         // Graph canvas
-        mCanvas = new GraphCanvasFX();
+        this.mCanvas = new GraphCanvasFX();
         VBox.setVgrow(canvasContainer, javafx.scene.layout.Priority.ALWAYS);
-        VBox.setVgrow(mCanvas, javafx.scene.layout.Priority.ALWAYS);
+        VBox.setVgrow(this.mCanvas, javafx.scene.layout.Priority.ALWAYS);
         HBox.setHgrow(canvasContainer, javafx.scene.layout.Priority.ALWAYS);
-        HBox.setHgrow(mCanvas, javafx.scene.layout.Priority.ALWAYS);
-        canvasContainer.getChildren().add(mCanvas);
+        HBox.setHgrow(this.mCanvas, javafx.scene.layout.Priority.ALWAYS);
+        canvasContainer.getChildren().add(this.mCanvas);
 
         // History list also part of the canvas container
         for (int i = 0; i < 33; i++) {
@@ -107,7 +108,7 @@ public class RegexpVisApp {
         canvasContainer.getChildren().add(historyList);
 
         root.getChildren().add(canvasContainer);
-        mCanvas.requestFocus(); // Pulls focus away from the text field
+        this.mCanvas.requestFocus(); // Pulls focus away from the text field
 
         // Control panel containing buttons and text input box
         VBox controlPanel = new VBox();
@@ -158,7 +159,8 @@ public class RegexpVisApp {
         textField.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
-                if (event.getCode() == KeyCode.ENTER && !enterKeyDown) {
+                if (event.getCode() == KeyCode.ENTER
+                        && !RegexpVisApp.this.enterKeyDown) {
                     RegexpVisApp.this.enterKeyDown = true;
                     String input = textField.getText().trim();
                     if (!input.isEmpty()) {
@@ -176,7 +178,7 @@ public class RegexpVisApp {
             }
         });
 
-        mCanvas.setOnEdgeClicked(new EventHandler<GraphCanvasEvent>() {
+        this.mCanvas.setOnEdgeClicked(new EventHandler<GraphCanvasEvent>() {
             @Override
             public void handle(GraphCanvasEvent event) {
                 MouseEvent mouseEvent = event.getMouseEvent();
@@ -195,7 +197,7 @@ public class RegexpVisApp {
         stage.show();
     }
 
-    private void onEdgeDoubleClicked(GraphCanvasEvent event) {
+    void onEdgeDoubleClicked(GraphCanvasEvent event) {
         propogateToCurrentActivity(event);
     }
 
@@ -205,7 +207,7 @@ public class RegexpVisApp {
         }
     }
 
-    private void onEnteredRegexp(String text) {
+    void onEnteredRegexp(String text) {
         if (this.currentActivity != null) {
             this.currentActivity.onEnteredRegexp(text);
         }
