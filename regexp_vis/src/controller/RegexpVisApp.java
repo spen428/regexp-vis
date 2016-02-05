@@ -28,6 +28,7 @@ import model.AutomatonState;
 import model.AutomatonTransition;
 import model.BasicRegexp;
 import model.InvalidRegexpException;
+import view.Activity;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 import view.GraphEdge;
@@ -35,15 +36,65 @@ import view.GraphNode;
 
 public class RegexpVisApp extends Application {
 
-    private static final String TEXTFIELD_PROMPT = "Type a regular expression and press Enter.";
-    private static final double CONTROL_PANEL_PADDING_VERTICAL = 20;
-    private static final double CONTROL_PANEL_PADDING_HORIZONTAL = 35;
     private static final int BUTTON_PANEL_PADDING = 10;
-    private static final double HISTORY_LIST_WIDTH = 140;
+    private static final int CONTROL_PANEL_PADDING_HORIZONTAL = 35;
+    private static final int CONTROL_PANEL_PADDING_VERTICAL = 20;
     private static final String HISTORY_LIST_HIDE_TEXT = "Hide History List";
     private static final String HISTORY_LIST_SHOW_TEXT = "Show History List";
+    private static final int HISTORY_LIST_WIDTH = 140;
+    private static final String TEXTFIELD_PROMPT = "Type a regular expression and press Enter.";
 
     private GraphCanvasFX mCanvas;
+    private Activity currentActivity;
+
+    private void onEdgeDoubleClicked(GraphCanvasEvent event) {
+        propogateToCurrentActivity(event);
+    }
+
+    private void propogateToCurrentActivity(GraphCanvasEvent event) {
+        if (this.currentActivity != null) {
+            this.currentActivity.processEvent(event);
+        }
+    }
+
+    private void onEnteredRegexp(String text) {
+        text = text.trim();
+        System.out.printf("Entered: %s%n", text);
+        if (text.isEmpty()) {
+            // TODO: message user about empty text field
+            System.out.printf("Entered regexp: %s%n", text);
+            return;
+        }
+
+        BasicRegexp re = null;
+        try {
+            re = BasicRegexp.parseRegexp(text);
+            // BasicRegexp.debugPrintBasicRegexp(0, re);
+        } catch (InvalidRegexpException e1) {
+            Alert alert = new Alert(AlertType.ERROR,
+                    "Error: invalid regexp entered. Details: \n\n"
+                            + e1.getMessage());
+            alert.showAndWait();
+            return;
+        }
+
+        mCanvas.removeAllNodes();
+        Automaton automaton = new Automaton();
+        AutomatonState startState = automaton.getStartState();
+        AutomatonState finalState = automaton.createNewState();
+        AutomatonTransition trans = automaton.createNewTransition(startState,
+                finalState, re);
+        finalState.setFinal(true);
+        automaton.addStateWithTransitions(finalState,
+                new LinkedList<AutomatonTransition>());
+        automaton.addTransition(trans);
+
+        GraphNode startNode = mCanvas.addNode(startState.getId(), 50.0, 50.0);
+        GraphNode endNode = mCanvas.addNode(finalState.getId(),
+                mCanvas.getWidth() - 50.0, mCanvas.getHeight() - 50.0);
+        GraphEdge edge = mCanvas.addEdge(trans.getId(), startNode, endNode,
+                re.toString());
+    }
 
     @Override
     public void start(Stage stage) {
@@ -179,48 +230,8 @@ public class RegexpVisApp extends Application {
         stage.show();
     }
 
-    private void onEnteredRegexp(String text)
-    {
-        text = text.trim();
-        System.out.printf("Entered: %s%n", text);
-        if (text.isEmpty()) {
-            // TODO: message user about empty text field
-            System.out.printf("Entered regexp: %s%n", text);
-            return;
-        }
-
-        BasicRegexp re = null;
-        try {
-            re = BasicRegexp.parseRegexp(text);
-            //BasicRegexp.debugPrintBasicRegexp(0, re);
-        } catch (InvalidRegexpException e1) {
-            Alert alert = new Alert(AlertType.ERROR,
-                    "Error: invalid regexp entered. Details: \n\n"
-                            + e1.getMessage());
-            alert.showAndWait();
-            return;
-        }
-
-        mCanvas.removeAllNodes();
-        Automaton automaton = new Automaton();
-        AutomatonState startState = automaton.getStartState();
-        AutomatonState finalState = automaton.createNewState();
-        AutomatonTransition trans = automaton.createNewTransition(startState, finalState, re);
-        finalState.setFinal(true);
-        automaton.addStateWithTransitions(finalState, new LinkedList<AutomatonTransition>());
-        automaton.addTransition(trans);
-
-        GraphNode startNode = mCanvas.addNode(startState.getId(), 50.0, 50.0);
-        GraphNode endNode = mCanvas.addNode(finalState.getId(), mCanvas.getWidth() - 50.0, mCanvas.getHeight() - 50.0);
-        GraphEdge edge = mCanvas.addEdge(trans.getId(), startNode, endNode, re.toString());
-    }
-
-    private void onEdgeDoubleClicked(GraphCanvasEvent event)
-    {
-
-    }
-
     public static void main(String[] args) {
-        launch(args);
+        Application.launch(args);
     }
+
 }
