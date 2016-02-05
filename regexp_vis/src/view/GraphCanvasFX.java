@@ -901,6 +901,8 @@ public final class GraphCanvasFX extends Canvas {
             // Left-click to drag
             return;
         }
+        
+        this.requestFocus();
 
         mDownX = event.getX();
         mDownY = event.getY();

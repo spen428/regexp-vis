@@ -3,6 +3,8 @@ package controller;
 import java.util.LinkedList;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -137,15 +139,22 @@ public class RegexpVisApp {
         controlPanel.getChildren().add(textField);
         root.getChildren().add(controlPanel);
 
-        // Textfield listeners
-        textField.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        // Textfield focus listener
+        // https://stackoverflow.com/questions/16549296/how-perform-task-on-javafx-textfield-at-onfocus-and-outfocus
+        textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
-            public void handle(MouseEvent event) {
-                if (event.getButton() == MouseButton.PRIMARY) {
+            public void changed(ObservableValue<? extends Boolean> observable,
+                    Boolean oldValue, Boolean newValue) {
+                if (newValue.booleanValue()) {
                     if (textField.getText().equals(TEXTFIELD_PROMPT)) {
                         // Clear text field on click if the prompt is displayed
                         textField.clear();
                         textField.requestFocus();
+                    }
+                } else {
+                    if (textField.getText().isEmpty()) {
+                        // Paste prompt on defocus if text box is empty
+                        textField.setText(TEXTFIELD_PROMPT);
                     }
                 }
             }
@@ -196,37 +205,9 @@ public class RegexpVisApp {
     }
 
     private void onEnteredRegexp(String text) {
-        System.out.printf("Entered regexp: %s%n", text);
-        BasicRegexp re = null;
-        try {
-            re = BasicRegexp.parseRegexp(text);
-            // BasicRegexp.debugPrintBasicRegexp(0, re);
-        } catch (InvalidRegexpException e1) {
-            Alert alert = new Alert(AlertType.ERROR,
-                    "Error: invalid regexp entered. Details: \n\n"
-                            + e1.getMessage());
-            alert.showAndWait();
-            return;
+        if (this.currentActivity != null) {
+            this.currentActivity.onEnteredRegexp(text);
         }
-
-        mCanvas.removeAllNodes();
-        automaton = new Automaton();
-        AutomatonState startState = automaton.getStartState();
-        AutomatonState finalState = automaton.createNewState();
-        AutomatonTransition trans = automaton.createNewTransition(startState,
-                finalState, re);
-        finalState.setFinal(true);
-        automaton.addStateWithTransitions(finalState,
-                new LinkedList<AutomatonTransition>());
-        automaton.addTransition(trans);
-
-        GraphNode startNode = mCanvas.addNode(startState.getId(), 50.0, 50.0);
-        mCanvas.setNodeUseStartStyle(startNode, true);
-        GraphNode endNode = mCanvas.addNode(finalState.getId(),
-                mCanvas.getWidth() - 50.0, mCanvas.getHeight() - 50.0);
-        mCanvas.setNodeUseFinalStyle(endNode, true);
-        GraphEdge edge = mCanvas.addEdge(trans.getId(), startNode, endNode,
-                re.toString());
     }
 
     public static void main(String[] args) {
