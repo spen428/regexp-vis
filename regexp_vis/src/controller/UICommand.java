@@ -1,5 +1,7 @@
 package controller;
 
+import com.sun.corba.se.impl.orbutil.graph.Graph;
+
 import javafx.geometry.Point2D;
 import model.AddStateCommand;
 import model.AddTransitionCommand;
@@ -9,7 +11,6 @@ import model.Command;
 import model.RemoveStateCommand;
 import model.RemoveTransitionCommand;
 import model.SetIsFinalCommand;
-import ui.Graph;
 import view.GraphCanvasFX;
 
 /**
