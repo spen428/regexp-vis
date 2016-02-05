@@ -35,7 +35,7 @@ import view.GraphEdge;
 import view.GraphNode;
 import view.RegexpBreakdownActivity;
 
-public class RegexpVisApp extends Application {
+public class RegexpVisApp {
 
     private static final int BUTTON_PANEL_PADDING = 10;
     private static final int CONTROL_PANEL_PADDING_HORIZONTAL = 35;
@@ -49,52 +49,7 @@ public class RegexpVisApp extends Application {
     private Activity currentActivity;
     private Automaton automaton;
 
-    private void onEdgeDoubleClicked(GraphCanvasEvent event) {
-        propogateToCurrentActivity(event);
-    }
-
-    private void propogateToCurrentActivity(GraphCanvasEvent event) {
-        if (this.currentActivity != null) {
-            this.currentActivity.processEvent(event);
-        }
-    }
-
-    private void onEnteredRegexp(String text) {
-        System.out.printf("Entered regexp: %s%n", text);
-        BasicRegexp re = null;
-        try {
-            re = BasicRegexp.parseRegexp(text);
-            // BasicRegexp.debugPrintBasicRegexp(0, re);
-        } catch (InvalidRegexpException e1) {
-            Alert alert = new Alert(AlertType.ERROR,
-                    "Error: invalid regexp entered. Details: \n\n"
-                            + e1.getMessage());
-            alert.showAndWait();
-            return;
-        }
-
-        mCanvas.removeAllNodes();
-        automaton = new Automaton();
-        AutomatonState startState = automaton.getStartState();
-        AutomatonState finalState = automaton.createNewState();
-        AutomatonTransition trans = automaton.createNewTransition(startState,
-                finalState, re);
-        finalState.setFinal(true);
-        automaton.addStateWithTransitions(finalState,
-                new LinkedList<AutomatonTransition>());
-        automaton.addTransition(trans);
-
-        GraphNode startNode = mCanvas.addNode(startState.getId(), 50.0, 50.0);
-        mCanvas.setNodeUseStartStyle(startNode, true);
-        GraphNode endNode = mCanvas.addNode(finalState.getId(),
-                mCanvas.getWidth() - 50.0, mCanvas.getHeight() - 50.0);
-        mCanvas.setNodeUseFinalStyle(endNode, true);
-        GraphEdge edge = mCanvas.addEdge(trans.getId(), startNode, endNode,
-                re.toString());
-    }
-
-    @Override
-    public void start(Stage stage) {
+    public RegexpVisApp(Stage stage) {
         final VBox root = new VBox();
         final HBox canvasContainer = new HBox();
         final ListView<String> historyList = new ListView<>();
@@ -228,6 +183,50 @@ public class RegexpVisApp extends Application {
         stage.setTitle("Hello World!");
         stage.setScene(scene);
         stage.show();
+    }
+
+    private void onEdgeDoubleClicked(GraphCanvasEvent event) {
+        propogateToCurrentActivity(event);
+    }
+
+    private void propogateToCurrentActivity(GraphCanvasEvent event) {
+        if (this.currentActivity != null) {
+            this.currentActivity.processEvent(event);
+        }
+    }
+
+    private void onEnteredRegexp(String text) {
+        System.out.printf("Entered regexp: %s%n", text);
+        BasicRegexp re = null;
+        try {
+            re = BasicRegexp.parseRegexp(text);
+            // BasicRegexp.debugPrintBasicRegexp(0, re);
+        } catch (InvalidRegexpException e1) {
+            Alert alert = new Alert(AlertType.ERROR,
+                    "Error: invalid regexp entered. Details: \n\n"
+                            + e1.getMessage());
+            alert.showAndWait();
+            return;
+        }
+
+        mCanvas.removeAllNodes();
+        automaton = new Automaton();
+        AutomatonState startState = automaton.getStartState();
+        AutomatonState finalState = automaton.createNewState();
+        AutomatonTransition trans = automaton.createNewTransition(startState,
+                finalState, re);
+        finalState.setFinal(true);
+        automaton.addStateWithTransitions(finalState,
+                new LinkedList<AutomatonTransition>());
+        automaton.addTransition(trans);
+
+        GraphNode startNode = mCanvas.addNode(startState.getId(), 50.0, 50.0);
+        mCanvas.setNodeUseStartStyle(startNode, true);
+        GraphNode endNode = mCanvas.addNode(finalState.getId(),
+                mCanvas.getWidth() - 50.0, mCanvas.getHeight() - 50.0);
+        mCanvas.setNodeUseFinalStyle(endNode, true);
+        GraphEdge edge = mCanvas.addEdge(trans.getId(), startNode, endNode,
+                re.toString());
     }
 
     public static void main(String[] args) {
