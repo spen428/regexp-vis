@@ -82,11 +82,20 @@ public class Automaton {
 
     public Automaton()
     {
+        clear();
+    }
+
+    /**
+     * Clear all states and transitions, and reset counters.
+     */
+    public void clear() {
+        mTransCounter = 0;
+        mCounter = 0;
         mGraph = new HashMap<>();
         mStartState = new AutomatonState(mCounter++);
         mGraph.put(mStartState.getId(), new StateTransitionsPair(mStartState));
     }
-
+    
     /**
      * @return The start state for this automaton.
      */
@@ -395,4 +404,5 @@ public class Automaton {
         // TODO:
         return null;
     }
+    
 }
