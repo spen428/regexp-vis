@@ -8,6 +8,7 @@ import model.Command;
 import model.RemoveStateCommand;
 import model.RemoveTransitionCommand;
 import model.SetIsFinalCommand;
+import ui.Graph;
 import view.GraphCanvasFX;
 
 /**
@@ -42,7 +43,7 @@ public abstract class UICommand extends Command {
      */
     public static UICommand fromCommand(GraphCanvasFX graph, Command cmd) {
         if (cmd instanceof AddStateCommand) {
-            return new AddStateUICommand(graph, (AddStateCommand) cmd);
+            return new AddStateUICommand(graph, (AddStateCommand) cmd, 0, 0);
         } else if (cmd instanceof AddTransitionCommand) {
             return new AddTransitionUICommand(graph, (AddTransitionCommand) cmd);
         } else if (cmd instanceof BreakdownCommand) {

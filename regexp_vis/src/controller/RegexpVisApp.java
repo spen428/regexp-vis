@@ -2,13 +2,6 @@ package controller;
 
 import java.util.LinkedList;
 
-import javax.swing.JOptionPane;
-
-import model.Automaton;
-import model.AutomatonState;
-import model.AutomatonTransition;
-import model.BasicRegexp;
-import model.InvalidRegexpException;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -30,6 +23,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import model.Automaton;
+import model.AutomatonState;
+import model.AutomatonTransition;
+import model.BasicRegexp;
+import model.InvalidRegexpException;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 import view.GraphEdge;
@@ -209,7 +207,7 @@ public class RegexpVisApp extends Application {
         AutomatonState finalState = automaton.createNewState();
         AutomatonTransition trans = automaton.createNewTransition(startState, finalState, re);
         finalState.setFinal(true);
-        automaton.addStateWithTransitions(finalState, new LinkedList<>());
+        automaton.addStateWithTransitions(finalState, new LinkedList<AutomatonTransition>());
         automaton.addTransition(trans);
 
         GraphNode startNode = mCanvas.addNode(startState.getId(), 50.0, 50.0);
