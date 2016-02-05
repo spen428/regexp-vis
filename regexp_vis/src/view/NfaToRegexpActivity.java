@@ -1,9 +1,11 @@
 package view;
 
+import model.Automaton;
+
 public class NfaToRegexpActivity extends Activity<GraphCanvasEvent> {
 
-    public NfaToRegexpActivity(GraphCanvasFX canvas) {
-        super(canvas);
+    public NfaToRegexpActivity(GraphCanvasFX canvas, Automaton automaton) {
+        super(canvas, automaton);
         // TODO Auto-generated constructor stub
     }
 

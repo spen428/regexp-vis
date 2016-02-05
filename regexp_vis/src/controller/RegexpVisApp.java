@@ -33,6 +33,7 @@ import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 import view.GraphEdge;
 import view.GraphNode;
+import view.RegexpBreakdownActivity;
 
 public class RegexpVisApp extends Application {
 
@@ -46,6 +47,7 @@ public class RegexpVisApp extends Application {
 
     private GraphCanvasFX mCanvas;
     private Activity currentActivity;
+    private Automaton automaton;
 
     private void onEdgeDoubleClicked(GraphCanvasEvent event) {
         propogateToCurrentActivity(event);
@@ -58,14 +60,7 @@ public class RegexpVisApp extends Application {
     }
 
     private void onEnteredRegexp(String text) {
-        text = text.trim();
-        System.out.printf("Entered: %s%n", text);
-        if (text.isEmpty()) {
-            // TODO: message user about empty text field
-            System.out.printf("Entered regexp: %s%n", text);
-            return;
-        }
-
+        System.out.printf("Entered regexp: %s%n", text);
         BasicRegexp re = null;
         try {
             re = BasicRegexp.parseRegexp(text);
@@ -79,7 +74,7 @@ public class RegexpVisApp extends Application {
         }
 
         mCanvas.removeAllNodes();
-        Automaton automaton = new Automaton();
+        automaton = new Automaton();
         AutomatonState startState = automaton.getStartState();
         AutomatonState finalState = automaton.createNewState();
         AutomatonTransition trans = automaton.createNewTransition(startState,
@@ -90,8 +85,10 @@ public class RegexpVisApp extends Application {
         automaton.addTransition(trans);
 
         GraphNode startNode = mCanvas.addNode(startState.getId(), 50.0, 50.0);
+        mCanvas.setNodeUseStartStyle(startNode, true);
         GraphNode endNode = mCanvas.addNode(finalState.getId(),
                 mCanvas.getWidth() - 50.0, mCanvas.getHeight() - 50.0);
+        mCanvas.setNodeUseFinalStyle(endNode, true);
         GraphEdge edge = mCanvas.addEdge(trans.getId(), startNode, endNode,
                 re.toString());
     }
@@ -206,10 +203,9 @@ public class RegexpVisApp extends Application {
             @Override
             public void handle(KeyEvent event) {
                 if (event.getCode() == KeyCode.ENTER) {
-                    onEnteredRegexp(textField.getText());
                     String input = textField.getText().trim();
                     if (!input.isEmpty()) {
-                        System.out.printf("Entered regexp: %s%n", input);
+                        onEnteredRegexp(input);
                     }
                 }
             }
@@ -224,6 +220,10 @@ public class RegexpVisApp extends Application {
                 }
             }
         });
+
+        this.automaton = new Automaton();
+        this.currentActivity = new RegexpBreakdownActivity(this.mCanvas,
+                this.automaton);
 
         stage.setTitle("Hello World!");
         stage.setScene(scene);

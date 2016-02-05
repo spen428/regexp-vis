@@ -1,5 +1,6 @@
 package controller;
 
+import javafx.geometry.Point2D;
 import model.AddStateCommand;
 import model.AutomatonState;
 import view.GraphCanvasFX;
@@ -12,21 +13,26 @@ import view.GraphNode;
  */
 public class AddStateUICommand extends UICommand {
     private final AddStateCommand ccmd;
-    private double x;
-    private double y;
+    private Point2D location;
 
-    public AddStateUICommand(GraphCanvasFX graph, AddStateCommand cmd,
-            double x, double y)
-    {
+    public AddStateUICommand(GraphCanvasFX graph, AddStateCommand cmd, double x,
+            double y) {
         super(graph, cmd);
         this.ccmd = cmd;
-        this.x = x;
-        this.y = y;
+        this.location = new Point2D(x, y);
+    }
+
+    public AddStateUICommand(GraphCanvasFX graph, AddStateCommand cmd,
+            Point2D location) {
+        super(graph, cmd);
+        this.ccmd = cmd;
+        this.location = location;
     }
 
     @Override
     public void redo() {
-        graph.addNode(ccmd.getState().getId(), x, y);
+        graph.addNode(ccmd.getState().getId(), location.getX(),
+                location.getY());
         ccmd.redo();
     }
 
@@ -34,10 +40,9 @@ public class AddStateUICommand extends UICommand {
     public void undo() {
         AutomatonState state = ccmd.getState();
         GraphNode node = graph.lookupNode(state.getId());
-        // Update coordinates so we restore the node to the position it was 
+        // Update coordinates so we restore the node to the position it was
         // before in redo()
-        x = node.getX();
-        y = node.getY();
+        this.location = new Point2D(node.getX(), node.getY());
         graph.removeNode(state.getId());
         ccmd.undo();
     }

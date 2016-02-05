@@ -61,4 +61,8 @@ public class GraphNode {
     {
         return mY;
     }
+    
+    public int getId() {
+        return this.mId;
+    }
 }

@@ -364,4 +364,35 @@ public class Automaton {
     {
         return new GraphIterator();
     }
+    
+    public AutomatonState getAutomatonStateById(int id)
+    {
+        StateTransitionsPair pair = mGraph.get(id);
+        if (pair == null) {
+            // TODO:
+            return null;
+        }
+        
+        return pair.getState();
+    }
+    
+    public AutomatonTransition getAutomatonTransitionById(int id)
+    {
+        /*StateTransitionsPair pair = mGraph.get(id);
+        if (pair == null) {
+            // TODO:
+            return null;
+        }*/
+        
+        for (StateTransitionsPair pair : mGraph.values()) {
+            for (AutomatonTransition t : pair.getTransitions()) {
+                if (t.getId() == id) {
+                    return t;
+                }
+            }
+        }
+        
+        // TODO:
+        return null;
+    }
 }

@@ -1,5 +1,7 @@
 package view;
 
+import model.Automaton;
+
 /**
  * 
  * @author sp611
@@ -7,8 +9,8 @@ package view;
  */
 public class NfaToDfaActivity extends Activity<GraphCanvasEvent> {
 
-    public NfaToDfaActivity(GraphCanvasFX canvas) {
-        super(canvas);
+    public NfaToDfaActivity(GraphCanvasFX canvas, Automaton automaton) {
+        super(canvas, automaton);
         // TODO Auto-generated constructor stub
     }
 
@@ -21,8 +23,9 @@ public class NfaToDfaActivity extends Activity<GraphCanvasEvent> {
     public class RemoveEpsilonTransitionsActivity
             extends Activity<GraphCanvasEvent> {
 
-        public RemoveEpsilonTransitionsActivity(GraphCanvasFX canvas) {
-            super(canvas);
+        public RemoveEpsilonTransitionsActivity(GraphCanvasFX canvas,
+                Automaton automaton) {
+            super(canvas, automaton);
             // TODO Auto-generated constructor stub
         }
 
@@ -37,8 +40,9 @@ public class NfaToDfaActivity extends Activity<GraphCanvasEvent> {
     public class RemoveNonDeterminismActivity
             extends Activity<GraphCanvasEvent> {
 
-        public RemoveNonDeterminismActivity(GraphCanvasFX canvas) {
-            super(canvas);
+        public RemoveNonDeterminismActivity(GraphCanvasFX canvas,
+                Automaton automaton) {
+            super(canvas, automaton);
             // TODO Auto-generated constructor stub
         }
 

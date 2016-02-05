@@ -54,4 +54,9 @@ public class GraphEdge {
         mTextWidth = -1.0;
         mTextHeight = -1.0;
     }
+    
+    public int getId() {
+        return this.mId;
+    }
+    
 }

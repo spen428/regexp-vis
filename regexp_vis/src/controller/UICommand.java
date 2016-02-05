@@ -1,5 +1,6 @@
 package controller;
 
+import javafx.geometry.Point2D;
 import model.AddStateCommand;
 import model.AddTransitionCommand;
 import model.Automaton;
@@ -23,6 +24,8 @@ import view.GraphCanvasFX;
 public abstract class UICommand extends Command {
     protected final GraphCanvasFX graph;
     protected final Command cmd;
+    protected final Point2D location = new Point2D(Math.random() * 800,
+            Math.random() * 600);
 
     public UICommand(GraphCanvasFX graph, Command cmd) {
         super(cmd.getAutomaton());
@@ -45,7 +48,8 @@ public abstract class UICommand extends Command {
         if (cmd instanceof AddStateCommand) {
             return new AddStateUICommand(graph, (AddStateCommand) cmd, 0, 0);
         } else if (cmd instanceof AddTransitionCommand) {
-            return new AddTransitionUICommand(graph, (AddTransitionCommand) cmd);
+            return new AddTransitionUICommand(graph,
+                    (AddTransitionCommand) cmd);
         } else if (cmd instanceof BreakdownCommand) {
             return new BreakdownUICommand(graph, (BreakdownCommand) cmd);
         } else if (cmd instanceof RemoveStateCommand) {
@@ -58,8 +62,10 @@ public abstract class UICommand extends Command {
         } else if (cmd == null) {
             return null;
         } else {
-            String msg = String.format("Conversion from %s to UICommand has "
-                    + "not yet been implemented.", cmd.getClass().toString());
+            String msg = String.format(
+                    "Conversion from %s to UICommand has "
+                            + "not yet been implemented.",
+                    cmd.getClass().toString());
             throw new UnsupportedOperationException(msg);
         }
     }

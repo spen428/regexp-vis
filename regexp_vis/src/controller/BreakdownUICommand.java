@@ -1,6 +1,8 @@
 package controller;
 
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 import model.BreakdownCommand;
@@ -15,7 +17,7 @@ import view.GraphCanvasFX;
  */
 public class BreakdownUICommand extends UICommand {
 
-    private final LinkedList<UICommand> commands;
+    protected final LinkedList<UICommand> commands;
 
     public BreakdownUICommand(GraphCanvasFX graph, BreakdownCommand cmd) {
         super(graph, cmd);
@@ -42,6 +44,11 @@ public class BreakdownUICommand extends UICommand {
         for (UICommand c : commands) {
             c.redo();
         }
+    }
+    
+    public List<UICommand> debugGetUICommands()
+    {
+        return Collections.unmodifiableList(commands);
     }
 
 }
