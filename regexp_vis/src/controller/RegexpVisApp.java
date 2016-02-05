@@ -1,7 +1,5 @@
 package controller;
 
-import java.util.LinkedList;
-
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -10,8 +8,6 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
@@ -20,21 +16,14 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Automaton;
-import model.AutomatonState;
-import model.AutomatonTransition;
-import model.BasicRegexp;
-import model.InvalidRegexpException;
 import view.Activity;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
-import view.GraphEdge;
-import view.GraphNode;
 import view.RegexpBreakdownActivity;
 
 public class RegexpVisApp {
@@ -50,6 +39,9 @@ public class RegexpVisApp {
     private GraphCanvasFX mCanvas;
     private Activity currentActivity;
     private Automaton automaton;
+
+    /* Keep track of enter key to prevent submitting regexp multiple times. */
+    protected boolean enterKeyDown;
 
     public RegexpVisApp(Stage stage) {
         final VBox root = new VBox();
@@ -163,14 +155,23 @@ public class RegexpVisApp {
          * onKeyReleased rather than onKeyPressed, to prevent double-hits. This
          * however may be perceived as undesirable behaviour by the user.
          */
-        textField.setOnKeyReleased(new EventHandler<KeyEvent>() {
+        textField.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
-                if (event.getCode() == KeyCode.ENTER) {
+                if (event.getCode() == KeyCode.ENTER && !enterKeyDown) {
+                    RegexpVisApp.this.enterKeyDown = true;
                     String input = textField.getText().trim();
                     if (!input.isEmpty()) {
                         onEnteredRegexp(input);
                     }
+                }
+            }
+        });
+        textField.setOnKeyReleased(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode() == KeyCode.ENTER) {
+                    RegexpVisApp.this.enterKeyDown = false;
                 }
             }
         });
