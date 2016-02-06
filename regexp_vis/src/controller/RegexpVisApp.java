@@ -9,6 +9,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -24,9 +25,27 @@ import model.Automaton;
 import view.Activity;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
+import view.NfaToDfaActivity;
+import view.NfaToRegexpActivity;
 import view.RegexpBreakdownActivity;
 
 public class RegexpVisApp {
+
+    enum ActivityType {
+        ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"),
+        ACTIVITY_NFA_TO_REGEXP("Convert NFA to Regular Expression"),
+        ACTIVITY_NFA_TO_DFA("Convert NFA to DFA");
+
+        private final String text;
+
+        private ActivityType(String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return this.text;
+        }
+    }
 
     private static final int BUTTON_PANEL_PADDING = 10;
     private static final int CONTROL_PANEL_PADDING_HORIZONTAL = 35;
@@ -36,12 +55,14 @@ public class RegexpVisApp {
     private static final int HISTORY_LIST_WIDTH = 140;
     private static final String TEXTFIELD_PROMPT = "Type a regular expression and press Enter.";
 
-    private GraphCanvasFX mCanvas;
-    private Activity<GraphCanvasEvent> currentActivity;
-    private Automaton automaton;
+    private final GraphCanvasFX mCanvas;
+    private final Automaton automaton;
+    private final Activity<GraphCanvasEvent>[] activities;
+    final CheckMenuItem[] activityMenuItems;
 
     /* Keep track of enter key to prevent submitting regexp multiple times. */
     protected boolean enterKeyDown;
+    private Activity<GraphCanvasEvent> currentActivity;
 
     public RegexpVisApp(Stage stage) {
         final VBox root = new VBox();
@@ -69,6 +90,23 @@ public class RegexpVisApp {
             }
         });
 
+        // --- Menu Activity
+        Menu menuActivity = new Menu("Activity");
+        ActivityType[] actTypes = ActivityType.values();
+        this.activityMenuItems = new CheckMenuItem[actTypes.length];
+        for (int i = 0; i < actTypes.length; i++) {
+            final CheckMenuItem item = new CheckMenuItem(actTypes[i].getText());
+            this.activityMenuItems[i] = item;
+            final ActivityType act = actTypes[i];
+            item.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent t) {
+                    setActivity(act);
+                }
+            });
+            menuActivity.getItems().add(item);
+        }
+
         // --- Menu View
         Menu menuView = new Menu("View");
         final MenuItem menuViewHistory = new MenuItem(HISTORY_LIST_HIDE_TEXT);
@@ -88,7 +126,8 @@ public class RegexpVisApp {
         Menu menuHelp = new Menu("Help");
         menuHelp.getItems().addAll(new MenuItem("About"));
 
-        menuBar.getMenus().addAll(menuFile, menuEdit, menuView, menuHelp);
+        menuBar.getMenus().addAll(menuFile, menuEdit, menuActivity, menuView,
+                menuHelp);
         root.getChildren().addAll(menuBar);
 
         // Graph canvas
@@ -188,13 +227,38 @@ public class RegexpVisApp {
             }
         });
 
+        /* Init fields */
         this.automaton = new Automaton();
-        this.currentActivity = new RegexpBreakdownActivity(this.mCanvas,
-                this.automaton);
+        this.activities = new Activity[ActivityType.values().length];
+        /* Using ordinals of enum to prevent misordering */
+        this.activities[ActivityType.ACTIVITY_REGEXP_BREAKDOWN
+                .ordinal()] = new RegexpBreakdownActivity(this.mCanvas,
+                        this.automaton);
+        this.activities[ActivityType.ACTIVITY_NFA_TO_DFA
+                .ordinal()] = new NfaToDfaActivity(this.mCanvas,
+                        this.automaton);
+        this.activities[ActivityType.ACTIVITY_NFA_TO_REGEXP
+                .ordinal()] = new NfaToRegexpActivity(this.mCanvas,
+                        this.automaton);
+        setActivity(ActivityType.ACTIVITY_REGEXP_BREAKDOWN);
 
         stage.setTitle("Hello World!");
         stage.setScene(scene);
         stage.show();
+    }
+
+    protected void setActivity(ActivityType actType) {
+        if (actType == null) {
+            throw new IllegalArgumentException();
+        }
+        this.currentActivity = this.activities[actType.ordinal()];
+        /*
+         * Set "checked" status of all menu items to reflect the change of
+         * activity
+         */
+        for (int i = 0; i < this.activityMenuItems.length; i++) {
+            this.activityMenuItems[i].setSelected(i == actType.ordinal());
+        }
     }
 
     void onEdgeDoubleClicked(GraphCanvasEvent event) {
