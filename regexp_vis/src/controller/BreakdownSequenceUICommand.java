@@ -1,10 +1,6 @@
 package controller;
 
-import java.util.Collections;
-import java.util.List;
-
 import model.AddStateCommand;
-import model.BreakdownCommand;
 import model.BreakdownSequenceCommand;
 import model.Command;
 import view.GraphCanvasFX;
@@ -16,20 +12,20 @@ public class BreakdownSequenceUICommand extends BreakdownUICommand {
     public BreakdownSequenceUICommand(GraphCanvasFX graph,
             BreakdownSequenceCommand cmd) {
         super(graph, cmd);
-        ccmd = cmd;
+        this.ccmd = cmd;
 
-        int transCount = ccmd.getNewTransitionsCount();
-        GraphNode fromNode = graph
-                .lookupNode(ccmd.getOriginalTransition().getFrom().getId());
+        int transCount = this.ccmd.getNewTransitionsCount();
+        GraphNode fromNode = graph.lookupNode(
+                this.ccmd.getOriginalTransition().getFrom().getId());
         GraphNode toNode = graph
-                .lookupNode(ccmd.getOriginalTransition().getTo().getId());
+                .lookupNode(this.ccmd.getOriginalTransition().getTo().getId());
         double dxPerNode = (toNode.getX() - fromNode.getX()) / transCount;
         double dyPerNode = (toNode.getY() - fromNode.getY()) / transCount;
 
         double curX = fromNode.getX() + dxPerNode;
         double curY = fromNode.getY() + dyPerNode;
 
-        for (Command tmpCmd : ccmd.getCommands()) {
+        for (Command tmpCmd : this.ccmd.getCommands()) {
             if (tmpCmd instanceof AddStateCommand) {
                 AddStateCommand oldCommand = (AddStateCommand) tmpCmd;
                 AddStateUICommand newCommand = new AddStateUICommand(graph,

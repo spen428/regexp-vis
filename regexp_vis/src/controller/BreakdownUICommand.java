@@ -21,18 +21,19 @@ public class BreakdownUICommand extends UICommand {
 
     public BreakdownUICommand(GraphCanvasFX graph, BreakdownCommand cmd) {
         super(graph, cmd);
-        this.commands = new LinkedList<UICommand>();
+        this.commands = new LinkedList<>();
 
-        /* Convert list of Command to UICommand */
-        ListIterator<Command> it = cmd.getCommands().listIterator();
-        while (it.hasNext()) {
-            this.commands.add(UICommand.fromCommand(graph, it.next()));
-        }
+        // /* Convert list of Command to UICommand */
+        // ListIterator<Command> it = cmd.getCommands().listIterator();
+        // while (it.hasNext()) {
+        // this.commands.add(UICommand.fromCommand(graph, it.next()));
+        // }
     }
 
     @Override
     public void undo() {
-        ListIterator<UICommand> it = commands.listIterator(commands.size());
+        ListIterator<UICommand> it = this.commands
+                .listIterator(this.commands.size());
         while (it.hasPrevious()) {
             UICommand c = it.previous();
             c.undo();
@@ -41,14 +42,13 @@ public class BreakdownUICommand extends UICommand {
 
     @Override
     public void redo() {
-        for (UICommand c : commands) {
+        for (UICommand c : this.commands) {
             c.redo();
         }
     }
-    
-    public List<UICommand> debugGetUICommands()
-    {
-        return Collections.unmodifiableList(commands);
+
+    public List<UICommand> debugGetUICommands() {
+        return Collections.unmodifiableList(this.commands);
     }
 
 }
