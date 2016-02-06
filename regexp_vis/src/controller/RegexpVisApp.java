@@ -31,6 +31,27 @@ import view.RegexpBreakdownActivity;
 
 public class RegexpVisApp {
 
+    /* Finals */
+    final CheckMenuItem[] activityMenuItems;
+    private final Activity<GraphCanvasEvent>[] activities;
+    private final Automaton automaton;
+    private final GraphCanvasFX mCanvas;
+
+    /* Constants */
+    private static final String CONTROL_PANEL_HIDE_TEXT = "Hide Control Panel";
+    private static final String CONTROL_PANEL_SHOW_TEXT = "Show Control Panel";
+    private static final String HISTORY_LIST_HIDE_TEXT = "Hide History List";
+    private static final String HISTORY_LIST_SHOW_TEXT = "Show History List";
+    private static final String TEXTFIELD_PROMPT = "Type a regular expression and press Enter.";
+    private static final int BUTTON_PANEL_PADDING_PX = 10;
+    private static final int CONTROL_PANEL_PADDING_HORIZONTAL_PX = 35;
+    private static final int CONTROL_PANEL_PADDING_VERTICAL_PX = 20;
+    private static final int HISTORY_LIST_WIDTH_PX = 140;
+
+    /* Variables */
+    private Activity<GraphCanvasEvent> currentActivity;
+    protected boolean enterKeyDown;
+
     enum ActivityType {
         ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"),
         ACTIVITY_NFA_TO_REGEXP("Convert NFA to Regular Expression"),
@@ -47,27 +68,11 @@ public class RegexpVisApp {
         }
     }
 
-    private static final int BUTTON_PANEL_PADDING = 10;
-    private static final int CONTROL_PANEL_PADDING_HORIZONTAL = 35;
-    private static final int CONTROL_PANEL_PADDING_VERTICAL = 20;
-    private static final String HISTORY_LIST_HIDE_TEXT = "Hide History List";
-    private static final String HISTORY_LIST_SHOW_TEXT = "Show History List";
-    private static final int HISTORY_LIST_WIDTH = 140;
-    private static final String TEXTFIELD_PROMPT = "Type a regular expression and press Enter.";
-
-    private final GraphCanvasFX mCanvas;
-    private final Automaton automaton;
-    private final Activity<GraphCanvasEvent>[] activities;
-    final CheckMenuItem[] activityMenuItems;
-
-    /* Keep track of enter key to prevent submitting regexp multiple times. */
-    protected boolean enterKeyDown;
-    private Activity<GraphCanvasEvent> currentActivity;
-
     public RegexpVisApp(Stage stage) {
         final VBox root = new VBox();
         final HBox canvasContainer = new HBox();
         final ListView<String> historyList = new ListView<>();
+        final VBox controlPanel = new VBox();
 
         Scene scene = new Scene(root, 800, 600);
 
@@ -110,8 +115,6 @@ public class RegexpVisApp {
         // --- Menu View
         Menu menuView = new Menu("View");
         final MenuItem menuViewHistory = new MenuItem(HISTORY_LIST_HIDE_TEXT);
-        menuView.getItems().addAll(menuViewHistory,
-                new MenuItem("Hide Control Panel"));
         menuViewHistory.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
@@ -121,6 +124,18 @@ public class RegexpVisApp {
                         ? HISTORY_LIST_HIDE_TEXT : HISTORY_LIST_SHOW_TEXT);
             }
         });
+        final MenuItem menuViewControlPanel = new MenuItem(
+                CONTROL_PANEL_HIDE_TEXT);
+        menuViewControlPanel.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                controlPanel.setVisible(!controlPanel.isVisible());
+                controlPanel.setManaged(controlPanel.isVisible());
+                menuViewControlPanel.setText(controlPanel.isVisible()
+                        ? CONTROL_PANEL_HIDE_TEXT : CONTROL_PANEL_SHOW_TEXT);
+            }
+        });
+        menuView.getItems().addAll(menuViewHistory, menuViewControlPanel);
 
         // --- Menu About
         Menu menuHelp = new Menu("Help");
@@ -142,19 +157,16 @@ public class RegexpVisApp {
         for (int i = 0; i < 33; i++) {
             historyList.getItems().add("Step " + i);
         }
-        historyList.setMinWidth(HISTORY_LIST_WIDTH);
-        historyList.setMaxWidth(HISTORY_LIST_WIDTH);
+        historyList.setMinWidth(HISTORY_LIST_WIDTH_PX);
+        historyList.setMaxWidth(HISTORY_LIST_WIDTH_PX);
         canvasContainer.getChildren().add(historyList);
 
         root.getChildren().add(canvasContainer);
         this.mCanvas.requestFocus(); // Pulls focus away from the text field
 
-        // Control panel containing buttons and text input box
-        VBox controlPanel = new VBox();
-
         HBox buttonPanel = new HBox();
-        buttonPanel.setMinSize(0, BUTTON_PANEL_PADDING * 2);
-        buttonPanel.setPadding(new Insets(BUTTON_PANEL_PADDING));
+        buttonPanel.setMinSize(0, BUTTON_PANEL_PADDING_PX * 2);
+        buttonPanel.setPadding(new Insets(BUTTON_PANEL_PADDING_PX));
         buttonPanel.setAlignment(Pos.CENTER);
         buttonPanel.getChildren().addAll(new Button("|<<"), new Button("<--"),
                 new Button("Load"), new Button("Save"),
@@ -164,10 +176,10 @@ public class RegexpVisApp {
 
         final TextField textField = new TextField(TEXTFIELD_PROMPT);
         textField.setPadding(new Insets(5));
-        controlPanel.setPadding(new Insets(CONTROL_PANEL_PADDING_VERTICAL,
-                CONTROL_PANEL_PADDING_HORIZONTAL,
-                CONTROL_PANEL_PADDING_VERTICAL,
-                CONTROL_PANEL_PADDING_HORIZONTAL));
+        controlPanel.setPadding(new Insets(CONTROL_PANEL_PADDING_VERTICAL_PX,
+                CONTROL_PANEL_PADDING_HORIZONTAL_PX,
+                CONTROL_PANEL_PADDING_VERTICAL_PX,
+                CONTROL_PANEL_PADDING_HORIZONTAL_PX));
         controlPanel.getChildren().add(textField);
         root.getChildren().add(controlPanel);
 
