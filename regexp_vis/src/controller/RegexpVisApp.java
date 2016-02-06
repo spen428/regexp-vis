@@ -8,6 +8,8 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ListView;
@@ -47,6 +49,13 @@ public class RegexpVisApp {
     private static final int CONTROL_PANEL_PADDING_HORIZONTAL_PX = 35;
     private static final int CONTROL_PANEL_PADDING_VERTICAL_PX = 20;
     private static final int HISTORY_LIST_WIDTH_PX = 140;
+    protected static final String ABOUT_HEADER = "Regular Expression Visualiser"
+            + " (v" + Main.VERSION + ")";
+    protected static final String ABOUT_CONTENT = "Authors:\n\n"
+            + "Matthew Nicholls\t<mjn33@kent.ac.uk>\n"
+            + "Parham Ghassemi\t<pg272@kent.ac.uk>\n"
+            + "Samuel Pengelly\t<sp611@kent.ac.uk>\n"
+            + "William Dix\t\t<wrd2@kent.ac.uk>\n";
 
     /* Variables */
     private Activity<GraphCanvasEvent> currentActivity;
@@ -80,8 +89,15 @@ public class RegexpVisApp {
 
         // --- Menu File
         Menu menuFile = new Menu("File");
+        MenuItem exit = new MenuItem("Exit");
+        exit.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                exitApplication();
+            }
+        });
         menuFile.getItems().addAll(new MenuItem("Import Graph..."),
-                new MenuItem("Export Graph..."), new MenuItem("Exit"));
+                new MenuItem("Export Graph..."), exit);
 
         // --- Menu Edit
         Menu menuEdit = new Menu("Edit");
@@ -139,7 +155,18 @@ public class RegexpVisApp {
 
         // --- Menu About
         Menu menuHelp = new Menu("Help");
-        menuHelp.getItems().addAll(new MenuItem("About"));
+        MenuItem about = new MenuItem("About");
+        about.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("About");
+                alert.setHeaderText(ABOUT_HEADER);
+                alert.setContentText(ABOUT_CONTENT);
+                alert.showAndWait();
+            }
+        });
+        menuHelp.getItems().addAll(about);
 
         menuBar.getMenus().addAll(menuFile, menuEdit, menuActivity, menuView,
                 menuHelp);
@@ -257,6 +284,12 @@ public class RegexpVisApp {
         stage.setTitle("Hello World!");
         stage.setScene(scene);
         stage.show();
+    }
+
+    protected static void exitApplication() {
+        // TODO Confirm exit (unsaved changes, etc.)
+        System.out.println("Exiting application...");
+        System.exit(0);
     }
 
     protected void setActivity(ActivityType actType) {
