@@ -1,6 +1,5 @@
 package controller;
 
-import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -320,10 +319,6 @@ public class RegexpVisApp {
         if (this.currentActivity != null) {
             this.currentActivity.onEnteredRegexp(text);
         }
-    }
-
-    public static void main(String[] args) {
-        Application.launch(args);
     }
 
 }
