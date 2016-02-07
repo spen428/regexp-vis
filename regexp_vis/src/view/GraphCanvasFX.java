@@ -931,7 +931,7 @@ public final class GraphCanvasFX extends Canvas {
             // System.out.println("onMousePressed, hit NODE " + n);
         } else if (e != null) {
             this.mDragEdge = e;
-            System.out.println("onMousePressed, hit EDGE " + e + "id = "
+            System.out.println("onMousePressed, hit EDGE " + e + " id = "
                     + e.getId() + " label text = \"" + e.mText + "\"");
             if (this.mEdgeClickedHandler != null) {
                 this.mEdgeClickedHandler
