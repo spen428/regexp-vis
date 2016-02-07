@@ -55,6 +55,7 @@ public class RegexpVisApp {
             + "Parham Ghassemi\t<pg272@kent.ac.uk>\n"
             + "Samuel Pengelly\t<sp611@kent.ac.uk>\n"
             + "William Dix\t\t<wrd2@kent.ac.uk>\n";
+    public static final String WINDOW_TITLE = Main.TITLE + " v" + Main.VERSION;
 
     /* Variables */
     protected Activity<GraphCanvasEvent> currentActivity;
@@ -280,7 +281,7 @@ public class RegexpVisApp {
                         this.automaton);
         setActivity(ActivityType.ACTIVITY_REGEXP_BREAKDOWN);
 
-        stage.setTitle("Hello World!");
+        stage.setTitle(WINDOW_TITLE);
         stage.setScene(scene);
         stage.show();
     }
