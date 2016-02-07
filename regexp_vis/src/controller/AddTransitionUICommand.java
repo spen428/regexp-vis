@@ -14,24 +14,25 @@ public class AddTransitionUICommand extends UICommand {
 
     private final AddTransitionCommand ccmd;
 
-    public AddTransitionUICommand(GraphCanvasFX graph, AddTransitionCommand cmd) {
+    public AddTransitionUICommand(GraphCanvasFX graph,
+            AddTransitionCommand cmd) {
         super(graph, cmd);
         this.ccmd = cmd;
     }
 
     @Override
     public void redo() {
-        AutomatonTransition t = ccmd.getTransition();
-        GraphNode nodeFrom = graph.lookupNode(t.getFrom().getId());
-        GraphNode nodeTo = graph.lookupNode(t.getTo().getId());
-        graph.addEdge(t.getId(), nodeFrom, nodeTo, t.getData().toString());
-        cmd.redo();
+        AutomatonTransition t = this.ccmd.getTransition();
+        GraphNode nodeFrom = this.graph.lookupNode(t.getFrom().getId());
+        GraphNode nodeTo = this.graph.lookupNode(t.getTo().getId());
+        this.graph.addEdge(t.getId(), nodeFrom, nodeTo, t.getData().toString());
+        this.cmd.redo();
     }
 
     @Override
     public void undo() {
-        graph.removeEdge(ccmd.getTransition().getId());
-        cmd.undo();
+        this.graph.removeEdge(this.ccmd.getTransition().getId());
+        this.cmd.undo();
     }
 
 }

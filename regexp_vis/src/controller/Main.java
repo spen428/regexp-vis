@@ -11,6 +11,7 @@ public class Main extends Application {
         Application.launch(args);
     }
 
+    @SuppressWarnings("unused")
     @Override
     public void start(Stage stage) throws Exception {
         new RegexpVisApp(stage);

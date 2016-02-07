@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -198,6 +199,10 @@ public final class GraphCanvasFX extends Canvas {
             }
         }
         return null;
+    }
+
+    public GraphNode addNode(int id, Point2D location) {
+        return addNode(id, location.getX(), location.getY());
     }
 
     public GraphNode addNode(int id, double x, double y) {

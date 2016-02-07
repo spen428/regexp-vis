@@ -13,7 +13,6 @@ import view.GraphNode;
  */
 public class AddStateUICommand extends UICommand {
     private final AddStateCommand ccmd;
-    private Point2D location;
 
     public AddStateUICommand(GraphCanvasFX graph, AddStateCommand cmd, double x,
             double y) {
@@ -31,20 +30,19 @@ public class AddStateUICommand extends UICommand {
 
     @Override
     public void redo() {
-        graph.addNode(ccmd.getState().getId(), location.getX(),
-                location.getY());
-        ccmd.redo();
+        this.graph.addNode(this.ccmd.getState().getId(), this.location);
+        this.ccmd.redo();
     }
 
     @Override
     public void undo() {
-        AutomatonState state = ccmd.getState();
-        GraphNode node = graph.lookupNode(state.getId());
+        AutomatonState state = this.ccmd.getState();
+        GraphNode node = this.graph.lookupNode(state.getId());
         // Update coordinates so we restore the node to the position it was
         // before in redo()
         this.location = new Point2D(node.getX(), node.getY());
-        graph.removeNode(state.getId());
-        ccmd.undo();
+        this.graph.removeNode(state.getId());
+        this.ccmd.undo();
     }
 
 }

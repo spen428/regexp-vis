@@ -1,7 +1,5 @@
 package view;
 
-import java.util.ArrayList;
-
 public class GraphNode {
     /**
      * The ID for this node
@@ -38,28 +36,28 @@ public class GraphNode {
 
     public GraphNode(int id, double x, double y, double r, boolean startStyle, boolean finalStyle)
     {
-        mId = id;
-        mX = x;
-        mY = y;
-        mRadius = r;
-        mUseStartStateStyle = startStyle;
-        mUseFinalStateStyle = finalStyle;
+        this.mId = id;
+        this.mX = x;
+        this.mY = y;
+        this.mRadius = r;
+        this.mUseStartStateStyle = startStyle;
+        this.mUseFinalStateStyle = finalStyle;
 
         // Loops are on top by default
-        mLoopDirVecX = 0;
-        mLoopDirVecY = -1;
+        this.mLoopDirVecX = 0;
+        this.mLoopDirVecY = -1;
         //mLoopDirNormalVecX = -mLoopDirVecY;
         //mLoopDirNormalVecY = mLoopDirVecX;
     }
 
     public double getX()
     {
-        return mX;
+        return this.mX;
     }
 
     public double getY()
     {
-        return mY;
+        return this.mY;
     }
     
     public int getId() {

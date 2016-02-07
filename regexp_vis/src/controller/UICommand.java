@@ -29,7 +29,7 @@ import view.GraphCanvasFX;
 public abstract class UICommand extends Command {
     protected final GraphCanvasFX graph;
     protected final Command cmd;
-    protected final Point2D location = new Point2D(Math.random() * 800,
+    protected Point2D location = new Point2D(Math.random() * 800,
             Math.random() * 600);
 
     public UICommand(GraphCanvasFX graph, Command cmd) {

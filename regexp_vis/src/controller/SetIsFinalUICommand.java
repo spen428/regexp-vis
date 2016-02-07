@@ -21,11 +21,11 @@ public class SetIsFinalUICommand extends UICommand {
 
     @Override
     public void redo() {
-        if (ccmd.isDiffers()) {
-            AutomatonState state = ccmd.getState();
-            GraphNode node = graph.lookupNode(state.getId());
-            graph.setNodeUseFinalStyle(node, !state.isFinal());
-            ccmd.redo();
+        if (this.ccmd.isDiffers()) {
+            AutomatonState state = this.ccmd.getState();
+            GraphNode node = this.graph.lookupNode(state.getId());
+            this.graph.setNodeUseFinalStyle(node, !state.isFinal());
+            this.ccmd.redo();
         }
     }
 

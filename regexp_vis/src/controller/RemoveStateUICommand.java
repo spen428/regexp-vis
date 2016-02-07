@@ -1,5 +1,6 @@
 package controller;
 
+import javafx.geometry.Point2D;
 import model.AutomatonState;
 import model.AutomatonTransition;
 import model.RemoveStateCommand;
@@ -14,36 +15,34 @@ import view.GraphNode;
 public class RemoveStateUICommand extends UICommand {
 
     private final RemoveStateCommand ccmd;
-    private double x;
-    private double y;
 
-    public RemoveStateUICommand(GraphCanvasFX graph, RemoveStateCommand cmd)
-    {
+    public RemoveStateUICommand(GraphCanvasFX graph, RemoveStateCommand cmd) {
         super(graph, cmd);
         this.ccmd = cmd;
     }
 
     @Override
     public void redo() {
-        AutomatonState state = ccmd.getState();
-        // Update coordinates so we restore the node to the position it was 
+        AutomatonState state = this.ccmd.getState();
+        // Update coordinates so we restore the node to the position it was
         // before in undo()
-        GraphNode node = graph.lookupNode(state.getId());
-        x = node.getX();
-        y = node.getY();
-        graph.removeNode(state.getId());
-        cmd.redo();
+        GraphNode node = this.graph.lookupNode(state.getId());
+        this.location = new Point2D(node.getX(), node.getY());
+        this.graph.removeNode(state.getId());
+        this.cmd.redo();
     }
 
     @Override
     public void undo() {
-        GraphNode nodeFrom = graph.addNode(ccmd.getState().getId(), x, y);
+        GraphNode nodeFrom = this.graph.addNode(this.ccmd.getState().getId(),
+                this.location);
 
-        for (AutomatonTransition t : ccmd.getTransitions()) {
-            GraphNode nodeTo = graph.lookupNode(t.getTo().getId());
-            graph.addEdge(t.getId(), nodeFrom, nodeTo, t.getData().toString());
+        for (AutomatonTransition t : this.ccmd.getTransitions()) {
+            GraphNode nodeTo = this.graph.lookupNode(t.getTo().getId());
+            this.graph.addEdge(t.getId(), nodeFrom, nodeTo,
+                    t.getData().toString());
         }
-        cmd.undo();
+        this.cmd.undo();
     }
 
 }

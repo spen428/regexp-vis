@@ -1,7 +1,6 @@
 package view;
 
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 
 final class GraphUtils {
