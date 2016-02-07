@@ -1,4 +1,4 @@
-package test.ui;
+package test.view;
 
 import static org.junit.Assert.*;
 import model.AddStateCommand;
