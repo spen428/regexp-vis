@@ -6,7 +6,11 @@ import javafx.geometry.Point2D;
 import model.AddStateCommand;
 import model.AddTransitionCommand;
 import model.Automaton;
+import model.BreakdownChoiceCommand;
 import model.BreakdownCommand;
+import model.BreakdownIterationCommand;
+import model.BreakdownOptionCommand;
+import model.BreakdownSequenceCommand;
 import model.Command;
 import model.RemoveStateCommand;
 import model.RemoveTransitionCommand;
@@ -52,7 +56,7 @@ public abstract class UICommand extends Command {
             return new AddTransitionUICommand(graph,
                     (AddTransitionCommand) cmd);
         } else if (cmd instanceof BreakdownCommand) {
-            return new BreakdownUICommand(graph, (BreakdownCommand) cmd);
+            return UICommand.fromBreakdownCommand(graph, cmd);
         } else if (cmd instanceof RemoveStateCommand) {
             return new RemoveStateUICommand(graph, (RemoveStateCommand) cmd);
         } else if (cmd instanceof RemoveTransitionCommand) {
@@ -69,5 +73,32 @@ public abstract class UICommand extends Command {
                     cmd.getClass().toString());
             throw new UnsupportedOperationException(msg);
         }
+    }
+
+    private static BreakdownUICommand fromBreakdownCommand(GraphCanvasFX graph,
+            Command cmd) {
+        if (cmd instanceof BreakdownSequenceCommand) {
+            return new BreakdownSequenceUICommand(graph,
+                    (BreakdownSequenceCommand) cmd);
+        } else if (cmd instanceof BreakdownChoiceCommand) {
+            return new BreakdownChoiceUICommand(graph,
+                    (BreakdownChoiceCommand) cmd);
+        } else if (cmd instanceof BreakdownIterationCommand) {
+            return new BreakdownIterationUICommand(graph,
+                    (BreakdownIterationCommand) cmd);
+        } else if (cmd instanceof BreakdownOptionCommand) {
+            return new BreakdownOptionUICommand(graph,
+                    (BreakdownOptionCommand) cmd);
+        }
+        // else
+        if (cmd instanceof BreakdownCommand) {
+            String msg = String.format(
+                    "Conversion from %s to BreakdownUICommand has "
+                            + "not yet been implemented.",
+                    cmd.getClass().toString());
+            throw new UnsupportedOperationException(msg);
+        }
+        throw new IllegalArgumentException(cmd.getClass().toString()
+                + " is not a subclass of BreakdownCommand.");
     }
 }

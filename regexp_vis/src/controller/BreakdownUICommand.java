@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.ListIterator;
 
 import model.BreakdownCommand;
-import model.Command;
 import view.GraphCanvasFX;
 
 /**
@@ -15,19 +14,13 @@ import view.GraphCanvasFX;
  * @author sp611
  *
  */
-public class BreakdownUICommand extends UICommand {
+public abstract class BreakdownUICommand extends UICommand {
 
     protected final LinkedList<UICommand> commands;
 
     public BreakdownUICommand(GraphCanvasFX graph, BreakdownCommand cmd) {
         super(graph, cmd);
         this.commands = new LinkedList<>();
-
-        // /* Convert list of Command to UICommand */
-        // ListIterator<Command> it = cmd.getCommands().listIterator();
-        // while (it.hasNext()) {
-        // this.commands.add(UICommand.fromCommand(graph, it.next()));
-        // }
     }
 
     @Override
@@ -43,11 +36,12 @@ public class BreakdownUICommand extends UICommand {
     @Override
     public void redo() {
         for (UICommand c : this.commands) {
+            System.out.println("BreakdownUICommand: " + c.toString());
             c.redo();
         }
     }
 
-    public List<UICommand> debugGetUICommands() {
+    public List<UICommand> getCommands() {
         return Collections.unmodifiableList(this.commands);
     }
 

@@ -47,21 +47,8 @@ public class RegexpBreakdownActivity extends Activity<GraphCanvasEvent> {
 
         BreakdownCommand cmd = TranslationTools
                 .createBreakdownCommand(this.automaton, trans);
-        ArrayList<Command> newCommands = new ArrayList<>();
-
-        if (cmd instanceof BreakdownSequenceCommand) {
-            BreakdownSequenceUICommand newCmd = new BreakdownSequenceUICommand(
-                    this.canvas, (BreakdownSequenceCommand) cmd);
-            newCommands.addAll(newCmd.debugGetUICommands());
-        } else {
-            for (Command oldCmd : cmd.getCommands()) {
-                newCommands.add(UICommand.fromCommand(this.canvas, oldCmd));
-            }
-        }
-
-        for (Command c : newCommands) {
-            c.redo();
-        }
+        UICommand uiCmd = UICommand.fromCommand(this.canvas, cmd);
+        uiCmd.redo();
     }
 
 }
