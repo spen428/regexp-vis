@@ -36,7 +36,7 @@ public class RegexpVisApp {
     final CheckMenuItem[] activityMenuItems;
     private final Activity<GraphCanvasEvent>[] activities;
     private final Automaton automaton;
-    private final GraphCanvasFX mCanvas;
+    protected final GraphCanvasFX mCanvas;
 
     /* Constants */
     private static final String CONTROL_PANEL_HIDE_TEXT = "Hide Control Panel";
@@ -57,7 +57,7 @@ public class RegexpVisApp {
             + "William Dix\t\t<wrd2@kent.ac.uk>\n";
 
     /* Variables */
-    private Activity<GraphCanvasEvent> currentActivity;
+    protected Activity<GraphCanvasEvent> currentActivity;
     protected boolean enterKeyDown;
 
     enum ActivityType {
