@@ -14,6 +14,10 @@ public class BreakdownSequenceUICommand extends BreakdownUICommand {
         super(graph, cmd);
         this.ccmd = cmd;
 
+        /*
+         * TODO: Case where transCount is too high, and states are too close
+         * together for edges to be rendered must be handled differenty.
+         */
         int transCount = this.ccmd.getNewTransitionsCount();
         GraphNode fromNode = graph.lookupNode(
                 this.ccmd.getOriginalTransition().getFrom().getId());

@@ -32,17 +32,21 @@ public class BreakdownIterationCommand extends BreakdownCommand {
     /**
      * Calculates the best isolation level a transition can have, often we can
      * performing "fully safe" translations
-     * @param automaton The automaton of transition "t"
-     * @param t The transition in question
+     * 
+     * @param automaton
+     *            The automaton of transition "t"
+     * @param t
+     *            The transition in question
      * @return The optimal isolation level for this transition
      */
     public static IsolationLevel calcBestIsolationLevel(Automaton automaton,
-        AutomatonTransition t)
-    {
+            AutomatonTransition t) {
         AutomatonState start = t.getFrom();
         AutomatonState end = t.getTo();
-        List<AutomatonTransition> startOutgoing = automaton.getStateTransitions(start);
-        List<AutomatonTransition> endIncoming = automaton.getIngoingTransition(end);
+        List<AutomatonTransition> startOutgoing = automaton
+                .getStateTransitions(start);
+        List<AutomatonTransition> endIncoming = automaton
+                .getIngoingTransition(end);
         boolean isolateStart = false;
         boolean isolateEnd = false;
         if (startOutgoing.size() > 1) {
@@ -68,14 +72,16 @@ public class BreakdownIterationCommand extends BreakdownCommand {
     }
 
     /**
-     * @param optimal The optimal isolation level as returned by
-     * calcBestIsolationLevel()
-     * @param desired The desired isolation level
+     * @param optimal
+     *            The optimal isolation level as returned by
+     *            calcBestIsolationLevel()
+     * @param desired
+     *            The desired isolation level
      * @return true if the given desired isolation level is compatible with the
-     * optimal isolation level
+     *         optimal isolation level
      */
-    public boolean isolationSufficent(IsolationLevel optimal, IsolationLevel desired)
-    {
+    public static boolean isolationSufficent(IsolationLevel optimal,
+            IsolationLevel desired) {
         if (optimal == desired) {
             return true;
         }
@@ -96,33 +102,36 @@ public class BreakdownIterationCommand extends BreakdownCommand {
     }
 
     /**
-     * @param automaton The automaton for the transition
-     * @param t the transition to break down
-     * @param level the desired IsolationLevel for this breakdown operation
-     * @throws IllegalArgumentException if the transition expression isn't STAR
-     * or PLUS
-     * @throws IllegalArgumentException if the desired isolation level would
-     * not result in a correct translation
+     * @param automaton
+     *            The automaton for the transition
+     * @param t
+     *            the transition to break down
+     * @param level
+     *            the desired IsolationLevel for this breakdown operation
+     * @throws IllegalArgumentException
+     *             if the transition expression isn't STAR or PLUS
+     * @throws IllegalArgumentException
+     *             if the desired isolation level would not result in a correct
+     *             translation
      */
     public BreakdownIterationCommand(Automaton automaton, AutomatonTransition t,
-        IsolationLevel level)
-    {
+            IsolationLevel level) {
         super(automaton, t);
-        mIsolationLevel = level;
+        this.mIsolationLevel = level;
 
-        BasicRegexp re = (BasicRegexp)t.getData();
+        BasicRegexp re = (BasicRegexp) t.getData();
 
-        if (re.getOperator() != BasicRegexp.RegexpOperator.STAR &&
-            re.getOperator() != BasicRegexp.RegexpOperator.PLUS) {
+        if (re.getOperator() != BasicRegexp.RegexpOperator.STAR
+                && re.getOperator() != BasicRegexp.RegexpOperator.PLUS) {
             throw new IllegalArgumentException(
-                "BreakdownIterationCommand must be passed either " +
-                "the PLUS or STAR operators, i.e. \"a+\" or \"a*\"");
+                    "BreakdownIterationCommand must be passed either "
+                            + "the PLUS or STAR operators, i.e. \"a+\" or \"a*\"");
         }
 
         if (!isolationSufficent(calcBestIsolationLevel(automaton, t), level)) {
             // Given isolation level insufficient, throw.
             throw new IllegalArgumentException(
-                "Bad isolation level passed, see isolationSufficent() method.");
+                    "Bad isolation level passed, see isolationSufficent() method.");
         }
 
         switch (level) {
@@ -147,145 +156,146 @@ public class BreakdownIterationCommand extends BreakdownCommand {
      * @return The isolation level of this breakdown operation
      * @see IsolationLevel
      */
-    public IsolationLevel getIsolationLevel()
-    {
-        return mIsolationLevel;
+    public IsolationLevel getIsolationLevel() {
+        return this.mIsolationLevel;
     }
 
-    private void createEndIsolated(BasicRegexp re)
-    {
+    private void createEndIsolated(BasicRegexp re) {
         Automaton automaton = getAutomaton();
         AutomatonTransition t = getOriginalTransition();
         AutomatonState start = t.getFrom();
         AutomatonState end = t.getTo();
 
-        mCommands.add(new RemoveTransitionCommand(automaton, t));
+        this.mCommands.add(new RemoveTransitionCommand(automaton, t));
         AutomatonState endIsolated = automaton.createNewState();
 
-        mCommands.add(new AddStateCommand(automaton, endIsolated));
+        this.mCommands.add(new AddStateCommand(automaton, endIsolated));
         AutomatonTransition endTrans, epsilonSkipTrans, epsilonBackwardTrans;
 
         endTrans = automaton.createNewTransition(endIsolated, end,
-            BasicRegexp.EPSILON_EXPRESSION);
+                BasicRegexp.EPSILON_EXPRESSION);
         // Transition which skips over the iteration (only for STAR)
         if (re.getOperator() == BasicRegexp.RegexpOperator.STAR) {
             epsilonSkipTrans = automaton.createNewTransition(start, end,
-                BasicRegexp.EPSILON_EXPRESSION);
+                    BasicRegexp.EPSILON_EXPRESSION);
         } else {
             epsilonSkipTrans = null;
         }
         // Epsilon transition for iteration
-        epsilonBackwardTrans = automaton.createNewTransition(endIsolated,
-            start, BasicRegexp.EPSILON_EXPRESSION);
+        epsilonBackwardTrans = automaton.createNewTransition(endIsolated, start,
+                BasicRegexp.EPSILON_EXPRESSION);
 
-        mCommands.add(new AddTransitionCommand(automaton, endTrans));
+        this.mCommands.add(new AddTransitionCommand(automaton, endTrans));
         if (epsilonSkipTrans != null) {
-            mCommands.add(new AddTransitionCommand(automaton, epsilonSkipTrans));
+            this.mCommands
+                    .add(new AddTransitionCommand(automaton, epsilonSkipTrans));
         }
-        mCommands.add(new AddTransitionCommand(automaton, epsilonBackwardTrans));
+        this.mCommands
+                .add(new AddTransitionCommand(automaton, epsilonBackwardTrans));
 
         // The transition for the subexpression itself
         BasicRegexp operand = re.getOperands().get(0);
-        AutomatonTransition subexprTrans = automaton.createNewTransition(
-            start, endIsolated, operand);
+        AutomatonTransition subexprTrans = automaton.createNewTransition(start,
+                endIsolated, operand);
 
-        mCommands.add(new AddTransitionCommand(automaton, subexprTrans));
+        this.mCommands.add(new AddTransitionCommand(automaton, subexprTrans));
     }
 
-    private void createStartIsolated(BasicRegexp re)
-    {
+    private void createStartIsolated(BasicRegexp re) {
         Automaton automaton = getAutomaton();
         AutomatonTransition t = getOriginalTransition();
         AutomatonState start = t.getFrom();
         AutomatonState end = t.getTo();
 
-        mCommands.add(new RemoveTransitionCommand(automaton, t));
+        this.mCommands.add(new RemoveTransitionCommand(automaton, t));
         AutomatonState startIsolated = automaton.createNewState();
 
-        mCommands.add(new AddStateCommand(automaton, startIsolated));
+        this.mCommands.add(new AddStateCommand(automaton, startIsolated));
         AutomatonTransition startTrans, epsilonSkipTrans, epsilonBackwardTrans;
 
         startTrans = automaton.createNewTransition(start, startIsolated,
-            BasicRegexp.EPSILON_EXPRESSION);
+                BasicRegexp.EPSILON_EXPRESSION);
         // Transition which skips over the iteration (only for STAR)
         if (re.getOperator() == BasicRegexp.RegexpOperator.STAR) {
             epsilonSkipTrans = automaton.createNewTransition(start, end,
-                BasicRegexp.EPSILON_EXPRESSION);
+                    BasicRegexp.EPSILON_EXPRESSION);
         } else {
             epsilonSkipTrans = null;
         }
         // Epsilon transition for iteration
-        epsilonBackwardTrans = automaton.createNewTransition(end,
-            startIsolated, BasicRegexp.EPSILON_EXPRESSION);
+        epsilonBackwardTrans = automaton.createNewTransition(end, startIsolated,
+                BasicRegexp.EPSILON_EXPRESSION);
 
-        mCommands.add(new AddTransitionCommand(automaton, startTrans));
+        this.mCommands.add(new AddTransitionCommand(automaton, startTrans));
         if (epsilonSkipTrans != null) {
-            mCommands.add(new AddTransitionCommand(automaton, epsilonSkipTrans));
+            this.mCommands
+                    .add(new AddTransitionCommand(automaton, epsilonSkipTrans));
         }
-        mCommands.add(new AddTransitionCommand(automaton, epsilonBackwardTrans));
+        this.mCommands
+                .add(new AddTransitionCommand(automaton, epsilonBackwardTrans));
 
         // The transition for the subexpression itself
         BasicRegexp operand = re.getOperands().get(0);
-        AutomatonTransition subexprTrans = automaton.createNewTransition(
-            startIsolated, end, operand);
+        AutomatonTransition subexprTrans = automaton
+                .createNewTransition(startIsolated, end, operand);
 
-        mCommands.add(new AddTransitionCommand(automaton, subexprTrans));
+        this.mCommands.add(new AddTransitionCommand(automaton, subexprTrans));
     }
 
-    private void createFullyIsolated(BasicRegexp re)
-    {
+    private void createFullyIsolated(BasicRegexp re) {
         Automaton automaton = getAutomaton();
         AutomatonTransition t = getOriginalTransition();
         AutomatonState start = t.getFrom();
         AutomatonState end = t.getTo();
 
-        mCommands.add(new RemoveTransitionCommand(automaton, t));
+        this.mCommands.add(new RemoveTransitionCommand(automaton, t));
         AutomatonState startIsolated = automaton.createNewState();
         AutomatonState endIsolated = automaton.createNewState();
 
-        mCommands.add(new AddStateCommand(automaton, startIsolated));
-        mCommands.add(new AddStateCommand(automaton, endIsolated));
+        this.mCommands.add(new AddStateCommand(automaton, startIsolated));
+        this.mCommands.add(new AddStateCommand(automaton, endIsolated));
         AutomatonTransition startTrans, endTrans, epsilonSkipTrans,
-            epsilonBackwardTrans;
+                epsilonBackwardTrans;
 
         startTrans = automaton.createNewTransition(start, startIsolated,
-            BasicRegexp.EPSILON_EXPRESSION);
+                BasicRegexp.EPSILON_EXPRESSION);
         endTrans = automaton.createNewTransition(endIsolated, end,
-            BasicRegexp.EPSILON_EXPRESSION);
+                BasicRegexp.EPSILON_EXPRESSION);
         // Transition which skips over the iteration (only for STAR)
         if (re.getOperator() == BasicRegexp.RegexpOperator.STAR) {
             epsilonSkipTrans = automaton.createNewTransition(start, end,
-                BasicRegexp.EPSILON_EXPRESSION);
+                    BasicRegexp.EPSILON_EXPRESSION);
         } else {
             epsilonSkipTrans = null;
         }
         // Epsilon transition for iteration
         epsilonBackwardTrans = automaton.createNewTransition(endIsolated,
-            startIsolated, BasicRegexp.EPSILON_EXPRESSION);
+                startIsolated, BasicRegexp.EPSILON_EXPRESSION);
 
-        mCommands.add(new AddTransitionCommand(automaton, startTrans));
-        mCommands.add(new AddTransitionCommand(automaton, endTrans));
+        this.mCommands.add(new AddTransitionCommand(automaton, startTrans));
+        this.mCommands.add(new AddTransitionCommand(automaton, endTrans));
         if (epsilonSkipTrans != null) {
-            mCommands.add(new AddTransitionCommand(automaton, epsilonSkipTrans));
+            this.mCommands
+                    .add(new AddTransitionCommand(automaton, epsilonSkipTrans));
         }
-        mCommands.add(new AddTransitionCommand(automaton, epsilonBackwardTrans));
+        this.mCommands
+                .add(new AddTransitionCommand(automaton, epsilonBackwardTrans));
 
         // The transition for the subexpression itself
         BasicRegexp operand = re.getOperands().get(0);
-        AutomatonTransition subexprTrans = automaton.createNewTransition(
-            startIsolated, endIsolated, operand);
+        AutomatonTransition subexprTrans = automaton
+                .createNewTransition(startIsolated, endIsolated, operand);
 
-        mCommands.add(new AddTransitionCommand(automaton, subexprTrans));
+        this.mCommands.add(new AddTransitionCommand(automaton, subexprTrans));
     }
 
-    private void createUnisolated(BasicRegexp re)
-    {
+    private void createUnisolated(BasicRegexp re) {
         Automaton automaton = getAutomaton();
         AutomatonTransition t = getOriginalTransition();
         AutomatonState start = t.getFrom();
         AutomatonState end = t.getTo();
 
-        mCommands.add(new RemoveTransitionCommand(automaton, t));
+        this.mCommands.add(new RemoveTransitionCommand(automaton, t));
 
         AutomatonTransition epsilonSkipTrans;
 
@@ -293,13 +303,14 @@ public class BreakdownIterationCommand extends BreakdownCommand {
         // PLUS
         if (re.getOperator() == BasicRegexp.RegexpOperator.STAR) {
             epsilonSkipTrans = automaton.createNewTransition(start, end,
-                BasicRegexp.EPSILON_EXPRESSION);
+                    BasicRegexp.EPSILON_EXPRESSION);
         } else {
             epsilonSkipTrans = automaton.createNewTransition(end, start,
-                BasicRegexp.EPSILON_EXPRESSION);
+                    BasicRegexp.EPSILON_EXPRESSION);
         }
 
-        mCommands.add(new AddTransitionCommand(automaton, epsilonSkipTrans));
+        this.mCommands
+                .add(new AddTransitionCommand(automaton, epsilonSkipTrans));
 
         // The transition for the subexpression itself
         BasicRegexp operand = re.getOperands().get(0);
@@ -310,6 +321,6 @@ public class BreakdownIterationCommand extends BreakdownCommand {
             subexprTrans = automaton.createNewTransition(start, end, operand);
         }
 
-        mCommands.add(new AddTransitionCommand(automaton, subexprTrans));
+        this.mCommands.add(new AddTransitionCommand(automaton, subexprTrans));
     }
 }
