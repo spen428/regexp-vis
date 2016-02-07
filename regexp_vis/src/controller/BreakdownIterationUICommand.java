@@ -34,14 +34,15 @@ public class BreakdownIterationUICommand extends BreakdownUICommand {
 
                 double dx = from.getX() - to.getX();
                 double dy = from.getY() - to.getY();
+                double hyp = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 
                 if (oneNewState) {
                     /*
                      * Breaking down this iteration creates one new node,
                      * position to form an equilateral triangle
                      */
-                    double newX = from.getX() + (dx / 2);
-                    double newY = from.getY() - (dy / 2);
+                    double newX = from.getX() + (hyp / 2);
+                    double newY = from.getY() - (hyp / 2) * Math.sqrt(3);
 
                     this.commands.add(new AddStateUICommand(graph,
                             (AddStateCommand) c, newX, newY));
