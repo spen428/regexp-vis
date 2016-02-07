@@ -1,14 +1,9 @@
 package view;
 
-import java.util.ArrayList;
-
-import controller.BreakdownSequenceUICommand;
 import controller.UICommand;
 import model.Automaton;
 import model.AutomatonTransition;
 import model.BreakdownCommand;
-import model.BreakdownSequenceCommand;
-import model.Command;
 import model.TranslationTools;
 
 /**
@@ -20,7 +15,6 @@ public class RegexpBreakdownActivity extends Activity<GraphCanvasEvent> {
 
     public RegexpBreakdownActivity(GraphCanvasFX canvas, Automaton automaton) {
         super(canvas, automaton);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
@@ -49,6 +43,7 @@ public class RegexpBreakdownActivity extends Activity<GraphCanvasEvent> {
                 .createBreakdownCommand(this.automaton, trans);
         UICommand uiCmd = UICommand.fromCommand(this.canvas, cmd);
         uiCmd.redo();
+        // TODO: Add to history
     }
 
 }
