@@ -42,8 +42,10 @@ public class RegexpBreakdownActivity extends Activity<GraphCanvasEvent> {
         BreakdownCommand cmd = TranslationTools
                 .createBreakdownCommand(this.automaton, trans);
         UICommand uiCmd = UICommand.fromCommand(this.canvas, cmd);
-        uiCmd.redo();
-        // TODO: Add to history
+        if (uiCmd != null) {
+            uiCmd.redo();
+            // TODO: Add to history
+        }
     }
 
 }
