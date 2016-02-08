@@ -41,8 +41,10 @@ public class BreakdownIterationCommand extends BreakdownCommand {
     {
         AutomatonState start = t.getFrom();
         AutomatonState end = t.getTo();
-        List<AutomatonTransition> startOutgoing = automaton.getStateTransitions(start);
-        List<AutomatonTransition> endIncoming = automaton.getIngoingTransition(end);
+        List<AutomatonTransition> startOutgoing = automaton
+                .getStateTransitions(start);
+        List<AutomatonTransition> endIncoming = automaton
+                .getIngoingTransition(end);
         boolean isolateStart = false;
         boolean isolateEnd = false;
         if (startOutgoing.size() > 1) {
@@ -74,7 +76,8 @@ public class BreakdownIterationCommand extends BreakdownCommand {
      * @return true if the given desired isolation level is compatible with the
      * optimal isolation level
      */
-    public boolean isolationSufficent(IsolationLevel optimal, IsolationLevel desired)
+    public static boolean isolationSufficent(IsolationLevel optimal,
+        IsolationLevel desired)
     {
         if (optimal == desired) {
             return true;

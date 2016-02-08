@@ -1,4 +1,4 @@
-package test.ui;
+package test.view;
 
 import javax.swing.JFrame;
 

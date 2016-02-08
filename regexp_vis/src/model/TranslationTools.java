@@ -1,26 +1,35 @@
 package model;
 
-import java.util.*;
-
 public final class TranslationTools {
-    public static Command createBreakdownCommand(Automaton automaton, AutomatonTransition t)
+    public static BreakdownCommand createBreakdownCommand(Automaton automaton,
+        AutomatonTransition transition)
     {
-        BasicRegexp re = (BasicRegexp)t.getData();
+        if (automaton == null) {
+            throw new IllegalArgumentException("Automaton cannot be null");
+        } else if (transition == null) {
+            throw new IllegalArgumentException(
+                "AutomatonTransition cannot be null");
+        }
+
+        BasicRegexp re = (BasicRegexp)transition.getData();
         switch (re.getOperator()) {
         case NONE:
             return null; // No operator to breakdown, nothing to do
         case STAR:
         case PLUS:
-            return new BreakdownIterationCommand(automaton, t,
-                BreakdownIterationCommand.calcBestIsolationLevel(automaton, t));
+            return new BreakdownIterationCommand(automaton, transition,
+                    BreakdownIterationCommand.calcBestIsolationLevel(automaton,
+                            transition));
         case OPTION:
-            return new BreakdownOptionCommand(automaton, t);
+            return new BreakdownOptionCommand(automaton, transition);
         case SEQUENCE:
-            return new BreakdownSequenceCommand(automaton, t);
+            return new BreakdownSequenceCommand(automaton, transition);
         case CHOICE:
-            return new BreakdownChoiceCommand(automaton, t);
+            return new BreakdownChoiceCommand(automaton, transition);
         default:
-            throw new UnsupportedOperationException("BUG: Translation not implemented for given operator");
+            throw new UnsupportedOperationException(
+                "BUG: Translation not implemented for operator "
+                            + re.getOperator().toString());
         }
     }
 }

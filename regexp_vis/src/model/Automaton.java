@@ -82,6 +82,15 @@ public class Automaton {
 
     public Automaton()
     {
+        clear();
+    }
+
+    /**
+     * Clear all states and transitions, and reset counters.
+     */
+    public void clear() {
+        mTransCounter = 0;
+        mCounter = 0;
         mGraph = new HashMap<>();
         mStartState = new AutomatonState(mCounter++);
         mGraph.put(mStartState.getId(), new StateTransitionsPair(mStartState));
@@ -363,5 +372,28 @@ public class Automaton {
     public Iterator<StateTransitionsPair> graphIterator()
     {
         return new GraphIterator();
+    }
+
+    public AutomatonState getAutomatonStateById(int id)
+    {
+        StateTransitionsPair pair = mGraph.get(id);
+        if (pair == null) {
+            return null;
+        }
+        
+        return pair.getState();
+    }
+
+    public AutomatonTransition getAutomatonTransitionById(int id)
+    {
+        for (StateTransitionsPair pair : mGraph.values()) {
+            for (AutomatonTransition t : pair.getTransitions()) {
+                if (t.getId() == id) {
+                    return t;
+                }
+            }
+        }
+
+        return null;
     }
 }

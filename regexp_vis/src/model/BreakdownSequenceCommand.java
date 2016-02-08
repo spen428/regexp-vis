@@ -7,6 +7,8 @@ import java.util.*;
  * of simpler transitions. For the regular expression to NFA conversion process.
  */
 public class BreakdownSequenceCommand extends BreakdownCommand {
+    private int mNewTransitionsCount;
+    
     /**
      * @param automaton The automaton for the transition
      * @param t The transition to break down
@@ -28,6 +30,7 @@ public class BreakdownSequenceCommand extends BreakdownCommand {
         }
 
         mCommands.add(new RemoveTransitionCommand(automaton, t));
+        mNewTransitionsCount = re.getOperands().size();
 
         AutomatonState prevState = from;
         Iterator<BasicRegexp> it = re.getOperands().iterator();
@@ -46,5 +49,14 @@ public class BreakdownSequenceCommand extends BreakdownCommand {
             mCommands.add(new AddTransitionCommand(automaton, newTrans));
             prevState = nextState;
         }
+    }
+    
+    /**
+     * @return The number of new transitions this breakdown will create, e.g. 
+     * "abc" will breakdown into 3 transitions "a", "b" and "c"
+     */
+    public int getNewTransitionsCount()
+    {
+        return this.mNewTransitionsCount;
     }
 }

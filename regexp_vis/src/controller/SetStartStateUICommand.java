@@ -1,11 +1,12 @@
-package ui;
+package controller;
 
 import model.AddStateCommand;
 import model.AutomatonState;
+import view.GraphCanvasFX;
 
 /**
  * Command to set the start state of the graph
- * 
+ *
  * @author sp611
  */
 public class SetStartStateUICommand extends UICommand {
@@ -19,19 +20,19 @@ public class SetStartStateUICommand extends UICommand {
     private final AutomatonState state;
     private AutomatonState oldStartState;
 
-    public SetStartStateUICommand(Graph graph, AutomatonState state) {
+    public SetStartStateUICommand(GraphCanvasFX graph, AutomatonState state) {
         super(graph, new AddStateCommand(null, state)); // Hack to prevent NPE
         this.state = state;
     }
 
     @Override
     public void redo() {
-        oldStartState = graph.getStartState();
-        graph.setStartState(state);
+        //oldStartState = graph.getStartState();
+        //graph.setStartState(state);
     }
 
     @Override
     public void undo() {
-        graph.setStartState(oldStartState);
+        //graph.setStartState(oldStartState);
     }
 }
