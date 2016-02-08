@@ -1,4 +1,4 @@
-package test.view;
+package test.controller;
 
 import javafx.application.Application;
 import javafx.scene.input.MouseButton;

@@ -23,12 +23,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Automaton;
-import view.Activity;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
-import view.NfaToDfaActivity;
-import view.NfaToRegexpActivity;
-import view.RegexpBreakdownActivity;
 
 public class RegexpVisApp {
 

@@ -1,8 +1,8 @@
-package test.view;
+package test.controller;
 
+import controller.Activity;
 import controller.RegexpVisApp;
 import javafx.stage.Stage;
-import view.Activity;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 
