@@ -1,17 +1,17 @@
 package model;
 
 public final class TranslationTools {
-
     public static BreakdownCommand createBreakdownCommand(Automaton automaton,
-            AutomatonTransition transition) {
+        AutomatonTransition transition)
+    {
         if (automaton == null) {
             throw new IllegalArgumentException("Automaton cannot be null");
         } else if (transition == null) {
             throw new IllegalArgumentException(
-                    "AutomatonTransition cannot be null");
+                "AutomatonTransition cannot be null");
         }
 
-        BasicRegexp re = (BasicRegexp) transition.getData();
+        BasicRegexp re = (BasicRegexp)transition.getData();
         switch (re.getOperator()) {
         case NONE:
             return null; // No operator to breakdown, nothing to do
@@ -28,9 +28,8 @@ public final class TranslationTools {
             return new BreakdownChoiceCommand(automaton, transition);
         default:
             throw new UnsupportedOperationException(
-                    "Translation not implemented for operator "
+                "BUG: Translation not implemented for operator "
                             + re.getOperator().toString());
         }
     }
-
 }

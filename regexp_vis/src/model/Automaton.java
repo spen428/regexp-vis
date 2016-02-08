@@ -95,7 +95,7 @@ public class Automaton {
         mStartState = new AutomatonState(mCounter++);
         mGraph.put(mStartState.getId(), new StateTransitionsPair(mStartState));
     }
-    
+
     /**
      * @return The start state for this automaton.
      */
