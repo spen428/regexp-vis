@@ -190,7 +190,7 @@ public final class GraphCanvasFX extends Canvas {
 
     public GraphEdge lookupEdge(int id)
     {
-        // TODO: Not too efficient, my be a good idea to store the edges in a
+        // TODO: Not too efficient, might be a good idea to store the edges in a
         // map as well
         for (NodeEdgePair pair : mGraph.values()) {
             for (GraphEdge e : pair.mEdges) {
@@ -277,15 +277,9 @@ public final class GraphCanvasFX extends Canvas {
         }
 
         // Check a transition doesn't already exist
-        for (GraphEdge edge : pair.mEdges) {
-            if (edge.mId == id) {
-                throw new RuntimeException("Edge ID already exists");
-            }
-        }
-        for (GraphEdge edge : pair.mLoopedEdges) {
-            if (edge.mId == id) {
-                throw new RuntimeException("Edge ID already exists");
-            }
+        GraphEdge oldEdge = lookupEdge(id);
+        if (oldEdge != null) {
+            throw new RuntimeException("Edge ID already exists");
         }
 
         GraphEdge e = new GraphEdge(id, from, to, text);
@@ -304,30 +298,20 @@ public final class GraphCanvasFX extends Canvas {
 
     public void removeEdge(int id)
     {
-        NodeEdgePair pair = mGraph.get(id);
-        if (pair == null) {
-            throw new RuntimeException("Node ID doesn't exist");
+        // Find the edge
+        GraphEdge oldEdge = lookupEdge(id);
+        if (oldEdge == null) {
+            throw new RuntimeException("Edge ID doesn't exist");
         }
 
-        // Check a transition doesn't already exist
-        Iterator<GraphEdge> it = pair.mEdges.iterator();
-        while (it.hasNext()) {
-            GraphEdge edge = it.next();
-            if (edge.mId == id) {
-                it.remove();
-                return;
-            }
+        // And remove it
+        NodeEdgePair pair = mGraph.get(oldEdge.mFrom.getId());
+        if (pair.mEdges.remove(oldEdge)) {
+            return;
         }
-        it = pair.mLoopedEdges.iterator();
-        while (it.hasNext()) {
-            GraphEdge edge = it.next();
-            if (edge.mId == id) {
-                it.remove();
-                return;
-            }
+        if (pair.mLoopedEdges.remove(oldEdge)) {
+            return;
         }
-
-        throw new RuntimeException("Edge ID doesn't exists");
     }
 
     private final static double DEFAULT_NODE_RADIUS = 20;
