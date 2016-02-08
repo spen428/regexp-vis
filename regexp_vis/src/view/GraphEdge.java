@@ -55,8 +55,9 @@ public class GraphEdge {
         mTextHeight = -1.0;
     }
     
-    public int getId() {
-        return this.mId;
+    public int getId()
+    {
+        return mId;
     }
     
 }

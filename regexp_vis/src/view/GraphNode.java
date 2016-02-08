@@ -36,31 +36,32 @@ public class GraphNode {
 
     public GraphNode(int id, double x, double y, double r, boolean startStyle, boolean finalStyle)
     {
-        this.mId = id;
-        this.mX = x;
-        this.mY = y;
-        this.mRadius = r;
-        this.mUseStartStateStyle = startStyle;
-        this.mUseFinalStateStyle = finalStyle;
+        mId = id;
+        mX = x;
+        mY = y;
+        mRadius = r;
+        mUseStartStateStyle = startStyle;
+        mUseFinalStateStyle = finalStyle;
 
         // Loops are on top by default
-        this.mLoopDirVecX = 0;
-        this.mLoopDirVecY = -1;
+        mLoopDirVecX = 0;
+        mLoopDirVecY = -1;
         //mLoopDirNormalVecX = -mLoopDirVecY;
         //mLoopDirNormalVecY = mLoopDirVecX;
     }
 
     public double getX()
     {
-        return this.mX;
+        return mX;
     }
 
     public double getY()
     {
-        return this.mY;
+        return mY;
     }
     
-    public int getId() {
-        return this.mId;
+    public int getId()
+    {
+        return mId;
     }
 }

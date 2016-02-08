@@ -30,7 +30,8 @@ public class AddStateUICommand extends UICommand {
 
     @Override
     public void redo() {
-        this.graph.addNode(this.ccmd.getState().getId(), this.location);
+        this.graph.addNode(this.ccmd.getState().getId(), this.location.getX(),
+                this.location.getY());
         this.ccmd.redo();
     }
 
