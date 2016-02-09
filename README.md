@@ -13,10 +13,9 @@ under `doc`, and miscellaneous tools and scripts under `tools`.
 
 `regexp_vis` is further subdivided into modules. The project is
 inspired by the Model-View-Controller (MVC) architecture design
-pattern, however the main distinction currently is between the Model
-(the `model` package) and the View and Controller combined (the `ui`
-package). Accompanying unit tests are in packages `test.model` and
-`test.ui`.
+pattern, with the bulk of the code organised into the `model`,
+`view` and `controller` packages. Accompanying unit tests are in
+packages `test.model`,`test.view`, and `test.controller`.
 
 We have also retained some demo code written to test the *Jython* programming
 language, as we initially considered using that language so that we could
