@@ -1,12 +1,19 @@
 package test.model;
 
-import static org.junit.Assert.*;
-import model.*;
-import java.util.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.LinkedList;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import model.Automaton;
+import model.AutomatonState;
+import model.AutomatonTransition;
 
 public class AutomatonTest {
     private Automaton mAutomaton;

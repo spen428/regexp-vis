@@ -1,18 +1,20 @@
 package test.view;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import model.AddStateCommand;
 import model.AddTransitionCommand;
 import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
 import model.CommandHistory;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import ui.Graph;
 
 public class GraphTest {
 

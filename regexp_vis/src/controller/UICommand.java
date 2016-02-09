@@ -1,7 +1,5 @@
 package controller;
 
-import com.sun.corba.se.impl.orbutil.graph.Graph;
-
 import javafx.geometry.Point2D;
 import model.AddStateCommand;
 import model.AddTransitionCommand;
@@ -21,7 +19,7 @@ import view.GraphCanvasFX;
  * Extends {@link Command} to facilitate UI-side command history.
  * <p>
  * Calling {@link #undo()} or {@link #redo()} will apply changes to both the
- * {@link Graph} and the {@link Automaton}.
+ * {@link GraphCanvasFX} and the {@link Automaton}.
  *
  * @author sp611
  *
@@ -42,7 +40,7 @@ public abstract class UICommand extends Command {
      * Convert a {@link Command} into a {@link UICommand}
      *
      * @param graph
-     *            the {@link Graph}
+     *            the {@link GraphCanvasFX}
      * @param cmd
      *            the {@link Command}
      *

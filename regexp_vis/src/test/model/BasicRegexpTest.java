@@ -1,11 +1,14 @@
 package test.model;
 
-import static org.junit.Assert.*;
-import model.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import model.BasicRegexp;
+import model.InvalidRegexpException;
 
 public class BasicRegexpTest {
 

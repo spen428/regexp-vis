@@ -35,7 +35,7 @@ public class RemoveStateUICommand extends UICommand {
     @Override
     public void undo() {
         GraphNode nodeFrom = this.graph.addNode(this.ccmd.getState().getId(),
-                this.location);
+                this.location.getX(), this.location.getY());
 
         for (AutomatonTransition t : this.ccmd.getTransitions()) {
             GraphNode nodeTo = this.graph.lookupNode(t.getTo().getId());
