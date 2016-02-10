@@ -2,7 +2,6 @@ package view;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
