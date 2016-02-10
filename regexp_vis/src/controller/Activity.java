@@ -21,6 +21,22 @@ import model.InvalidRegexpException;
  */
 public abstract class Activity<T extends Event> {
 
+    enum ActivityType {
+        ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"),
+        ACTIVITY_NFA_TO_REGEXP("Convert NFA to Regular Expression"),
+        ACTIVITY_NFA_TO_DFA("Convert NFA to DFA");
+
+        private final String text;
+
+        private ActivityType(String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return this.text;
+        }
+    }
+
     protected final GraphCanvasFX canvas;
     protected final Automaton automaton;
 

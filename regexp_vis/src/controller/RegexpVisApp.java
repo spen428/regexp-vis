@@ -57,22 +57,6 @@ public class RegexpVisApp {
     protected Activity<GraphCanvasEvent> currentActivity;
     protected boolean enterKeyDown;
 
-    enum ActivityType {
-        ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"),
-        ACTIVITY_NFA_TO_REGEXP("Convert NFA to Regular Expression"),
-        ACTIVITY_NFA_TO_DFA("Convert NFA to DFA");
-
-        private final String text;
-
-        private ActivityType(String text) {
-            this.text = text;
-        }
-
-        public String getText() {
-            return this.text;
-        }
-    }
-
     public RegexpVisApp(Stage stage) {
         final VBox root = new VBox();
         final HBox canvasContainer = new HBox();
@@ -109,12 +93,12 @@ public class RegexpVisApp {
 
         // --- Menu Activity
         Menu menuActivity = new Menu("Activity");
-        ActivityType[] actTypes = ActivityType.values();
+        Activity.ActivityType[] actTypes = Activity.ActivityType.values();
         this.activityMenuItems = new CheckMenuItem[actTypes.length];
         for (int i = 0; i < actTypes.length; i++) {
             final CheckMenuItem item = new CheckMenuItem(actTypes[i].getText());
             this.activityMenuItems[i] = item;
-            final ActivityType act = actTypes[i];
+            final Activity.ActivityType act = actTypes[i];
             item.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent t) {
@@ -264,18 +248,18 @@ public class RegexpVisApp {
 
         /* Init fields */
         this.automaton = new Automaton();
-        this.activities = new Activity[ActivityType.values().length];
+        this.activities = new Activity[Activity.ActivityType.values().length];
         /* Using ordinals of enum to prevent misordering */
-        this.activities[ActivityType.ACTIVITY_REGEXP_BREAKDOWN
+        this.activities[Activity.ActivityType.ACTIVITY_REGEXP_BREAKDOWN
                 .ordinal()] = new RegexpBreakdownActivity(this.mCanvas,
                         this.automaton);
-        this.activities[ActivityType.ACTIVITY_NFA_TO_DFA
+        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_DFA
                 .ordinal()] = new NfaToDfaActivity(this.mCanvas,
                         this.automaton);
-        this.activities[ActivityType.ACTIVITY_NFA_TO_REGEXP
+        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_REGEXP
                 .ordinal()] = new NfaToRegexpActivity(this.mCanvas,
                         this.automaton);
-        setActivity(ActivityType.ACTIVITY_REGEXP_BREAKDOWN);
+        setActivity(Activity.ActivityType.ACTIVITY_REGEXP_BREAKDOWN);
 
         stage.setTitle(WINDOW_TITLE);
         stage.setScene(scene);
@@ -288,7 +272,7 @@ public class RegexpVisApp {
         System.exit(0);
     }
 
-    protected void setActivity(ActivityType actType) {
+    protected void setActivity(Activity.ActivityType actType) {
         if (actType == null) {
             throw new IllegalArgumentException();
         }
