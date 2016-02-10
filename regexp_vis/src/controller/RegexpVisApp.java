@@ -20,6 +20,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Automaton;
@@ -179,14 +180,14 @@ public class RegexpVisApp {
         buttonBackToStart.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
-                currentActivity.historyStart();
+                RegexpVisApp.this.currentActivity.historyStart();
             }
         });
         Button buttonBack = new Button("<--");
         buttonBack.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
-                currentActivity.historyPrev();
+                RegexpVisApp.this.currentActivity.historyPrev();
             }
         });
         Button buttonLoad = new Button("Load");
@@ -195,27 +196,31 @@ public class RegexpVisApp {
         buttonForward.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
-                currentActivity.historyNext();
+                RegexpVisApp.this.currentActivity.historyNext();
             }
         });
         Button buttonForwardToEnd = new Button(">>|");
         buttonForwardToEnd.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
-                currentActivity.historyEnd();
+                RegexpVisApp.this.currentActivity.historyEnd();
             }
         });
-        buttonPanel.getChildren().addAll(buttonBackToStart, buttonBack, buttonLoad,
-                buttonSave, buttonForward, buttonForwardToEnd);
+        buttonPanel.getChildren().addAll(buttonBackToStart, buttonBack,
+                buttonLoad, buttonSave, buttonForward, buttonForwardToEnd);
         controlPanel.getChildren().add(buttonPanel);
 
+        final HBox inputPanel = new HBox();
         final TextField textField = new TextField(TEXTFIELD_PROMPT);
         textField.setPadding(new Insets(5));
+        HBox.setHgrow(textField, Priority.ALWAYS);
+        Button buttonEnter = new Button("Enter");
+        inputPanel.getChildren().addAll(textField, buttonEnter);
         controlPanel.setPadding(new Insets(CONTROL_PANEL_PADDING_VERTICAL_PX,
                 CONTROL_PANEL_PADDING_HORIZONTAL_PX,
                 CONTROL_PANEL_PADDING_VERTICAL_PX,
                 CONTROL_PANEL_PADDING_HORIZONTAL_PX));
-        controlPanel.getChildren().add(textField);
+        controlPanel.getChildren().add(inputPanel);
         root.getChildren().add(controlPanel);
 
         // Textfield focus listener
@@ -260,6 +265,15 @@ public class RegexpVisApp {
             public void handle(KeyEvent event) {
                 if (event.getCode() == KeyCode.ENTER) {
                     RegexpVisApp.this.enterKeyDown = false;
+                }
+            }
+        });
+        buttonEnter.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String input = textField.getText().trim();
+                if (!input.isEmpty()) {
+                    onEnteredRegexp(input);
                 }
             }
         });
