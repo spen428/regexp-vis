@@ -4,7 +4,7 @@
 
 <project name="regexp_vis" default="jar" basedir=".">
 
-    <property name="mainclass" value="main.Main" />
+    <property name="mainclass" value="controller.Main" />
 
     <target name="all" depends="clean, test, jar" />
 
