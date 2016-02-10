@@ -1,12 +1,12 @@
 package controller;
 
-import view.GraphCanvasEvent;
-import view.GraphCanvasFX;
-import view.GraphEdge;
 import model.Automaton;
 import model.AutomatonTransition;
 import model.BreakdownCommand;
 import model.TranslationTools;
+import view.GraphCanvasEvent;
+import view.GraphCanvasFX;
+import view.GraphEdge;
 
 /**
  * 
@@ -41,13 +41,9 @@ public class RegexpBreakdownActivity extends Activity<GraphCanvasEvent> {
             return;
         }
 
-        BreakdownCommand cmd = TranslationTools
-                .createBreakdownCommand(this.automaton, trans);
-        UICommand uiCmd = UICommand.fromCommand(this.canvas, cmd);
-        if (uiCmd != null) {
-            uiCmd.redo();
-            // TODO: Add to history
-        }
+        BreakdownCommand cmd = TranslationTools.createBreakdownCommand(
+                this.automaton, trans);
+        super.executeNewCommand(cmd);
     }
 
 }

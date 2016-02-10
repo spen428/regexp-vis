@@ -47,9 +47,7 @@ public class NfaToDfaActivity extends Activity<GraphCanvasEvent> {
                     .getAutomatonTransitionById(edge.getId());
             BasicRegexp re = (BasicRegexp) transition.getData();
             if (re.getChar() == BasicRegexp.EPSILON_CHAR) {
-                UICommand cmd = UICommand.fromCommand(this.canvas,
-                        new RemoveTransitionCommand(automaton, transition));
-                super.executeNewCommand(cmd);
+                super.executeNewCommand(new RemoveTransitionCommand(automaton, transition));
             }
         }
 
