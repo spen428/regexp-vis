@@ -175,10 +175,38 @@ public class RegexpVisApp {
         buttonPanel.setMinSize(0, BUTTON_PANEL_PADDING_PX * 2);
         buttonPanel.setPadding(new Insets(BUTTON_PANEL_PADDING_PX));
         buttonPanel.setAlignment(Pos.CENTER);
-        buttonPanel.getChildren().addAll(new Button("|<<"), new Button("<--"),
-                new Button("Load"), new Button("Save"),
-                new Button("Self-Destruct"), new Button("-->"),
-                new Button(">>|"));
+        Button buttonBackToStart = new Button("|<<");
+        buttonBackToStart.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                currentActivity.historyStart();
+            }
+        });
+        Button buttonBack = new Button("<--");
+        buttonBack.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                currentActivity.historyPrev();
+            }
+        });
+        Button buttonLoad = new Button("Load");
+        Button buttonSave = new Button("Save");
+        Button buttonForward = new Button("-->");
+        buttonForward.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                currentActivity.historyNext();
+            }
+        });
+        Button buttonForwardToEnd = new Button(">>|");
+        buttonForwardToEnd.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                currentActivity.historyEnd();
+            }
+        });
+        buttonPanel.getChildren().addAll(buttonBackToStart, buttonBack, buttonLoad,
+                buttonSave, buttonForward, buttonForwardToEnd);
         controlPanel.getChildren().add(buttonPanel);
 
         final TextField textField = new TextField(TEXTFIELD_PROMPT);

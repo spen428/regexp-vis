@@ -115,4 +115,12 @@ public abstract class Activity<T extends Event> {
         this.history.seekIdx(idx);
     }
 
+    void historyStart() {
+        this.history.seekIdx(0);
+    }
+
+    void historyEnd() {
+        this.history.seekIdx(this.history.getHistorySize());
+    }
+
 }
