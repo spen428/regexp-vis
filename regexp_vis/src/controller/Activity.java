@@ -2,9 +2,6 @@ package controller;
 
 import java.util.LinkedList;
 
-import view.GraphCanvasFX;
-import view.GraphEdge;
-import view.GraphNode;
 import javafx.event.Event;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -12,7 +9,11 @@ import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
 import model.BasicRegexp;
+import model.CommandHistory;
 import model.InvalidRegexpException;
+import view.GraphCanvasFX;
+import view.GraphEdge;
+import view.GraphNode;
 
 /**
  * 
@@ -40,13 +41,13 @@ public abstract class Activity<T extends Event> {
     protected final GraphCanvasFX canvas;
     protected final Automaton automaton;
 
-    public Activity(GraphCanvasFX canvas, Automaton automaton) {
+    Activity(GraphCanvasFX canvas, Automaton automaton) {
         super();
         this.canvas = canvas;
         this.automaton = automaton;
     }
 
-    public void onEnteredRegexp(String text) {
+    void onEnteredRegexp(String text) {
         System.out.printf("Entered regexp: %s%n", text);
         BasicRegexp re = null;
         try {
@@ -81,6 +82,6 @@ public abstract class Activity<T extends Event> {
                 re.toString());
     }
 
-    public abstract void processEvent(T event);
+    abstract void processEvent(T event);    
 
 }
