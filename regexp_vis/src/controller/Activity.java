@@ -40,14 +40,16 @@ public abstract class Activity<T extends Event> {
 
     protected final GraphCanvasFX canvas;
     protected final Automaton automaton;
+    protected final CommandHistory history;
 
     Activity(GraphCanvasFX canvas, Automaton automaton) {
         super();
         this.canvas = canvas;
         this.automaton = automaton;
+        this.history = new CommandHistory();
     }
 
-    void onEnteredRegexp(String text) {
+    public void onEnteredRegexp(String text) {
         System.out.printf("Entered regexp: %s%n", text);
         BasicRegexp re = null;
         try {
@@ -82,6 +84,19 @@ public abstract class Activity<T extends Event> {
                 re.toString());
     }
 
-    abstract void processEvent(T event);    
+    public abstract void processEvent(T event);
+
+    // Expose CommandHistory methods, except for executeNewCommand()
+    void historyPrev() {
+        this.history.prev();
+    }
+
+    void historyNext() {
+        this.history.next();
+    }
+
+    void historySeek(int idx) {
+        this.history.seekIdx(idx);
+    }
 
 }
