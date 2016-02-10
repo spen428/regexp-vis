@@ -27,6 +27,12 @@ public class RegexpBreakdownActivity extends Activity<GraphCanvasEvent> {
     }
 
     private void onEdgeDoubleClick(GraphCanvasEvent event) {
+        if (this.history.getHistoryIdx() != this.history.getHistorySize()) {
+            System.out.println("Ignoring breakdown event as we are not at the "
+                    + "end of the history list.");
+            return;
+        }
+
         GraphEdge edge = event.getTargetEdge();
         if (edge == null) {
             return;
@@ -41,8 +47,8 @@ public class RegexpBreakdownActivity extends Activity<GraphCanvasEvent> {
             return;
         }
 
-        BreakdownCommand cmd = TranslationTools.createBreakdownCommand(
-                this.automaton, trans);
+        BreakdownCommand cmd = TranslationTools
+                .createBreakdownCommand(this.automaton, trans);
         super.executeNewCommand(cmd);
     }
 
