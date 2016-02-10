@@ -1,12 +1,17 @@
 package model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Observable;
 
 /**
  * Stores a history of commands for rewind and playback
+ * 
+ * Extends {@link Observable}, sending the current value of
+ * {@link CommandHistory#mHistoryIdx} to all observers.
  * @see Command
  */
-public class CommandHistory {
+public class CommandHistory extends Observable {
+
     private final ArrayList<Command> mCommandList;
     private int mHistoryIdx;
 
@@ -49,6 +54,8 @@ public class CommandHistory {
         }
 
         mCommandList.get(--mHistoryIdx).undo();
+        this.setChanged();
+        this.notifyObservers(mHistoryIdx);
     }
 
     /**
@@ -61,6 +68,8 @@ public class CommandHistory {
         }
 
         mCommandList.get(mHistoryIdx++).redo();
+        this.setChanged();
+        this.notifyObservers(mHistoryIdx);
     }
 
     /**
@@ -90,6 +99,8 @@ public class CommandHistory {
         while (idx < mHistoryIdx) {
             mCommandList.get(--mHistoryIdx).undo();
         }
+        this.setChanged();
+        this.notifyObservers(mHistoryIdx);
     }
 
     /**
@@ -108,5 +119,13 @@ public class CommandHistory {
         mCommandList.add(cmd);
         cmd.redo();
         mHistoryIdx++;
+        this.setChanged();
+        this.notifyObservers(mHistoryIdx);
     }
+
+    public void clear() {
+        mCommandList.clear();
+        mHistoryIdx = 0;
+    }
+
 }

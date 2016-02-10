@@ -1,7 +1,11 @@
 package controller;
 
+import java.util.Observable;
+import java.util.Observer;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -27,13 +31,14 @@ import model.Automaton;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 
-public class RegexpVisApp {
+public class RegexpVisApp implements Observer {
 
     /* Finals */
     final CheckMenuItem[] activityMenuItems;
     private final Activity<GraphCanvasEvent>[] activities;
     private final Automaton automaton;
     protected final GraphCanvasFX mCanvas;
+    final ListView<String> historyList;
 
     /* Constants */
     private static final String CONTROL_PANEL_HIDE_TEXT = "Hide Control Panel";
@@ -61,7 +66,7 @@ public class RegexpVisApp {
     public RegexpVisApp(Stage stage) {
         final VBox root = new VBox();
         final HBox canvasContainer = new HBox();
-        final ListView<String> historyList = new ListView<>();
+        this.historyList = new ListView<>();
         final VBox controlPanel = new VBox();
 
         Scene scene = new Scene(root, 800, 600);
@@ -115,10 +120,14 @@ public class RegexpVisApp {
         menuViewHistory.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                historyList.setVisible(!historyList.isVisible());
-                historyList.setManaged(historyList.isVisible());
-                menuViewHistory.setText(historyList.isVisible()
-                        ? HISTORY_LIST_HIDE_TEXT : HISTORY_LIST_SHOW_TEXT);
+                RegexpVisApp.this.historyList
+                        .setVisible(!RegexpVisApp.this.historyList.isVisible());
+                RegexpVisApp.this.historyList
+                        .setManaged(RegexpVisApp.this.historyList.isVisible());
+                menuViewHistory
+                        .setText(RegexpVisApp.this.historyList.isVisible()
+                                ? HISTORY_LIST_HIDE_TEXT
+                                : HISTORY_LIST_SHOW_TEXT);
             }
         });
         final MenuItem menuViewControlPanel = new MenuItem(
@@ -162,12 +171,9 @@ public class RegexpVisApp {
         canvasContainer.getChildren().add(this.mCanvas);
 
         // History list also part of the canvas container
-        for (int i = 0; i < 33; i++) {
-            historyList.getItems().add("Step " + i);
-        }
-        historyList.setMinWidth(HISTORY_LIST_WIDTH_PX);
-        historyList.setMaxWidth(HISTORY_LIST_WIDTH_PX);
-        canvasContainer.getChildren().add(historyList);
+        this.historyList.setMinWidth(HISTORY_LIST_WIDTH_PX);
+        this.historyList.setMaxWidth(HISTORY_LIST_WIDTH_PX);
+        canvasContainer.getChildren().add(this.historyList);
 
         root.getChildren().add(canvasContainer);
         this.mCanvas.requestFocus(); // Pulls focus away from the text field
@@ -318,7 +324,25 @@ public class RegexpVisApp {
         if (actType == null) {
             throw new IllegalArgumentException();
         }
+
+        /* Observe only the current CommandHistory */
+        if (this.currentActivity != null) {
+            this.currentActivity.history.deleteObserver(this);
+        }
         this.currentActivity = this.activities[actType.ordinal()];
+        this.currentActivity.history.addObserver(this);
+
+        /* Update history list */
+        this.historyList.getItems().clear();
+        if (this.currentActivity.history.getHistorySize() > 0) {
+            // If it's empty, we 'll add the Step 0 in onEnteredRegexp() instead
+            for (int i = 0; i <= this.currentActivity.history
+                    .getHistorySize(); i++) {
+                // 1 extra, so that "Step 0" is the inital state
+                this.historyList.getItems().add("Step " + i);
+            }
+        }
+
         /*
          * Set "checked" status of all menu items to reflect the change of
          * activity
@@ -340,7 +364,24 @@ public class RegexpVisApp {
 
     void onEnteredRegexp(String text) {
         if (this.currentActivity != null) {
+            this.historyList.getItems().clear();
+            this.historyList.getItems().add("Step 0");
+            this.currentActivity.history.clear();
             this.currentActivity.onEnteredRegexp(text);
+        }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        /* Called whenever CommandHistory of current Activity changes */
+        if (arg instanceof Integer) {
+            int idx = (int) arg;
+            ObservableList<String> items = this.historyList.getItems();
+            if (items.size() <= idx) {
+                items.add("Step " + idx);
+            } else {
+                this.historyList.getSelectionModel().select(idx);
+            }
         }
     }
 

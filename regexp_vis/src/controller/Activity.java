@@ -24,9 +24,9 @@ import view.GraphNode;
 public abstract class Activity<T extends Event> {
 
     enum ActivityType {
-        ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"), ACTIVITY_NFA_TO_REGEXP(
-                "Convert NFA to Regular Expression"), ACTIVITY_NFA_TO_DFA(
-                "Convert NFA to DFA");
+        ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"),
+        ACTIVITY_NFA_TO_REGEXP("Convert NFA to Regular Expression"),
+        ACTIVITY_NFA_TO_DFA("Convert NFA to DFA");
 
         private final String text;
 
@@ -69,8 +69,8 @@ public abstract class Activity<T extends Event> {
         // TODO: Add the following to history
         AutomatonState startState = this.automaton.getStartState();
         AutomatonState finalState = this.automaton.createNewState();
-        AutomatonTransition trans = this.automaton.createNewTransition(
-                startState, finalState, re);
+        AutomatonTransition trans = this.automaton
+                .createNewTransition(startState, finalState, re);
         finalState.setFinal(true);
         this.automaton.addStateWithTransitions(finalState,
                 new LinkedList<AutomatonTransition>());
