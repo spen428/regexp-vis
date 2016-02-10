@@ -28,6 +28,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Automaton;
+import model.CommandHistory;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 
@@ -173,6 +174,15 @@ public class RegexpVisApp implements Observer {
         // History list also part of the canvas container
         this.historyList.setMinWidth(HISTORY_LIST_WIDTH_PX);
         this.historyList.setMaxWidth(HISTORY_LIST_WIDTH_PX);
+        this.historyList.getSelectionModel().selectedIndexProperty()
+                .addListener(new ChangeListener<Number>() {
+                    @Override
+                    public void changed(
+                            ObservableValue<? extends Number> observable,
+                            Number oldValue, Number newValue) {
+                        RegexpVisApp.this.setHistoryIdx(newValue);
+                    }
+                });
         canvasContainer.getChildren().add(this.historyList);
 
         root.getChildren().add(canvasContainer);
@@ -202,6 +212,7 @@ public class RegexpVisApp implements Observer {
         buttonForward.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
+                // TODO: Breakdown next edge if at end of history?
                 RegexpVisApp.this.currentActivity.historyNext();
             }
         });
@@ -209,6 +220,7 @@ public class RegexpVisApp implements Observer {
         buttonForwardToEnd.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
+                // TODO: Breakdown all edges if at end of history?
                 RegexpVisApp.this.currentActivity.historyEnd();
             }
         });
@@ -314,6 +326,22 @@ public class RegexpVisApp implements Observer {
         stage.show();
     }
 
+    /**
+     * Called by the {@link ListView} component to perform a
+     * {@link CommandHistory} seek when a list item is selected.
+     * 
+     * @param idx
+     *            the historyIdx to seek to
+     */
+    protected void setHistoryIdx(Number value) {
+        int idx = (int) value;
+        // Note: called with value -1 when the history is reset.
+        if (idx >= 0) {
+            this.currentActivity.history.seekIdx(idx);
+            this.historyList.getSelectionModel().select(idx);
+        }
+    }
+
     protected static void exitApplication() {
         // TODO Confirm exit (unsaved changes, etc.)
         System.out.println("Exiting application...");
@@ -334,13 +362,11 @@ public class RegexpVisApp implements Observer {
 
         /* Update history list */
         this.historyList.getItems().clear();
-        if (this.currentActivity.history.getHistorySize() > 0) {
-            // If it's empty, we 'll add the Step 0 in onEnteredRegexp() instead
-            for (int i = 0; i <= this.currentActivity.history
-                    .getHistorySize(); i++) {
-                // 1 extra, so that "Step 0" is the inital state
-                this.historyList.getItems().add("Step " + i);
-            }
+        for (int i = 0; i <= this.currentActivity.history
+                .getHistorySize(); i++) {
+            // 1 extra, so that "Step 0" is the inital state
+            this.historyList.getItems().add("Step " + i);
+            this.historyList.getSelectionModel().select(i);
         }
 
         /*
@@ -366,6 +392,7 @@ public class RegexpVisApp implements Observer {
         if (this.currentActivity != null) {
             this.historyList.getItems().clear();
             this.historyList.getItems().add("Step 0");
+            this.historyList.getSelectionModel().select(0);
             this.currentActivity.history.clear();
             this.currentActivity.onEnteredRegexp(text);
         }
@@ -379,9 +406,8 @@ public class RegexpVisApp implements Observer {
             ObservableList<String> items = this.historyList.getItems();
             if (items.size() <= idx) {
                 items.add("Step " + idx);
-            } else {
-                this.historyList.getSelectionModel().select(idx);
             }
+            this.historyList.getSelectionModel().select(idx);
         }
     }
 
