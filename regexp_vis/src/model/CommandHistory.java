@@ -14,6 +14,12 @@ public class CommandHistory extends Observable {
 
     public static final boolean CLOBBER_BY_DEFAULT = false;
 
+    /**
+     * Value propogated to observers each time the last element of the history
+     * list is removed.
+     */
+    public static final int HISTORY_CLOBBERED = -2;
+
     private final ArrayList<Command> mCommandList;
     private int mHistoryIdx;
     private boolean clobber;
@@ -114,10 +120,19 @@ public class CommandHistory extends Observable {
      */
     public void executeNewCommand(Command cmd)
     {
-        if (mHistoryIdx != mCommandList.size()) {
-            throw new RuntimeException(
-                "Cannot execute new command while not and the end of the " +
-                "command list");
+        if (mHistoryIdx < mCommandList.size()) {
+            if (clobber) {
+                /* Overwrite (well, remove) history past this point */
+                while (mHistoryIdx < mCommandList.size()) {
+                    mCommandList.remove(mCommandList.size() - 1);
+                    this.setChanged();
+                    this.notifyObservers(HISTORY_CLOBBERED);
+                }
+            } else {
+                throw new RuntimeException(
+                    "Cannot execute new command while not and the end of the " +
+                    "command list");
+            }
         }
 
         mCommandList.add(cmd);

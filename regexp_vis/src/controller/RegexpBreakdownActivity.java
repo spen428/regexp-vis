@@ -27,7 +27,8 @@ public class RegexpBreakdownActivity extends Activity<GraphCanvasEvent> {
     }
 
     private void onEdgeDoubleClick(GraphCanvasEvent event) {
-        if (this.history.getHistoryIdx() != this.history.getHistorySize()) {
+        if (this.history.getHistoryIdx() != this.history.getHistorySize()
+                && !this.history.isClobbered()) {
             System.out.println("Ignoring breakdown event as we are not at the "
                     + "end of the history list.");
             return;

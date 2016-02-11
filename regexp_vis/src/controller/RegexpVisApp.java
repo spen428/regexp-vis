@@ -424,10 +424,18 @@ public class RegexpVisApp implements Observer {
         if (arg instanceof Integer) {
             int idx = (int) arg;
             ObservableList<String> items = this.historyList.getItems();
-            if (items.size() <= idx) {
-                items.add("Step " + idx);
+            if (idx == CommandHistory.HISTORY_CLOBBERED) {
+                /*
+                 * The last element of the history list was removed, we must
+                 * reflect this change in the UI.
+                 */
+                items.remove(items.size() - 1);
+            } else {
+                if (items.size() <= idx) {
+                    items.add("Step " + idx);
+                }
+                this.historyList.getSelectionModel().select(idx);
             }
-            this.historyList.getSelectionModel().select(idx);
         }
     }
 
