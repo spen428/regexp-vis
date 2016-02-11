@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -482,6 +483,8 @@ public final class GraphCanvasFX extends Canvas {
         edge.mTextX = textX;
         edge.mTextY = textY;
         edge.mTextAngle = textAngle;
+
+        edge.mMiddlePoint = new Point2D(midPointX, midPointY);
     }
 
     /**
@@ -596,6 +599,8 @@ public final class GraphCanvasFX extends Canvas {
         }
 
         // Draw label
+        double peakX = midPointX - absHeight * G_C_gradientVecX;
+        double peakY = midPointY - absHeight * G_C_gradientVecY;
         double textX = midPointX
                 - (absHeight + TEXT_POS_HEIGHT) * G_C_gradientVecX;
         double textY = midPointY
@@ -628,6 +633,8 @@ public final class GraphCanvasFX extends Canvas {
         edge.mArcCenterY = circleY;
         edge.mArcStartAngle = startAngle;
         edge.mArcExtent = arcExtent;
+
+        edge.mMiddlePoint = new Point2D(peakX, peakY);
     }
 
     /**
@@ -688,6 +695,10 @@ public final class GraphCanvasFX extends Canvas {
             edge.mArcRadius = tmpRadius;
             edge.mArcCenterX = n.mX;
             edge.mArcCenterY = n.mY;
+
+            double peakX = n.mX + tmpRadius * n.mLoopDirVecX;
+            double peakY = n.mY + tmpRadius * n.mLoopDirVecY;
+            edge.mMiddlePoint = new Point2D(peakX, peakY);
 
             updateEdgeLabelHitTestData(edge, textX, textY, loopDirNormalVecX,
                     loopDirNormalVecY, n.mLoopDirVecX, n.mLoopDirVecY);

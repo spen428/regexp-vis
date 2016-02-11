@@ -1,5 +1,7 @@
 package view;
 
+import javafx.geometry.Point2D;
+
 public class GraphEdge {
     final int mId;
     final GraphNode mFrom;
@@ -45,6 +47,8 @@ public class GraphEdge {
     double mArcStartAngle;
     double mArcExtent;
 
+    Point2D mMiddlePoint;
+
     public GraphEdge(int id, GraphNode from, GraphNode to, String text)
     {
         mId = id;
@@ -54,10 +58,24 @@ public class GraphEdge {
         mTextWidth = -1.0;
         mTextHeight = -1.0;
     }
-    
+
     public int getId()
     {
         return mId;
+    }
+
+    public boolean isRendered()
+    {
+        return mIsRendered;
+    }
+
+    /**
+     * @return The middle point of the edge, for a line this is the midpoint of
+     * the line, for an arc this is the peak of the arc.
+     */
+    public Point2D getEdgeMiddlePoint()
+    {
+        return mMiddlePoint;
     }
     
 }
