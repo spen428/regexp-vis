@@ -14,21 +14,37 @@ final class GraphUtils {
      */
     public static final double COS_30_DEG = Math.sqrt(3) * 0.5;
 
+    /**
+     * @param x The vector x component
+     * @param y The vector y component
+     * @return The length squared for the given vector
+     */
     public static double vecLengthSqr(double x, double y)
     {
         return x * x + y * y;
     }
 
+    /**
+     * @param x The vector x component
+     * @param y The vector y component
+     * @return The length for the given vector
+     */
     public static double vecLength(double x, double y)
     {
         return Math.sqrt(x * x + y * y);
     }
 
+    /**
+     * Calculates the angle (in degrees) of the specified vector on the circle,
+     * formed by going anti-clockwise.
+     *
+     * @param x The vector x component
+     * @param y The vector y component
+     * @param r The pre-calculated length of the vector
+     * @return The calculated angle
+     */
     public static double calcAngleOnCircle(double x, double y, double r)
     {
-        // TODO: document: assumption that parameter "r" is calculated correctly
-        //                 assumption circle is centred at (0,0)
-
         // Using the absolute value of y, so we always get a positive value for
         // theta
         double theta = Math.toDegrees(Math.asin(Math.abs(y) / r));
@@ -54,8 +70,8 @@ final class GraphUtils {
     }
 
     /**
-     * Calculates the angle to rotate text given a desired direction, adjusts 
-     * the angle such that text should always be display left-to-right to 
+     * Calculates the angle to rotate text given a desired direction, adjusts
+     * the angle such that text should always be display left-to-right to
      * improve readability.
      *
      * @param x The x component of the direction vector
@@ -76,9 +92,9 @@ final class GraphUtils {
     }
 
     /**
-     * Utility method used to calculate the "arcExtent" parameter of 
-     * GraphicsContext.strokeArc. Handles cases such as startAngle = 10, 
-     * endAngle = 350 producing 340 for example, as the result must be in the 
+     * Utility method used to calculate the "arcExtent" parameter of
+     * GraphicsContext.strokeArc. Handles cases such as startAngle = 10,
+     * endAngle = 350 producing 340 for example, as the result must be in the
      * [-180, 180] degree range.
      *
      * @param startAngle The starting angle for the arc
@@ -96,10 +112,20 @@ final class GraphUtils {
         return diffAngle;
     }
 
+    /**
+     * Calculate the intersection points for two circles, one centred at the
+     * origin of radius "r1", and the other centred a point (x2, y2) of radius
+     * "r2"
+     *
+     * @param r1 The radius of the circle centred at the origin
+     * @param x2 The x coordinate of the centre of the other circle
+     * @param y2 The y coordinate of the centre of the other circle
+     * @param r2 The x coordinate of the centre of the other circle
+     * @return The two calculated points, as an array. In the form {x1, y1, x2,
+     * y2}
+     */
     public static double[] calcCircleIntersectionPoints(double r1, double x2, double y2, double r2)
     {
-        // TODO: document: assume circle 1 is at the origin to simplify 
-        // equations
         double r1Sqr = r1 * r1;
         double x2Sqr = x2 * x2;
         double y2Sqr = y2 * y2;
@@ -133,22 +159,45 @@ final class GraphUtils {
         return new double[] {result1x, result1y, result2x, result2y};
     }
 
-    public static double[] filterArcIntersectionPoint(double[] points, double x1, double y1, double x2, double y2, double x3, double y3)
+    /**
+     * For the results calculated by calcCircleIntersectionPoints(). Returns the
+     * point which lies on the arc by using isPointInArcSection().
+     *
+     * @param points The points to test, as returned by
+     * calcCircleIntersectionPoints()
+     * @param x1 The x component of a vector specifying either end of the arc
+     * @param y1 The y component of a vector specifying either end of the arc
+     * @param x2 The x component of the vector which bisects the arc
+     * @param y2 The y component of the vector which bisects the arc
+     * @return A single point, as an array, or null if neither point is on the
+     * arc
+     */
+    public static double[] filterArcIntersectionPoint(double[] points, double x1, double y1, double x3, double y3)
     {
         if (points == null) {
             return null;
         }
 
-        if (isPointInArcSection(points[0], points[1], x1, y1, x2, y2, x3, y3)) {
+        if (isPointInArcSection(points[0], points[1], x1, y1, x3, y3)) {
             return new double[] {points[0], points[1]};
-        } else if (isPointInArcSection(points[2], points[3], x1, y1, x2, y2, x3, y3)) {
+        } else if (isPointInArcSection(points[2], points[3], x1, y1, x3, y3)) {
             return new double[] {points[2], points[3]};
         } else {
             return null;
         }
     }
 
-    public static boolean isPointInArcSection(double x, double y, double x1, double y1, double x2, double y2, double x3, double y3)
+    /**
+     * @param x The x coordinate of the point to test
+     * @param y The y coordinate of the point to test
+     * @param x1 The x component of a vector specifying either end of the arc
+     * @param y1 The y component of a vector specifying either end of the arc
+     * @param x2 The x component of the vector which bisects the arc
+     * @param y2 The y component of the vector which bisects the arc
+     * @return True if the point is between the angle formed by the arc, false 
+     * otherwise
+     */
+    public static boolean isPointInArcSection(double x, double y, double x1, double y1, double x3, double y3)
     {
         double invVecLength = 1 / vecLength(x3, y3);
         x3 *= invVecLength;
@@ -163,18 +212,32 @@ final class GraphUtils {
         return cosBeta > cosAlpha;
     }
 
+    /**
+     * Calculate two vectors around a given (unit) vector and given angle. The
+     * calculated vectors also both unit vectors.
+     *
+     * @param x0 The vector x component
+     * @param y0 The vector y component
+     * @param cosAlpha The cosine of the angle between the given vector, and the
+     * calculated vectors returned
+     * @return The two calculated vectors, as an array. In the form {x1, y1, x2,
+     * y2}
+     */
     public static double[] vectorsAround(double x0, double y0, double cosAlpha)
     {
         if (cosAlpha == -1) {
+            // Only one vector, in the opposite direction
             return new double[] {-x0, -y0};
         }
         if (y0 == 0) {
+            // Special case to handle, otherwise we would get a divide by zero
             double resultX = cosAlpha / x0;
             double resultY1 = Math.sqrt(1 - resultX * resultX);
             double resultY2 = -Math.sqrt(1 - resultX * resultX);
             return new double[] {resultX, resultY1, resultX, resultY2};
         }
 
+        // Solve a quadratic to get the solution
         double x0Sqr = x0 * x0;
         double y0Sqr = y0 * y0;
         double cosAlphaSqr = cosAlpha * cosAlpha;
@@ -198,13 +261,35 @@ final class GraphUtils {
         return new double[] {resultX1, resultY1, resultX2, resultY2};
     }
 
-    public static void setGcRotation(GraphicsContext gc, double angle, double px, double py) 
+    /**
+     * Set the rotation for a given GraphicsContext. Needed since JavaFX doesn't
+     * have a method which allows us to rotate around an arbitrary point, only
+     * at (0,0) presumably.
+     *
+     * @param gc The GraphicsContext in question
+     * @param angle The angle to rotate
+     * @param px The x coordinate of the point to rotate about
+     * @param py The y coordinate of the point to rotate about
+     */
+    public static void setGcRotation(GraphicsContext gc, double angle, double px, double py)
     {
         // http://stackoverflow.com/a/18262938
         Rotate r = new Rotate(angle, px, py);
         gc.setTransform(r.getMxx(), r.getMyx(), r.getMxy(), r.getMyy(), r.getTx(), r.getTy());
     }
 
+    /**
+     * Fill an arrow head (just a triangle) of given size, length and position
+     *
+     * @param gc The GraphicsContext to draw to
+     * @param arrowBaseX The x coordinate of the midpoint of the baseline of the
+     * arrow
+     * @param arrowBaseY The y coordinate of the midpoint of the baseline of the
+     * arrow
+     * @param arrowTipX The x coordinate of the tip of the arrow
+     * @param arrowTipY The y coordinate of the tip of the arrow
+     * @param width The width of the baseline of the arrow
+     */
     public static void fillArrowHead(GraphicsContext gc, double arrowBaseX,
             double arrowBaseY, double arrowTipX, double arrowTipY, double width)
     {
@@ -228,6 +313,15 @@ final class GraphUtils {
             new double[] { arrowTipY, baselinePointY1,  baselinePointY2 }, 3);
     }
 
+    /**
+     * Utility function to draw a filled circle centred at a given position and
+     * radius, a minor wrapper.
+     *
+     * @param gc The GraphicsContext to draw to
+     * @param x The x coordinate of the centre of the circle
+     * @param y The y coordinate of the centre of the circle
+     * @param r The radius of the circle
+     */
     public static void fillCircleCentred(GraphicsContext gc, double x, double y, double r) {
         double cornerX = x - r;
         double cornerY = y - r;
@@ -236,6 +330,15 @@ final class GraphUtils {
         gc.fillOval(cornerX, cornerY, d, d);
     }
 
+    /**
+     * Utility function to draw an empty circle centred at a given position and
+     * radius, a minor wrapper.
+     *
+     * @param gc The GraphicsContext to draw to
+     * @param x The x coordinate of the centre of the circle
+     * @param y The y coordinate of the centre of the circle
+     * @param r The radius of the circle
+     */
     public static void strokeCircleCentred(GraphicsContext gc, double x, double y, double r) {
         double cornerX = x - r;
         double cornerY = y - r;

@@ -199,6 +199,14 @@ public final class GraphCanvasFX extends Canvas {
         return null;
     }
 
+    /**
+     * Add a node of a given id, to the canvas.
+     *
+     * @param id The ID of the node
+     * @param x The x position of the centre of the node
+     * @param y The y position of the centre of the node
+     * @throws RuntimeException If a node with that ID already exists
+     */
     public GraphNode addNode(int id, double x, double y) {
         // Need to check the ID, otherwise we would overwrite the previous value
         if (mGraph.containsKey(id)) {
@@ -225,16 +233,36 @@ public final class GraphCanvasFX extends Canvas {
         return n;
     }
 
+    /**
+     * Set a given GraphNode to use the "final state" style, i.e. with a double
+     * border.
+     *
+     * @param n The graph node in question
+     * @param value Whether to use the "final state" style or not
+     */
     public void setNodeUseFinalStyle(GraphNode n, boolean value) {
         // No layout data update required (for now at least)
         n.mUseFinalStateStyle = value;
     }
 
+    /**
+     * Set a given GraphNode to use the "start state" style, i.e. with a leading
+     * arrow from the left
+     *
+     * @param n The graph node in question
+     * @param value Whether to use the "start state" style or not
+     */
     public void setNodeUseStartStyle(GraphNode n, boolean value) {
         // No layout data update required (for now at least)
         n.mUseStartStateStyle = value;
     }
 
+    /**
+     * Change the label text for a given edge
+     *
+     * @param edge The graph edge in question
+     * @param text The new text for the label
+     */
     public void setEdgeLabelText(GraphEdge edge, String text) {
         edge.mText = text;
         // Text metrics need to be recalculated
@@ -242,11 +270,20 @@ public final class GraphCanvasFX extends Canvas {
         edge.mTextHeight = -1.0;
     }
 
+    /**
+     * Removes all nodes (and thus edges) from the graph.
+     */
     public void removeAllNodes() {
         mGraph.clear();
     }
 
+    /**
+     * Removes the node with the given id, out-going edges will also be removed
+     *
+     * @param id The ID of the node to remove
+     */
     public void removeNode(int id) {
+        // FIXME: handle in-coming edges
         NodeEdgePair pair = mGraph.get(id);
         if (pair == null) {
             throw new RuntimeException("Node ID doesn't exist");
@@ -255,6 +292,17 @@ public final class GraphCanvasFX extends Canvas {
         mGraph.remove(id);
     }
 
+    /**
+     * Add an edge between two nodes, with the given label text.
+     *
+     * @param id The ID of the new edge
+     * @param from The GraphNode from which the edge comes from
+     * @param to The GraphNode for which the edge goes to
+     * @param text The text for the label
+     * @return The newly created GraphEdge
+     * @throws RuntimeException If the given GraphNode doesn't belong to this
+     * canvas, or if an edge with the given ID already exists
+     */
     public GraphEdge addEdge(int id, GraphNode from, GraphNode to,
             String text) {
         NodeEdgePair pair = mGraph.get(from.mId);
@@ -299,9 +347,13 @@ public final class GraphCanvasFX extends Canvas {
         }
     }
 
+    /**
+     * The default radius for nodes
+     */
     private final static double DEFAULT_NODE_RADIUS = 20;
     /**
-     * The distance between TODO:
+     * The distance between the two lines for the double border style of final
+     * states
      */
     private final static double FINAL_STATE_BORDER_GAP = 3;
     /**
@@ -334,6 +386,17 @@ public final class GraphCanvasFX extends Canvas {
      */
     private final static double ARC_LOOP_COS_HALF_ANGLE = Math.sqrt(3) * 0.5;
 
+    /**
+     * Update the layout data for an edge that is a line, which the drawing code
+     * uses later. The idea is to do more computationally expensive operations 
+     * here, an only re-perform them when necessary, opposed to doing that for 
+     * each time we redraw. E.g. moving one node will not change the layout data
+     * for many other edges. 
+     *
+     * @param edge The edge to update the layout data for
+     * @param textAngle The calculated angle the edge label text should be
+     * rotated by
+     */
     private void updateEdgeLineLayoutData(GraphEdge edge, double textAngle) {
         // Set "mIsRendered" here so we can exit the method early to avoid
         // rendering the line if problems arise
@@ -396,6 +459,16 @@ public final class GraphCanvasFX extends Canvas {
         edge.mTextAngle = textAngle;
     }
 
+    /**
+     * Update the layout data for an edge that is an arc. See 
+     * updateEdgeLineLayoutData() for more information
+     *
+     * @param edge The edge to update the layout data for
+     * @param height How high the arc should bend at the midpoint. Negative 
+     * values allowed, in which case the arc bends in the opposite direction
+     * @param textAngle The calculated angle the edge label text should be
+     * rotated by
+     */
     private void updateEdgeArcLayoutData(GraphEdge edge, double height,
             double textAngle) {
         // Set "mIsRendered" here so we can exit the method early to avoid
@@ -444,8 +517,7 @@ public final class GraphCanvasFX extends Canvas {
         double[] results = GraphUtils.calcCircleIntersectionPoints(radius,
                 x1 - circleX, y1 - circleY, from.mRadius);
         results = GraphUtils.filterArcIntersectionPoint(results, x1 - circleX,
-                y1 - circleY, x2 - circleX, y2 - circleY, tmpGradientX,
-                tmpGradientY);
+                y1 - circleY, tmpGradientX, tmpGradientY);
         double newX1, newY1;
         if (results == null) {
             System.out.println(
@@ -465,9 +537,8 @@ public final class GraphCanvasFX extends Canvas {
         }
         results = GraphUtils.calcCircleIntersectionPoints(radius, x2 - circleX,
                 y2 - circleY, to.mRadius);
-        results = GraphUtils.filterArcIntersectionPoint(results,
-                newX1 - circleX, newY1 - circleY, x2 - circleX, y2 - circleY,
-                tmpGradientX, tmpGradientY);
+        results = GraphUtils.filterArcIntersectionPoint(results, newX1
+                - circleX, newY1 - circleY, tmpGradientX, tmpGradientY);
         double newX2, newY2;
         if (results == null) {
             System.out.println(
@@ -487,9 +558,8 @@ public final class GraphCanvasFX extends Canvas {
         }
         results = GraphUtils.calcCircleIntersectionPoints(radius,
                 newX2 - circleX, newY2 - circleY, ARROW_LENGTH);
-        results = GraphUtils.filterArcIntersectionPoint(results,
-                newX1 - circleX, newY1 - circleY, newX2 - circleX,
-                newY2 - circleY, tmpGradientX, tmpGradientY);
+        results = GraphUtils.filterArcIntersectionPoint(results, newX1
+                - circleX, newY1 - circleY, tmpGradientX, tmpGradientY);
         double arrowX, arrowY;
         if (results == null) {
             System.out.println(
@@ -535,6 +605,13 @@ public final class GraphCanvasFX extends Canvas {
         edge.mArcExtent = arcExtent;
     }
 
+    /**
+     * Update the layout data for the looped edge of a node (node from == node 
+     * to). See updateEdgeLineLayoutData() for more information.
+     *
+     * @param n The node for which the edges belong to
+     * @param edges The edges to update the layout data for
+     */
     private void updateEdgesLoopedLayoutData(GraphNode n,
             ArrayList<GraphEdge> edges) {
         double maxRadius = n.mRadius + ARC_LOOP_BASE_DISTANCE
@@ -593,6 +670,13 @@ public final class GraphCanvasFX extends Canvas {
         }
     }
 
+    /**
+     * Update the layout data for all edges between two nodes, in both 
+     * directions. See updateEdgeLineLayoutData() for more information.
+     *
+     * @param pair1 The node-edge pair for a node
+     * @param pair2 The node-edge pair for another node
+     */
     private void updateConnectionLayoutData(NodeEdgePair pair1,
             NodeEdgePair pair2) {
         GraphNode n1 = pair1.mNode;
@@ -657,6 +741,11 @@ public final class GraphCanvasFX extends Canvas {
         }
     }
 
+    /**
+     * Update all layout data, usually this is not needed but for simplicity 
+     * sake / debugging this can be used to ensure layout data gets updated 
+     * properly. See updateEdgeLineLayoutData() for more information.
+     */
     private void updateAllLayoutData() {
         for (NodeEdgePair pair : mGraph.values()) {
             GraphNode n = pair.mNode;
@@ -675,6 +764,12 @@ public final class GraphCanvasFX extends Canvas {
         }
     }
 
+    /**
+     * Draw an edge which is a line, layout data calculated in 
+     * updateEdgeLineLayoutData().
+     *
+     * @param edge The edge to draw
+     */
     private void drawEdgeLine(GraphEdge edge) {
         mGC.setFill(mEdgeLabelColour);
         mGC.setFontSmoothingType(FontSmoothingType.LCD);
@@ -697,6 +792,12 @@ public final class GraphCanvasFX extends Canvas {
                 edge.mArrowTipX, edge.mArrowTipY, ARROW_WIDTH);
     }
 
+    /**
+     * Draw an edge which is an arc, layout data calculated in 
+     * updateEdgeArcLayoutData().
+     *
+     * @param edge The edge to draw
+     */
     private void drawEdgeArc(GraphEdge edge) {
         mGC.setFill(mEdgeLabelColour);
         mGC.setFontSmoothingType(FontSmoothingType.LCD);
@@ -721,6 +822,12 @@ public final class GraphCanvasFX extends Canvas {
                 edge.mArrowTipX, edge.mArrowTipY, ARROW_WIDTH);
     }
 
+    /**
+     * Draw an edge, checks the type of the edge to call the correct drawing 
+     * method.
+     *
+     * @param edge The edge to draw
+     */
     private void drawEdge(GraphEdge edge) {
         if (!edge.mIsRendered) {
             return;
@@ -733,6 +840,13 @@ public final class GraphCanvasFX extends Canvas {
         }
     }
 
+    /**
+     * Draw the looped edges for a GraphNode, layout data calculated in 
+     * updateEdgesLoopedLayoutData().
+     *
+     * @param n The graph node the edges belong to
+     * @param edges The looped edges of the graph node to draw
+     */
     private void drawEdgesLooped(GraphNode n, ArrayList<GraphEdge> edges) {
         if (edges == null || edges.isEmpty()) {
             return;
@@ -770,6 +884,12 @@ public final class GraphCanvasFX extends Canvas {
         mGC.setTransform(new Affine());
     }
 
+    /**
+     * Draw a node, no corresponding function to update layout data, as non is 
+     * needed yet.
+     *
+     * @param n The node to draw
+     */
     void drawNode(GraphNode n) {
         mGC.setFill(mNodeBackgroundColour);
         mGC.setStroke(mNodeBorderColour);
@@ -944,6 +1064,13 @@ public final class GraphCanvasFX extends Canvas {
                 + event.getY() + ", clickCount = " + event.getClickCount());
     }
 
+    /**
+     * Finds which node has been hit at the given coordinates.
+     *
+     * @param x The x coordinate of the hit test
+     * @param y The y coordinate of the hit test
+     * @return The node which was hit, or null if no node was hit
+     */
     private GraphNode findNodeHit(double x, double y) {
         for (NodeEdgePair pair : mGraph.values()) {
             if (nodeHitTest(pair.mNode, x, y)) {
@@ -953,6 +1080,13 @@ public final class GraphCanvasFX extends Canvas {
         return null;
     }
 
+    /**
+     * Finds which edge has been hit at the given coordinates.
+     *
+     * @param x The x coordinate of the hit test
+     * @param y The y coordinate of the hit test
+     * @return The edge which was hit, or null if no edge was hit
+     */
     private GraphEdge findEdgeLabelHit(double x, double y) {
         for (NodeEdgePair pair : mGraph.values()) {
             for (GraphEdge e : pair.mLoopedEdges) {
@@ -1012,6 +1146,9 @@ public final class GraphCanvasFX extends Canvas {
         return true;
     }
 
+    /**
+     * Main redrawing routine, doesn't update layout data for efficiency.
+     */
     public void doRedraw() {
         mGC.clearRect(0, 0, getWidth(), getHeight());
         mGC.setFill(Color.WHITE);
