@@ -12,13 +12,17 @@ import java.util.Observable;
  */
 public class CommandHistory extends Observable {
 
+    public static final boolean CLOBBER_BY_DEFAULT = false;
+
     private final ArrayList<Command> mCommandList;
     private int mHistoryIdx;
+    private boolean clobber;
 
     public CommandHistory()
     {
         mCommandList = new ArrayList<>();
         mHistoryIdx = 0;
+        clobber = CLOBBER_BY_DEFAULT;
     }
 
     /**
@@ -126,6 +130,14 @@ public class CommandHistory extends Observable {
     public void clear() {
         mCommandList.clear();
         mHistoryIdx = 0;
+    }
+
+    public boolean isClobbered() {
+        return this.clobber;
+    }
+
+    public void setClobbered(boolean clobber) {
+        this.clobber = clobber;
     }
 
 }

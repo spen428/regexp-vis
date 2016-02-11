@@ -88,15 +88,35 @@ public class RegexpVisApp implements Observer {
 
         // --- Menu Edit
         Menu menuEdit = new Menu("Edit");
-        MenuItem menuEditBlah = new MenuItem("Blah");
-        menuEdit.getItems().addAll(new MenuItem("Undo"), new MenuItem("Redo"),
-                menuEditBlah, new MenuItem("Preferences..."));
-        menuEditBlah.setOnAction(new EventHandler<ActionEvent>() {
+        MenuItem menuEditUndo = new MenuItem("Undo");
+        menuEditUndo.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(ActionEvent t) {
-                System.out.println("Hello World!11");
+            public void handle(ActionEvent event) {
+                RegexpVisApp.this.currentActivity.history.prev();
             }
         });
+        MenuItem menuEditRedo = new MenuItem("Redo");
+        menuEditRedo.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                RegexpVisApp.this.currentActivity.history.next();
+            }
+        });
+        final CheckMenuItem menuEditClobberHistory = new CheckMenuItem(
+                "Clobber History");
+        menuEditClobberHistory.setSelected(CommandHistory.CLOBBER_BY_DEFAULT);
+        menuEditClobberHistory.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                boolean clob = RegexpVisApp.this.currentActivity.history
+                        .isClobbered();
+                RegexpVisApp.this.currentActivity.history.setClobbered(!clob);
+                menuEditClobberHistory.setSelected(!clob);
+            }
+        });
+        MenuItem menuEditPreferences = new MenuItem("Preferences...");
+        menuEdit.getItems().addAll(menuEditUndo, menuEditRedo,
+                menuEditClobberHistory, menuEditPreferences);
 
         // --- Menu Activity
         Menu menuActivity = new Menu("Activity");
