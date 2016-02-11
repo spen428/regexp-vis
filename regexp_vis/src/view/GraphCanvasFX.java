@@ -200,6 +200,32 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
+     * Reposition a node in the bounds it's allowed to be in.
+     * 
+     * @param n The node to reposition
+     */
+    private void repositionNode(GraphNode n) {
+        // Prevent placing the node outside the canvas, preventing the user from
+        // ever dragging it again
+        double x = n.mX, y = n.mY;
+        // The checks are ordered this way, such that we will preferentially put
+        // the starting state arrow out of the canvas, over putting the node
+        // outside the canvas (in case of too little space)
+        if (n.mUseStartStateStyle) {
+            x = Math.max(n.mRadius + INITIAL_STATE_LINE_LENGTH + ARROW_LENGTH, x);
+        } else {
+            x = Math.max(n.mRadius, x);
+        }
+        x = Math.min(getWidth() - n.mRadius, x);
+
+        y = Math.min(getHeight() - n.mRadius, y);
+        y = Math.max(n.mRadius, y);
+
+        n.mX = x;
+        n.mY = y;
+    }
+
+    /**
      * Add a node of a given id, to the canvas.
      *
      * @param id The ID of the node
@@ -215,14 +241,9 @@ public final class GraphCanvasFX extends Canvas {
 
         double radius = DEFAULT_NODE_RADIUS;
 
-        // Prevent placing the node outside the canvas, preventing the user from
-        // ever dragging it
-        x = Math.min(getWidth() - radius, x);
-        x = Math.max(radius, x);
-        y = Math.min(getHeight() - radius, y);
-        y = Math.max(radius, y);
-
         GraphNode n = new GraphNode(id, x, y, radius, false, false);
+        repositionNode(n);
+
         NodeEdgePair pair = new NodeEdgePair(n);
         mGraph.put(id, pair);
 
@@ -255,6 +276,10 @@ public final class GraphCanvasFX extends Canvas {
     public void setNodeUseStartStyle(GraphNode n, boolean value) {
         // No layout data update required (for now at least)
         n.mUseStartStateStyle = value;
+        if (value) {
+            // May need to reposition node now that we have an arrow
+            repositionNode(n);
+        }
     }
 
     /**
@@ -975,15 +1000,9 @@ public final class GraphCanvasFX extends Canvas {
             double newX = (event.getX() - mDownX) + mDragOrigX;
             double newY = (event.getY() - mDownY) + mDragOrigY;
 
-            // Prevent user dragging the node outside the canvas, preventing
-            // them from ever dragging it again
-            newX = Math.min(getWidth() - mDragNode.mRadius, newX);
-            newX = Math.max(mDragNode.mRadius, newX);
-            newY = Math.min(getHeight() - mDragNode.mRadius, newY);
-            newY = Math.max(mDragNode.mRadius, newY);
-
             mDragNode.mX = newX;
             mDragNode.mY = newY;
+            repositionNode(mDragNode);
         } else if (mDragEdge != null && mDragEdge.mFrom == mDragEdge.mTo) {
             // Trying to drag a looped edge, update loop direction vector
             System.out.println("Dragging edge");
