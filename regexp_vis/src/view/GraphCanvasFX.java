@@ -1074,26 +1074,11 @@ public final class GraphCanvasFX extends Canvas {
             mDragNode = n;
             mDragOrigX = n.mX;
             mDragOrigY = n.mY;
-            if (mNodeClickedHandler != null) {
-                mNodeClickedHandler
-                        .handle(new GraphCanvasEvent(event, n, null));
-            }
             // System.out.println("onMousePressed, hit NODE " + n);
         } else if (e != null) {
             mDragEdge = e;
             System.out.println("onMousePressed, hit EDGE " + e + " id = "
                     + e.getId() + " label text = \"" + e.mText + "\"");
-            if (mEdgeClickedHandler != null) {
-                mEdgeClickedHandler
-                        .handle(new GraphCanvasEvent(event, null, e));
-            }
-        } else {
-            // System.out.println("onMousePressed, X = " + event.getX() + ", Y =
-            // " + event.getY());
-            if (mBackgroundClickedHandler != null) {
-                mNodeClickedHandler
-                        .handle(new GraphCanvasEvent(event, null, null));
-            }
         }
 
         // TODO: be smarter about this (do minimum amount of layout
@@ -1117,6 +1102,26 @@ public final class GraphCanvasFX extends Canvas {
     private void onMouseClicked(MouseEvent event) {
         System.out.println("onMouseClicked, X = " + event.getX() + ", Y = "
                 + event.getY() + ", clickCount = " + event.getClickCount());
+
+        // Check for a hit on a node first, they take preference
+        GraphNode n = findNodeHit(mDownX, mDownY);
+        GraphEdge e = findEdgeLabelHit(mDownX, mDownY);
+        if (n != null) {
+            if (mNodeClickedHandler != null) {
+                mNodeClickedHandler
+                        .handle(new GraphCanvasEvent(event, n, null));
+            }
+        } else if (e != null) {
+            if (mEdgeClickedHandler != null) {
+                mEdgeClickedHandler
+                        .handle(new GraphCanvasEvent(event, null, e));
+            }
+        } else {
+            if (mBackgroundClickedHandler != null) {
+                mNodeClickedHandler
+                        .handle(new GraphCanvasEvent(event, null, null));
+            }
+        }
     }
 
     /**
@@ -1209,7 +1214,7 @@ public final class GraphCanvasFX extends Canvas {
         mGC.setFill(Color.WHITE);
         mGC.setStroke(Color.BLACK);
 
-        // TODO: document: remember, drawing coordinates has the origin in the
+        // Remember, drawing coordinates has the origin in the
         // top left corner, with y increasing going downward, the maths in
         // places accounts for this (where it matters)
 
