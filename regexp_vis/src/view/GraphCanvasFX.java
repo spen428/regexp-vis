@@ -62,11 +62,11 @@ public final class GraphCanvasFX extends Canvas {
      */
     private double mDownX, mDownY;
     /**
-     * The highest x coordinate and highest y coordinate of all nodes (note
+     * The nodes with the highest x coordinate and highest y coordinate (note
      * these could be separate nodes). Used to handle placement when canvas is
      * resized too small.
      */
-    private double mMaxNodeX, mMaxNodeY;
+    private GraphNode mMaxPosXNode, mMaxPosYNode;
     /**
      * The graphics context we are using to do rendering
      */
@@ -227,6 +227,23 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
+     * Updates which nodes have the maximum x coordinate and the maximum y
+     * coordinate. For handling a shrinking canvas.
+     */
+    private void updateMaxPosNodes() {
+        mMaxPosXNode = null;
+        mMaxPosYNode = null;
+        for (NodeEdgePair pair : mGraph.values()) {
+            if (mMaxPosXNode == null || mMaxPosXNode.mX < pair.mNode.mX) {
+                mMaxPosXNode = pair.mNode;
+            }
+            if (mMaxPosYNode == null || mMaxPosYNode.mY < pair.mNode.mY) {
+                mMaxPosYNode = pair.mNode;
+            }
+        }
+    }
+
+    /**
      * Add a node of a given id, to the canvas.
      *
      * @param id The ID of the node
@@ -244,6 +261,7 @@ public final class GraphCanvasFX extends Canvas {
 
         GraphNode n = new GraphNode(id, x, y, radius, false, false);
         repositionNode(n);
+        updateMaxPosNodes();
 
         NodeEdgePair pair = new NodeEdgePair(n);
         mGraph.put(id, pair);
@@ -280,6 +298,7 @@ public final class GraphCanvasFX extends Canvas {
         if (value) {
             // May need to reposition node now that we have an arrow
             repositionNode(n);
+            updateMaxPosNodes();
         }
     }
 
@@ -411,6 +430,11 @@ public final class GraphCanvasFX extends Canvas {
      * For looped edges, the cosine of half the angle of the arcs
      */
     private final static double ARC_LOOP_COS_HALF_ANGLE = Math.sqrt(3) * 0.5;
+    /**
+     * When we resize and discover the canvas is too small, multiply all x / y
+     * coordinates by this factor.
+     */
+    private final static double RESIZE_SHRINK_FACTOR = 0.90;
 
     /**
      * Update the layout data for an edge that is a line, which the drawing code
@@ -1014,6 +1038,7 @@ public final class GraphCanvasFX extends Canvas {
             mDragNode.mX = newX;
             mDragNode.mY = newY;
             repositionNode(mDragNode);
+            updateMaxPosNodes();
         } else if (mDragEdge != null && mDragEdge.mFrom == mDragEdge.mTo) {
             // Trying to drag a looped edge, update loop direction vector
             System.out.println("Dragging edge");
@@ -1238,6 +1263,33 @@ public final class GraphCanvasFX extends Canvas {
     public void resize(double width, double height) {
         super.setWidth(width);
         super.setHeight(height);
+
+        // Need to recalc layout data if we move everything
+        boolean recalcLayoutData = false;
+        if (mMaxPosXNode != null && mMaxPosXNode.mX > width) {
+            // Scale all node x coordinates by RESIZE_SHRINK_FACTOR
+            for (NodeEdgePair pair : mGraph.values()) {
+                pair.mNode.mX *= RESIZE_SHRINK_FACTOR;
+                repositionNode(pair.mNode);
+            }
+            recalcLayoutData = true;
+        }
+        if (mMaxPosYNode != null && mMaxPosYNode.mY > height) {
+            // Scale all node y coordinates by RESIZE_SHRINK_FACTOR
+            for (NodeEdgePair pair : mGraph.values()) {
+                pair.mNode.mY *= RESIZE_SHRINK_FACTOR;
+                repositionNode(pair.mNode);
+            }
+            recalcLayoutData = true;
+        }
+
+        if (recalcLayoutData) {
+            // This is why updateMaxPosNodes() isn't in repositionNode(), otherwise
+            // we would have n^2 time complexity to the number of nodes
+            updateMaxPosNodes();
+            updateAllLayoutData();
+        }
+
         doRedraw();
     }
 }
