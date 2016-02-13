@@ -14,7 +14,20 @@
         <fileset dir="lib" includes="*.jar" />
     </path>
 
-    <target name="build">
+    <target name="versioncheck">
+        <!-- http://www.asjava.com/ant/how-to-check-java-version-in-ant/ -->
+        <fail message="Unsupported Java version: ${ant.java.version}.
+            This software requires Java 1.8">
+            <condition>
+                <not>
+                    <equals arg1="${ant.java.version}" arg2="1.8"/>
+                </not>
+            </condition>
+        </fail>
+        <echo message="Java version ${ant.java.version}: OK" />
+    </target>
+
+    <target name="build" depends="versioncheck">
         <mkdir dir="bin" />
         <javac srcdir="src" destdir="bin" classpathref="classpath"
             includes="**/*.java" excludes="test/**/*.java"
