@@ -1,14 +1,18 @@
 package test.view;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 import view.GraphNode;
 
@@ -84,6 +88,15 @@ public class GraphCanvasFXTest extends Application {
         mCanvas.addEdge(5, n1, n1, "loop2");
         mCanvas.addEdge(6, n1, n1, "loop3");
         mCanvas.doRedraw();
+        mCanvas.startCreateEdgeMode(n1);
+
+        mCanvas.setOnCreatedEdge(new EventHandler<GraphCanvasEvent>() {
+            @Override
+            public void handle(GraphCanvasEvent event) {
+                Alert a = new Alert(AlertType.INFORMATION, "Edge created");
+                a.showAndWait();
+            }
+        });
 
     }
 

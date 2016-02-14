@@ -1,5 +1,7 @@
 package view;
 
+import javafx.geometry.Point2D;
+
 public class GraphNode {
     /**
      * The ID for this node
@@ -21,15 +23,10 @@ public class GraphNode {
     //double mLoopDirNormalVecX;
     //double mLoopDirNormalVecY;
 
-    double mStartLineX1;
-    double mStartLineY1;
-    double mStartLineX2;
-    double mStartLineY2;
-
-    double mEndLineX1;
-    double mEndLineY1;
-    double mEndLineX2;
-    double mEndLineY2;
+    Point2D mStartLineP1;
+    Point2D mStartLineDir;
+    Point2D mEndLineP1;
+    Point2D mEndLineDir;
 
     double mStartAngle;
     double mArcExtent;
