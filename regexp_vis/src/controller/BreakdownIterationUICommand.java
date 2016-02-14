@@ -1,5 +1,6 @@
 package controller;
 
+import javafx.geometry.Point2D;
 import model.AddStateCommand;
 import model.AutomatonState;
 import model.AutomatonTransition;
@@ -24,17 +25,19 @@ public class BreakdownIterationUICommand extends BreakdownUICommand {
         final AutomatonState toState = transition.getTo();
         final int numAddedStates = BreakdownUITools.getNumAddedStates(cmd);
         final boolean fromChoice = BreakdownUITools.wasChoiceTransition(cmd);
+        final GraphNode fromNode = graph.lookupNode(fromState.getId());
+        final GraphNode toNode = graph.lookupNode(toState.getId());
+
+        Point2D[] rekt = null;
+        if (numAddedStates == 2) {
+            rekt = BreakdownUITools.computeRectanglePoints(fromNode.getX(),
+                    fromNode.getY(), toNode.getX(), toNode.getY());
+        }
 
         boolean positionedFirst = false;
         for (Command c : cmd.getCommands()) {
             if (c instanceof AddStateCommand) {
                 /* new state should be intelligently positioned */
-                GraphNode fromNode = graph.lookupNode(fromState.getId());
-                GraphNode toNode = graph.lookupNode(toState.getId());
-                double dx = fromNode.getX() - toNode.getX();
-                double dy = fromNode.getY() - toNode.getY();
-                double hyp = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-
                 if (fromChoice) {
                     // TODO
                     double newX = Math.random() * 800;
@@ -43,34 +46,24 @@ public class BreakdownIterationUICommand extends BreakdownUICommand {
                             (AddStateCommand) c, newX, newY));
                 } else {
                     if (numAddedStates == 1) {
-                        /*
-                         * Breaking down this iteration creates one new node,
-                         * position to form an equilateral triangle
-                         */
-                        double newX = fromNode.getX() + (hyp / 2);
-                        double newY = fromNode.getY() - (hyp / 2)
-                                * Math.sqrt(3);
-
+                        /* Form a triangle */
+                        Point2D newPos = BreakdownUITools.computeThirdPoint(
+                                fromNode.getX(), fromNode.getY(), toNode.getX(),
+                                toNode.getY());
                         this.commands.add(new AddStateUICommand(graph,
-                                (AddStateCommand) c, newX, newY));
+                                (AddStateCommand) c, newPos.getX(),
+                                newPos.getY()));
                     } else if (numAddedStates == 2) {
-                        /*
-                         * Breaking down this iteration creates two new nodes,
-                         * position to form a square
-                         */
+                        /* Form a rectangle */
                         if (!positionedFirst) {
-                            /* Place first new node on same x-coord as `to` */
-                            double newX = toNode.getX();
-                            double newY = toNode.getY() + (2 * dy);
                             this.commands.add(new AddStateUICommand(graph,
-                                    (AddStateCommand) c, newX, newY));
+                                    (AddStateCommand) c, rekt[0].getX(),
+                                    rekt[0].getY()));
                             positionedFirst = true;
                         } else {
-                            /* Place second new node on same y-coord as `from` */
-                            double newX = fromNode.getX() - (2 * dx);
-                            double newY = fromNode.getY();
                             this.commands.add(new AddStateUICommand(graph,
-                                    (AddStateCommand) c, newX, newY));
+                                    (AddStateCommand) c, rekt[1].getX(),
+                                    rekt[1].getY()));
                         }
                     }
                 }

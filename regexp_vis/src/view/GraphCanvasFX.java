@@ -376,7 +376,7 @@ public final class GraphCanvasFX extends Canvas {
     /**
      * The default radius for nodes
      */
-    private final static double DEFAULT_NODE_RADIUS = 20;
+    public final static double DEFAULT_NODE_RADIUS = 20;
     /**
      * The distance between the two lines for the double border style of final
      * states
