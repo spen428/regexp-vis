@@ -35,7 +35,7 @@ public abstract class UICommand extends Command {
         this.graph = graph;
         this.cmd = cmd;
     }
-
+    
     /**
      * Convert a {@link Command} into a {@link UICommand}
      *

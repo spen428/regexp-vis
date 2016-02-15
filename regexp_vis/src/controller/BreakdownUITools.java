@@ -9,9 +9,14 @@ import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
 import model.BreakdownCommand;
+import model.BreakdownSequenceCommand;
 import model.Command;
 import model.RemoveStateCommand;
 import view.GraphCanvasFX;
+<<<<<<< Updated upstream
+=======
+import view.GraphNode;
+>>>>>>> Stashed changes
 
 /**
  * 
@@ -167,6 +172,59 @@ public class BreakdownUITools {
         }
 
         return between;
+    }
+
+    /**
+     * Intelligently place the nodes created by the given
+     * {@link BreakdownSequenceCommand} along a line or curve between the two
+     * existing nodes from which this {@link BreakdownSequenceCommand} was
+     * generated.
+     * 
+     * @param graph
+     *            the {@link GraphCanvasFX}
+     * @param cmd
+     *            the {@link BreakdownCommand}
+     * @return a {@link Point2D} array of the locations to place the new nodes,
+     *         in order starting from the "from" end.
+     */
+    public static Point2D[] placeNodes(GraphCanvasFX graph,
+            BreakdownSequenceCommand cmd) {
+        /*
+         * TODO: Case where transCount is too high, and states are too close
+         * together for edges to be rendered must be handled differenty.
+         */
+        final AutomatonTransition transition = cmd.getOriginalTransition();
+        final GraphNode fromNode = graph
+                .lookupNode(transition.getFrom().getId());
+        final GraphNode toNode = graph.lookupNode(transition.getTo().getId());
+        final int transCount = cmd.getNewTransitionsCount();
+        final boolean fromChoice = BreakdownUITools.wasChoiceTransition(cmd);
+
+        Point2D[] points = new Point2D[transCount];
+
+        if (fromChoice) {
+            /*
+             * The nodes should be placed roughly along the curve that
+             * previously existed.
+             */
+            Point2D edgeMid = graph
+                    .lookupEdge(cmd.getOriginalTransition().getId())
+                    .getEdgeMiddlePoint();
+
+        } else {
+            /* Didn't breakdown from a choice, just place along a line */
+            double dxPerNode = (toNode.getX() - fromNode.getX()) / transCount;
+            double dyPerNode = (toNode.getY() - fromNode.getY()) / transCount;
+            double curX = fromNode.getX() + dxPerNode;
+            double curY = fromNode.getY() + dyPerNode;
+
+            for (int i = 0; i < transCount; i++) {
+                points[i] = new Point2D(curX, curY);
+                curX += dxPerNode;
+                curY += dyPerNode;
+            }
+        }
+        return points;
     }
 
 }
