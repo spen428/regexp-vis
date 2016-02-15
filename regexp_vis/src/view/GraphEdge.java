@@ -1,6 +1,7 @@
 package view;
 
 import javafx.geometry.Point2D;
+import javafx.scene.paint.Color;
 
 public class GraphEdge {
     final int mId;
@@ -48,8 +49,10 @@ public class GraphEdge {
     double mArcExtent;
 
     Point2D mMiddlePoint;
+    Color mLineColour;
 
-    public GraphEdge(int id, GraphNode from, GraphNode to, String text)
+    public GraphEdge(int id, GraphNode from, GraphNode to, String text,
+            Color lineColour)
     {
         mId = id;
         mFrom = from;
@@ -57,6 +60,7 @@ public class GraphEdge {
         mText = text;
         mTextWidth = -1.0;
         mTextHeight = -1.0;
+        mLineColour = lineColour;
     }
 
     public int getId()

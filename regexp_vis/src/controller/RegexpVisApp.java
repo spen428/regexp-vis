@@ -22,7 +22,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -36,7 +35,7 @@ public class RegexpVisApp implements Observer {
 
     /* Finals */
     final CheckMenuItem[] activityMenuItems;
-    private final Activity<GraphCanvasEvent>[] activities;
+    private final Activity[] activities;
     private final Automaton automaton;
     protected final GraphCanvasFX mCanvas;
     final ListView<String> historyList;
@@ -61,7 +60,7 @@ public class RegexpVisApp implements Observer {
     public static final String WINDOW_TITLE = Main.TITLE + " v" + Main.VERSION;
 
     /* Variables */
-    protected Activity<GraphCanvasEvent> currentActivity;
+    protected Activity currentActivity;
     protected boolean enterKeyDown;
 
     public RegexpVisApp(Stage stage) {
@@ -315,14 +314,22 @@ public class RegexpVisApp implements Observer {
                 }
             }
         });
-
+        this.mCanvas.setOnNodeClicked(new EventHandler<GraphCanvasEvent>() {
+            @Override
+            public void handle(GraphCanvasEvent event) {
+                onNodeClicked(event);
+            }
+        });
         this.mCanvas.setOnEdgeClicked(new EventHandler<GraphCanvasEvent>() {
             @Override
             public void handle(GraphCanvasEvent event) {
-                MouseEvent mouseEvent = event.getMouseEvent();
-                if (mouseEvent.getClickCount() == 2) {
-                    onEdgeDoubleClicked(event);
-                }
+                onEdgeClicked(event);
+            }
+        });
+        this.mCanvas.setOnBackgroundClicked(new EventHandler<GraphCanvasEvent>() {
+            @Override
+            public void handle(GraphCanvasEvent event) {
+                onBackgroundClicked(event);
             }
         });
 
@@ -398,17 +405,25 @@ public class RegexpVisApp implements Observer {
         }
     }
 
-    void onEdgeDoubleClicked(GraphCanvasEvent event) {
-        propogateToCurrentActivity(event);
-    }
-
-    private void propogateToCurrentActivity(GraphCanvasEvent event) {
+    private void onNodeClicked(GraphCanvasEvent event) {
         if (this.currentActivity != null) {
-            this.currentActivity.processEvent(event);
+            this.currentActivity.onNodeClicked(event);
         }
     }
 
-    void onEnteredRegexp(String text) {
+    private void onEdgeClicked(GraphCanvasEvent event) {
+        if (this.currentActivity != null) {
+            this.currentActivity.onEdgeClicked(event);
+        }
+    }
+
+    private void onBackgroundClicked(GraphCanvasEvent event) {
+        if (this.currentActivity != null) {
+            this.currentActivity.onBackgroundClicked(event);
+        }
+    }
+
+    private void onEnteredRegexp(String text) {
         if (this.currentActivity != null) {
             this.historyList.getItems().clear();
             this.historyList.getItems().add("Step 0");

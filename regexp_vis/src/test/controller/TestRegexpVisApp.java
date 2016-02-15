@@ -23,11 +23,11 @@ public class TestRegexpVisApp extends RegexpVisApp {
         this.currentActivity.onEnteredRegexp(regexp);
     }
 
-    public void setActivity(Activity<GraphCanvasEvent> activity) {
+    public void setActivity(Activity activity) {
         this.currentActivity = activity;
     }
 
-    public Activity<GraphCanvasEvent> getCurrentActivity() {
+    public Activity getCurrentActivity() {
         return this.currentActivity;
     }
 

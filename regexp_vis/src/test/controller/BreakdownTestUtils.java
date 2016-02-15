@@ -16,7 +16,7 @@ class BreakdownTestUtils {
     static void breakdownEdges(TestRegexpVisApp ui, int... edgeIds) {
         for (int i : edgeIds) {
             GraphEdge edge = ui.getGraph().lookupEdge(i);
-            ui.getCurrentActivity().processEvent(createBreakdownEvent(edge));
+            ui.getCurrentActivity().onEdgeClicked(createBreakdownEvent(edge));
         }
     }
 
