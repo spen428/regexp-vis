@@ -774,9 +774,6 @@ public final class GraphCanvasFX extends Canvas {
      */
     private void updateEdgesLoopedLayoutData(GraphNode n,
             ArrayList<GraphEdge> edges) {
-        double maxRadius = n.mRadius + ARC_LOOP_BASE_DISTANCE
-                + ARC_GAP_SIZE * (edges.size() - 1);
-
         double[] results = GraphUtils.vectorsAround(n.mLoopDirVecX,
                 n.mLoopDirVecY, ARC_LOOP_COS_HALF_ANGLE);
         double startVecX = results[0];
@@ -1076,18 +1073,12 @@ public final class GraphCanvasFX extends Canvas {
         mGC.setTextAlign(TextAlignment.CENTER);
         mGC.setTextBaseline(VPos.CENTER);
 
-        double loopDirNormalVecX = -n.mLoopDirVecY;
-        double loopDirNormalVecY = n.mLoopDirVecX;
-
         for (GraphEdge edge : edges) {
             if (edge.mText != null) {
                 GraphUtils.setGcRotation(mGC, -edge.mTextAngle, edge.mTextX,
                         edge.mTextY);
                 mGC.fillText(edge.mText, edge.mTextX, edge.mTextY);
             }
-            updateEdgeLabelHitTestData(edge, edge.mTextX, edge.mTextY,
-                    loopDirNormalVecX, loopDirNormalVecY, n.mLoopDirVecX,
-                    n.mLoopDirVecY);
         }
 
         mGC.setTransform(new Affine());
@@ -1406,8 +1397,7 @@ public final class GraphCanvasFX extends Canvas {
         double x1 = x - e.mLabelTestX1;
         double y1 = y - e.mLabelTestY1;
         double cosAlpha = x1 * e.mLabelTestBisectX + y1 * e.mLabelTestBisectY;
-        cosAlpha /= GraphUtils.vecLength(x1, y1); // Math.sqrt(x1 * x1 + y1 *
-                                                  // y1);
+        cosAlpha /= GraphUtils.vecLength(x1, y1);
         if (cosAlpha < COS_45_DEG) {
             return false;
         }
@@ -1417,8 +1407,7 @@ public final class GraphCanvasFX extends Canvas {
         // Negative since we want mLabelTestBisect{X,Y} vector to be in the
         // opposite direction
         cosAlpha = -(x1 * e.mLabelTestBisectX + y1 * e.mLabelTestBisectY);
-        cosAlpha /= GraphUtils.vecLength(x1, y1); // Math.sqrt(x1 * x1 + y1 *
-                                                  // y1);
+        cosAlpha /= GraphUtils.vecLength(x1, y1);
         if (cosAlpha < COS_45_DEG) {
             return false;
         }
