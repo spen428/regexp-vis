@@ -9,14 +9,12 @@ import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
 import model.BreakdownCommand;
+import model.BreakdownIterationCommand;
 import model.BreakdownSequenceCommand;
 import model.Command;
 import model.RemoveStateCommand;
 import view.GraphCanvasFX;
-<<<<<<< Updated upstream
-=======
 import view.GraphNode;
->>>>>>> Stashed changes
 
 /**
  * 
@@ -174,6 +172,42 @@ public class BreakdownUITools {
         return between;
     }
 
+    public static Point2D[] placeNodes(GraphCanvasFX graph,
+            BreakdownIterationCommand cmd) {
+        final AutomatonTransition transition = cmd.getOriginalTransition();
+        final AutomatonState fromState = transition.getFrom();
+        final AutomatonState toState = transition.getTo();
+        final int numAddedStates = BreakdownUITools.getNumAddedStates(cmd);
+        final boolean fromChoice = BreakdownUITools.wasChoiceTransition(cmd);
+        final GraphNode fromNode = graph.lookupNode(fromState.getId());
+        final GraphNode toNode = graph.lookupNode(toState.getId());
+
+        Point2D[] points = new Point2D[numAddedStates];
+
+        if (fromChoice) {
+            // TODO
+            for (int i = 0; i < numAddedStates; i++) {
+                points[i] = randomPoint();
+            }
+        } else {
+            if (numAddedStates == 1) {
+                /* Form a triangle */
+                points[0] = computeThirdPoint(fromNode.getX(), fromNode.getY(),
+                        toNode.getX(), toNode.getY());
+            } else if (numAddedStates == 2) {
+                /* Form a rectangle */
+                points = computeRectanglePoints(fromNode.getX(),
+                        fromNode.getY(), toNode.getX(), toNode.getY());
+            } else {
+                for (int i = 0; i < numAddedStates; i++) {
+                    points[i] = randomPoint();
+                }
+            }
+        }
+
+        return points;
+    }
+
     /**
      * Intelligently place the nodes created by the given
      * {@link BreakdownSequenceCommand} along a line or curve between the two
@@ -210,7 +244,10 @@ public class BreakdownUITools {
             Point2D edgeMid = graph
                     .lookupEdge(cmd.getOriginalTransition().getId())
                     .getEdgeMiddlePoint();
-
+            // TODO
+            for (int i = 0; i < transCount; i++) {
+                points[i] = randomPoint();
+            }
         } else {
             /* Didn't breakdown from a choice, just place along a line */
             double dxPerNode = (toNode.getX() - fromNode.getX()) / transCount;
@@ -225,6 +262,10 @@ public class BreakdownUITools {
             }
         }
         return points;
+    }
+
+    private static Point2D randomPoint() {
+        return new Point2D(Math.random() * 800, Math.random() * 600);
     }
 
 }
