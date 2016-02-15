@@ -42,12 +42,12 @@ public class BreakdownUITools {
      *            x coordinate of B
      * @param by
      *            y coordinate of B
-     * @param height
-     *            height of triangle ABC, may be negative
+     * @param above
+     *            whether to find the y > midY or the y < midY point
      * @return {@link Point2D} C
      */
-    public static Point2D computeThirdPoint(double ax, double ay, double bx,
-            double by) {
+    private static Point2D computeThirdPoint(double ax, double ay, double bx,
+            double by, boolean above) {
         final int sign = (ay < by) ? 1 : -1; // Dictates where to place point C
         final double dx = Math.abs(ax - bx);
         final double dy = Math.abs(ay - by) * sign;
@@ -56,43 +56,45 @@ public class BreakdownUITools {
         final double w = (BREAKDOWN_HEIGHT_PX * Math.sin(theta));
         final double n = sign * (Math
                 .sqrt(Math.pow(BREAKDOWN_HEIGHT_PX, 2) - Math.pow(w, 2)));
-        final double qx = (mx - w), qy = my; // Point which forms rat MQC.
-        final double cx = qx, cy = (qy + n); // The desired point
-        // System.out.printf("A = (%f,%f)%n", ax, ay);
-        // System.out.printf("B = (%f,%f)%n", bx, by);
-        // System.out.printf("C = (%f,%f)%n", cx, cy);
-        // System.out.printf("M = (%f,%f)%n", mx, my);
-        // System.out.printf("Q = (%f,%f)%n", qx, qy);
-        // System.out.printf("w = %f, n = %f, theta = %f%n", w, n, theta);
-        return new Point2D(cx, cy);
+
+        if (above) {
+            final double cx = (mx + w);
+            final double cy = (my - n);
+            return new Point2D(cx, cy);
+        } else {
+            final double cx = (mx - w);
+            final double cy = (my + n);
+            return new Point2D(cx, cy);
+        }
     }
 
-    public static Point2D[] computeRectanglePoints(double ax, double ay,
-            double bx, double by) {
-        // Based on computeThirdPoint() above
+    private static Point2D[] computeRectanglePoints(double ax, double ay,
+            double bx, double by, boolean above) {
         final int sign = (ay < by) ? 1 : -1;
-        final double deltax = Math.abs(ax - bx);
-        final double deltay = Math.abs(ay - by) * sign;
-        final double theta = Math.atan(deltay / deltax) * sign;
+        final double deltaX = Math.abs(ax - bx);
+        final double deltaY = Math.abs(ay - by) * sign;
+        final double theta = Math.atan(deltaY / deltaX) * sign;
         final double w = (BREAKDOWN_HEIGHT_PX * Math.sin(theta));
         final double n = sign * (Math
                 .sqrt(Math.pow(BREAKDOWN_HEIGHT_PX, 2) - Math.pow(w, 2)));
-        final double cx = (ax - w), cy = (ay + n);
-        final double dx = (bx - w), dy = (by + n);
-        System.out.printf("A = (%f,%f)%n", ax, ay);
-        System.out.printf("B = (%f,%f)%n", bx, by);
-        System.out.printf("C = (%f,%f)%n", cx, cy);
-        System.out.printf("D = (%f,%f)%n", dx, dy);
-        System.out.printf("w = %f, n = %f, theta = %f%n", w, n, theta);
-        return new Point2D[] { new Point2D(cx, cy), new Point2D(dx, dy) };
+
+        if (above) {
+            final double cx = (ax - w), cy = (ay + n);
+            final double dx = (bx - w), dy = (by + n);
+            return new Point2D[] { new Point2D(cx, cy), new Point2D(dx, dy) };
+        } else {
+            final double cx = (ax - w), cy = (ay + n);
+            final double dx = (bx - w), dy = (by + n);
+            return new Point2D[] { new Point2D(cx, cy), new Point2D(dx, dy) };
+        }
     }
 
-    public static Point2D[] computePoints(double ax, double ay, double bx,
-            double by, int numPoints) {
+    private static Point2D[] computePoints(double ax, double ay, double bx,
+            double by, int numPoints, boolean above) {
         if (numPoints < 1) {
             throw new IllegalArgumentException();
         } else if (numPoints == 1) {
-            return new Point2D[] { computeThirdPoint(ax, ay, bx, by) };
+            return new Point2D[] { computeThirdPoint(ax, ay, bx, by, above) };
         }
         // TODO
         throw new UnsupportedOperationException();
@@ -172,6 +174,19 @@ public class BreakdownUITools {
         return between;
     }
 
+    /**
+     * Intelligently place the nodes created by the given
+     * {@link BreakdownIterationCommand} along a line or curve between the two
+     * existing nodes from which this {@link BreakdownIterationCommand} was
+     * generated.
+     * 
+     * @param graph
+     *            the {@link GraphCanvasFX}
+     * @param cmd
+     *            the {@link BreakdownIterationCommand}
+     * @return a {@link Point2D} array of the locations to place the new nodes,
+     *         in order starting from the "from" end.
+     */
     public static Point2D[] placeNodes(GraphCanvasFX graph,
             BreakdownIterationCommand cmd) {
         final AutomatonTransition transition = cmd.getOriginalTransition();
@@ -183,25 +198,29 @@ public class BreakdownUITools {
         final GraphNode toNode = graph.lookupNode(toState.getId());
 
         Point2D[] points = new Point2D[numAddedStates];
+        boolean above = (numAddedStates == 1); // Some arbitrary default value
 
         if (fromChoice) {
-            // TODO
+            Point2D edgeMid = graph
+                    .lookupEdge(cmd.getOriginalTransition().getId())
+                    .getEdgeMiddlePoint();
+            final double dy = Math.abs(fromNode.getY() - toNode.getY());
+            System.out.printf("PLACENODES: dy = %f  my = %f%n", dy,
+                    edgeMid.getY());
+            above = (edgeMid.getY() > dy);
+        }
+
+        if (numAddedStates == 1) {
+            /* Form a triangle */
+            points[0] = computeThirdPoint(fromNode.getX(), fromNode.getY(),
+                    toNode.getX(), toNode.getY(), above);
+        } else if (numAddedStates == 2) {
+            /* Form a rectangle */
+            points = computeRectanglePoints(fromNode.getX(), fromNode.getY(),
+                    toNode.getX(), toNode.getY(), above);
+        } else {
             for (int i = 0; i < numAddedStates; i++) {
                 points[i] = randomPoint();
-            }
-        } else {
-            if (numAddedStates == 1) {
-                /* Form a triangle */
-                points[0] = computeThirdPoint(fromNode.getX(), fromNode.getY(),
-                        toNode.getX(), toNode.getY());
-            } else if (numAddedStates == 2) {
-                /* Form a rectangle */
-                points = computeRectanglePoints(fromNode.getX(),
-                        fromNode.getY(), toNode.getX(), toNode.getY());
-            } else {
-                for (int i = 0; i < numAddedStates; i++) {
-                    points[i] = randomPoint();
-                }
             }
         }
 
@@ -217,7 +236,7 @@ public class BreakdownUITools {
      * @param graph
      *            the {@link GraphCanvasFX}
      * @param cmd
-     *            the {@link BreakdownCommand}
+     *            the {@link BreakdownSequenceCommand}
      * @return a {@link Point2D} array of the locations to place the new nodes,
      *         in order starting from the "from" end.
      */
