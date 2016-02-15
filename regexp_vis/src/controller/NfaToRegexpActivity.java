@@ -4,7 +4,7 @@ import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 import model.Automaton;
 
-public class NfaToRegexpActivity extends Activity<GraphCanvasEvent> {
+public class NfaToRegexpActivity extends Activity {
 
     public NfaToRegexpActivity(GraphCanvasFX canvas, Automaton automaton) {
         super(canvas, automaton);
@@ -12,8 +12,17 @@ public class NfaToRegexpActivity extends Activity<GraphCanvasEvent> {
     }
 
     @Override
-    public void processEvent(GraphCanvasEvent event) {
-        // TODO Auto-generated method stub
+    public void onNodeClicked(GraphCanvasEvent event) {
+
+    }
+
+    @Override
+    public void onEdgeClicked(GraphCanvasEvent event) {
+
+    }
+
+    @Override
+    public void onBackgroundClicked(GraphCanvasEvent event) {
 
     }
 

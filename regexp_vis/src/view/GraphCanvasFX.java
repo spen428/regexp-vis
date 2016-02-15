@@ -1275,7 +1275,7 @@ public final class GraphCanvasFX extends Canvas {
             mDragNode = n;
             mDragOrigX = n.mX;
             mDragOrigY = n.mY;
-            // System.out.println("onMousePressed, hit NODE " + n);
+            System.out.println("onMousePressed, hit NODE " + n);
         } else if (e != null) {
             mDragEdge = e;
             System.out.println("onMousePressed, hit EDGE " + e + " id = "
@@ -1301,8 +1301,10 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     private void onMouseClicked(MouseEvent event) {
-        System.out.println("onMouseClicked, X = " + event.getX() + ", Y = "
-                + event.getY() + ", clickCount = " + event.getClickCount());
+        double x = event.getX();
+        double y = event.getY();
+        System.out.println("onMouseClicked, X = " + x + ", Y = "
+                + y + ", clickCount = " + event.getClickCount());
 
         if (mCreateEdgeModeActive) {
             if (mTempEdge != null) {
@@ -1324,8 +1326,8 @@ public final class GraphCanvasFX extends Canvas {
         }
 
         // Check for a hit on a node first, they take preference
-        GraphNode n = findNodeHit(mDownX, mDownY);
-        GraphEdge e = findEdgeLabelHit(mDownX, mDownY);
+        GraphNode n = findNodeHit(x, y);
+        GraphEdge e = findEdgeLabelHit(x, y);
         if (n != null) {
             if (mNodeClickedHandler != null) {
                 mNodeClickedHandler

@@ -13,17 +13,27 @@ import view.GraphEdge;
  * @author sp611
  *
  */
-public class RegexpBreakdownActivity extends Activity<GraphCanvasEvent> {
+public class RegexpBreakdownActivity extends Activity {
 
     public RegexpBreakdownActivity(GraphCanvasFX canvas, Automaton automaton) {
         super(canvas, automaton);
     }
 
     @Override
-    public void processEvent(GraphCanvasEvent event) {
+    public void onNodeClicked(GraphCanvasEvent event) {
+
+    }
+
+    @Override
+    public void onEdgeClicked(GraphCanvasEvent event) {
         if (event.getMouseEvent().getClickCount() == 2) {
             onEdgeDoubleClick(event);
         }
+    }
+
+    @Override
+    public void onBackgroundClicked(GraphCanvasEvent event) {
+
     }
 
     private void onEdgeDoubleClick(GraphCanvasEvent event) {
@@ -52,5 +62,4 @@ public class RegexpBreakdownActivity extends Activity<GraphCanvasEvent> {
                 .createBreakdownCommand(this.automaton, trans);
         super.executeNewCommand(cmd);
     }
-
 }

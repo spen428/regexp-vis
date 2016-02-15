@@ -13,7 +13,7 @@ import model.RemoveTransitionCommand;
  * @author sp611
  * 
  */
-public class NfaToDfaActivity extends Activity<GraphCanvasEvent> {
+public class NfaToDfaActivity extends Activity {
 
     public NfaToDfaActivity(GraphCanvasFX canvas, Automaton automaton) {
         super(canvas, automaton);
@@ -21,13 +21,21 @@ public class NfaToDfaActivity extends Activity<GraphCanvasEvent> {
     }
 
     @Override
-    public void processEvent(GraphCanvasEvent event) {
-        // TODO Auto-generated method stub
+    public void onNodeClicked(GraphCanvasEvent event) {
 
     }
 
-    public class RemoveEpsilonTransitionsActivity extends
-            Activity<GraphCanvasEvent> {
+    @Override
+    public void onEdgeClicked(GraphCanvasEvent event) {
+
+    }
+
+    @Override
+    public void onBackgroundClicked(GraphCanvasEvent event) {
+
+    }
+
+    public class RemoveEpsilonTransitionsActivity extends Activity {
 
         public RemoveEpsilonTransitionsActivity(GraphCanvasFX canvas,
                 Automaton automaton) {
@@ -35,10 +43,20 @@ public class NfaToDfaActivity extends Activity<GraphCanvasEvent> {
         }
 
         @Override
-        public void processEvent(GraphCanvasEvent event) {
+        public void onNodeClicked(GraphCanvasEvent event) {
+
+        }
+
+        @Override
+        public void onEdgeClicked(GraphCanvasEvent event) {
             if (event.getMouseEvent().getClickCount() == 2) {
                 onEdgeDoubleClick(event);
             }
+        }
+
+        @Override
+        public void onBackgroundClicked(GraphCanvasEvent event) {
+
         }
 
         private void onEdgeDoubleClick(GraphCanvasEvent event) {
@@ -53,8 +71,7 @@ public class NfaToDfaActivity extends Activity<GraphCanvasEvent> {
 
     }
 
-    public class RemoveNonDeterminismActivity extends
-            Activity<GraphCanvasEvent> {
+    public class RemoveNonDeterminismActivity extends Activity {
 
         public RemoveNonDeterminismActivity(GraphCanvasFX canvas,
                 Automaton automaton) {
@@ -63,8 +80,17 @@ public class NfaToDfaActivity extends Activity<GraphCanvasEvent> {
         }
 
         @Override
-        public void processEvent(GraphCanvasEvent event) {
-            // TODO Auto-generated method stub
+        public void onNodeClicked(GraphCanvasEvent event) {
+
+        }
+
+        @Override
+        public void onEdgeClicked(GraphCanvasEvent event) {
+
+        }
+
+        @Override
+        public void onBackgroundClicked(GraphCanvasEvent event) {
 
         }
 
