@@ -102,10 +102,6 @@ public final class GraphCanvasFX extends Canvas {
     /**
      * The colour we are using to draw the background of nodes
      */
-    private Color mNodeBackgroundColour;
-    /**
-     * The colour we are using to draw the border of nodes
-     */
     private Color mNodeBorderColour;
     /**
      * The colour we are using to render text on nodes
@@ -176,7 +172,6 @@ public final class GraphCanvasFX extends Canvas {
         mLabelFont = Font.font("Consolas", 16.0);
         mNodeFont = Font.font("Consolas", 16.0);
         mEdgeLabelColour = Color.BLACK;
-        mNodeBackgroundColour = Color.WHITE;
         mNodeBorderColour = Color.BLACK;
         mNodeTextColour = Color.BLACK;
 
@@ -329,7 +324,8 @@ public final class GraphCanvasFX extends Canvas {
 
         double radius = DEFAULT_NODE_RADIUS;
 
-        GraphNode n = new GraphNode(id, x, y, radius, false, false);
+        GraphNode n = new GraphNode(id, x, y, radius, false, false,
+                DEFAULT_NODE_BACKGROUND_COLOUR);
         repositionNode(n);
         updateMaxPosNodes();
 
@@ -370,6 +366,16 @@ public final class GraphCanvasFX extends Canvas {
             repositionNode(n);
             updateMaxPosNodes();
         }
+    }
+
+    /**
+     * Set the background colour of a node
+     *
+     * @param n The graph node in question
+     * @param colour The background colour
+     */
+    public void setNodeBackgroundColour(GraphNode n, Color colour) {
+        n.mBackgroundColour = colour;
     }
 
     /**
@@ -481,6 +487,10 @@ public final class GraphCanvasFX extends Canvas {
         mCreateEdgeFromNode = null;
     }
 
+    /**
+     * The default colour we are using to render the background of nodes
+     */
+    private final static Color DEFAULT_NODE_BACKGROUND_COLOUR = Color.WHITE;
     /**
      * The default colour we are using to render the lines/arcs for edges
      */
@@ -1111,7 +1121,7 @@ public final class GraphCanvasFX extends Canvas {
      * @param n The node to draw
      */
     void drawNode(GraphNode n) {
-        mGC.setFill(mNodeBackgroundColour);
+        mGC.setFill(n.mBackgroundColour);
         mGC.setStroke(mNodeBorderColour);
 
         GraphUtils.fillCircleCentred(mGC, n.mX, n.mY, n.mRadius);

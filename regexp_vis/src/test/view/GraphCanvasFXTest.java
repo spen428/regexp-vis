@@ -11,6 +11,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
@@ -89,6 +90,7 @@ public class GraphCanvasFXTest extends Application {
         mCanvas.addEdge(6, n1, n1, "loop3");
         mCanvas.doRedraw();
         mCanvas.startCreateEdgeMode(n1);
+        mCanvas.setNodeBackgroundColour(n1, Color.BEIGE);
 
         mCanvas.setOnCreatedEdge(new EventHandler<GraphCanvasEvent>() {
             @Override

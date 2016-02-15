@@ -1,6 +1,7 @@
 package view;
 
 import javafx.geometry.Point2D;
+import javafx.scene.paint.Color;
 
 public class GraphNode {
     /**
@@ -31,7 +32,10 @@ public class GraphNode {
     double mStartAngle;
     double mArcExtent;
 
-    public GraphNode(int id, double x, double y, double r, boolean startStyle, boolean finalStyle)
+    Color mBackgroundColour;
+
+    public GraphNode(int id, double x, double y, double r, boolean startStyle,
+            boolean finalStyle, Color backgroundColour)
     {
         mId = id;
         mX = x;
@@ -45,6 +49,8 @@ public class GraphNode {
         mLoopDirVecY = -1;
         //mLoopDirNormalVecX = -mLoopDirVecY;
         //mLoopDirNormalVecY = mLoopDirVecX;
+
+        mBackgroundColour = backgroundColour;
     }
 
     public double getX()
