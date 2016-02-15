@@ -48,14 +48,37 @@ public class BreakdownUITools {
      */
     private static Point2D computeThirdPoint(double ax, double ay, double bx,
             double by, boolean above) {
+        return computeThirdPoint(ax, ay, bx, by, above, BREAKDOWN_HEIGHT_PX);
+    }
+
+    /**
+     * Calculate the third point of triangle ABC, where points A and B lie on
+     * the base of the triangle.
+     * 
+     * @param ax
+     *            x coordinate of A
+     * @param ay
+     *            y coordinate of A
+     * @param bx
+     *            x coordinate of B
+     * @param by
+     *            y coordinate of B
+     * @param above
+     *            whether to find the y > midY or the y < midY point
+     * @param height
+     *            the height of the triangle
+     * @return {@link Point2D} C
+     */
+    private static Point2D computeThirdPoint(double ax, double ay, double bx,
+            double by, boolean above, double height) {
         final int sign = (ay < by) ? 1 : -1; // Dictates where to place point C
         final double dx = Math.abs(ax - bx);
         final double dy = Math.abs(ay - by) * sign;
         final double theta = Math.atan(dy / dx) * sign; // Slope of line AB
         final double mx = (ax + (dx / 2)), my = (ay + (dy / 2)); // Midpoint
-        final double w = (BREAKDOWN_HEIGHT_PX * Math.sin(theta));
-        final double n = sign * (Math
-                .sqrt(Math.pow(BREAKDOWN_HEIGHT_PX, 2) - Math.pow(w, 2)));
+        final double w = (height * Math.sin(theta));
+        final double n = sign
+                * (Math.sqrt(Math.pow(height, 2) - Math.pow(w, 2)));
 
         if (above) {
             final double cx = (mx + w);
@@ -96,8 +119,41 @@ public class BreakdownUITools {
         } else if (numPoints == 1) {
             return new Point2D[] { computeThirdPoint(ax, ay, bx, by, above) };
         }
-        // TODO
-        throw new UnsupportedOperationException();
+
+        final int sign = (ay < by) ? 1 : -1;
+        final double deltaX = Math.abs(ax - bx);
+        final double deltaY = Math.abs(ay - by) * sign;
+        final double dxPerNode = (deltaX / numPoints);
+        final double dyPerNode = (deltaY / numPoints);
+
+        double deltaH = BREAKDOWN_HEIGHT_PX / ((numPoints / 2) + 1);
+        double prevX = ax;
+        double prevY = ay;
+        double curX = ax + dxPerNode;
+        double curY = ay + dyPerNode;
+        double height = deltaH;
+
+        Point2D[] points = new Point2D[numPoints];
+
+        for (int i = 0; i < numPoints; i++) {
+            points[i] = computeThirdPoint(prevX, prevY, curX, curY, above,
+                    height);
+            prevX = curX;
+            prevY = curY;
+            curX += dxPerNode;
+            curY += dyPerNode;
+            height += deltaH;
+            if (height == BREAKDOWN_HEIGHT_PX) {
+                /* Start descending */
+                if (numPoints % 2 == 0) {
+                    /* Even number of points means none should be at max */
+                    height -= deltaH;
+                }
+                deltaH *= -1;
+            }
+        }
+
+        return points;
     }
 
     /**
@@ -205,8 +261,6 @@ public class BreakdownUITools {
                     .lookupEdge(cmd.getOriginalTransition().getId())
                     .getEdgeMiddlePoint();
             final double dy = Math.abs(fromNode.getY() - toNode.getY());
-            System.out.printf("PLACENODES: dy = %f  my = %f%n", dy,
-                    edgeMid.getY());
             above = (edgeMid.getY() > dy);
         }
 
@@ -242,16 +296,15 @@ public class BreakdownUITools {
      */
     public static Point2D[] placeNodes(GraphCanvasFX graph,
             BreakdownSequenceCommand cmd) {
-        /*
-         * TODO: Case where transCount is too high, and states are too close
-         * together for edges to be rendered must be handled differenty.
-         */
         final AutomatonTransition transition = cmd.getOriginalTransition();
         final GraphNode fromNode = graph
                 .lookupNode(transition.getFrom().getId());
         final GraphNode toNode = graph.lookupNode(transition.getTo().getId());
+
         final int transCount = cmd.getNewTransitionsCount();
         final boolean fromChoice = BreakdownUITools.wasChoiceTransition(cmd);
+        final double dxPerNode = (toNode.getX() - fromNode.getX()) / transCount;
+        final double dyPerNode = (toNode.getY() - fromNode.getY()) / transCount;
 
         Point2D[] points = new Point2D[transCount];
 
@@ -263,14 +316,13 @@ public class BreakdownUITools {
             Point2D edgeMid = graph
                     .lookupEdge(cmd.getOriginalTransition().getId())
                     .getEdgeMiddlePoint();
-            // TODO
-            for (int i = 0; i < transCount; i++) {
-                points[i] = randomPoint();
-            }
+            final double dy = Math.abs(fromNode.getY() - toNode.getY());
+            final boolean above = (edgeMid.getY() > dy);
+            points = computePoints(fromNode.getX(), fromNode.getY(),
+                    toNode.getX(), toNode.getY(), transCount - 1, above);
+            System.out.println(above);
         } else {
             /* Didn't breakdown from a choice, just place along a line */
-            double dxPerNode = (toNode.getX() - fromNode.getX()) / transCount;
-            double dyPerNode = (toNode.getY() - fromNode.getY()) / transCount;
             double curX = fromNode.getX() + dxPerNode;
             double curY = fromNode.getY() + dyPerNode;
 
