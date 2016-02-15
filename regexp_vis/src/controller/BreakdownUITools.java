@@ -114,6 +114,12 @@ public class BreakdownUITools {
 
     private static Point2D[] computePoints(double ax, double ay, double bx,
             double by, int numPoints, boolean above) {
+        return computePoints(ax, ay, bx, by, numPoints, BREAKDOWN_HEIGHT_PX,
+                above);
+    }
+
+    private static Point2D[] computePoints(double ax, double ay, double bx,
+            double by, int numPoints, double height, boolean above) {
         if (numPoints < 1) {
             throw new IllegalArgumentException();
         } else if (numPoints == 1) {
@@ -135,7 +141,7 @@ public class BreakdownUITools {
 
         for (int i = 0; i < numPoints; i++) {
             points[i] = computeThirdPoint(prevX, prevY, curX, curY, above,
-                    BREAKDOWN_HEIGHT_PX);
+                    height);
             prevX = curX;
             prevY = curY;
             curX += dxPerNode;
@@ -305,7 +311,6 @@ public class BreakdownUITools {
             final boolean above = (edgeMid.getY() > dy);
             points = computePoints(fromNode.getX(), fromNode.getY(),
                     toNode.getX(), toNode.getY(), transCount - 1, above);
-            System.out.println(above);
         } else {
             /* Didn't breakdown from a choice, just place along a line */
             double curX = fromNode.getX() + dxPerNode;
