@@ -126,31 +126,20 @@ public class BreakdownUITools {
         final double dxPerNode = (deltaX / numPoints);
         final double dyPerNode = (deltaY / numPoints);
 
-        double deltaH = BREAKDOWN_HEIGHT_PX / ((numPoints / 2) + 1);
         double prevX = ax;
         double prevY = ay;
         double curX = ax + dxPerNode;
         double curY = ay + dyPerNode;
-        double height = deltaH;
 
         Point2D[] points = new Point2D[numPoints];
 
         for (int i = 0; i < numPoints; i++) {
             points[i] = computeThirdPoint(prevX, prevY, curX, curY, above,
-                    height);
+                    BREAKDOWN_HEIGHT_PX);
             prevX = curX;
             prevY = curY;
             curX += dxPerNode;
             curY += dyPerNode;
-            height += deltaH;
-            if (height == BREAKDOWN_HEIGHT_PX) {
-                /* Start descending */
-                if (numPoints % 2 == 0) {
-                    /* Even number of points means none should be at max */
-                    height -= deltaH;
-                }
-                deltaH *= -1;
-            }
         }
 
         return points;
@@ -252,32 +241,28 @@ public class BreakdownUITools {
         final boolean fromChoice = BreakdownUITools.wasChoiceTransition(cmd);
         final GraphNode fromNode = graph.lookupNode(fromState.getId());
         final GraphNode toNode = graph.lookupNode(toState.getId());
+        final double dx = Math.abs(fromNode.getX() - toNode.getX());
+        final double dy = Math.abs(fromNode.getY() - toNode.getY());
+        final double len = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 
         Point2D[] points = new Point2D[numAddedStates];
-        boolean above = (numAddedStates == 1); // Some arbitrary default value
-
-        if (fromChoice) {
-            Point2D edgeMid = graph
-                    .lookupEdge(cmd.getOriginalTransition().getId())
-                    .getEdgeMiddlePoint();
-            final double dy = Math.abs(fromNode.getY() - toNode.getY());
-            above = (edgeMid.getY() > dy);
-        }
-
-        if (numAddedStates == 1) {
-            /* Form a triangle */
-            points[0] = computeThirdPoint(fromNode.getX(), fromNode.getY(),
-                    toNode.getX(), toNode.getY(), above);
-        } else if (numAddedStates == 2) {
-            /* Form a rectangle */
-            points = computeRectanglePoints(fromNode.getX(), fromNode.getY(),
-                    toNode.getX(), toNode.getY(), above);
-        } else {
-            for (int i = 0; i < numAddedStates; i++) {
-                points[i] = randomPoint();
+        if (numAddedStates > 0) {
+            boolean above = (numAddedStates == 1); // Arbitrary default value
+            if (fromChoice) {
+                Point2D edgeMid = graph
+                        .lookupEdge(cmd.getOriginalTransition().getId())
+                        .getEdgeMiddlePoint();
+                above = (edgeMid.getY() > dy);
+            }
+            if (numAddedStates == 2 && len <= BREAKDOWN_HEIGHT_PX * 2) {
+                /* A bit too cramped to make an arc */
+                points = computeRectanglePoints(fromNode.getX(),
+                        fromNode.getY(), toNode.getX(), toNode.getY(), above);
+            } else {
+                points = computePoints(fromNode.getX(), fromNode.getY(),
+                        toNode.getX(), toNode.getY(), numAddedStates, above);
             }
         }
-
         return points;
     }
 
@@ -335,7 +320,7 @@ public class BreakdownUITools {
         return points;
     }
 
-    private static Point2D randomPoint() {
+    public static Point2D randomPoint() {
         return new Point2D(Math.random() * 800, Math.random() * 600);
     }
 
