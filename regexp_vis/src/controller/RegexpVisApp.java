@@ -1,7 +1,11 @@
 package controller;
 
+import java.util.Observable;
+import java.util.Observer;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -20,19 +24,22 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Automaton;
+import model.CommandHistory;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 
-public class RegexpVisApp {
+public class RegexpVisApp implements Observer {
 
     /* Finals */
     final CheckMenuItem[] activityMenuItems;
     private final Activity<GraphCanvasEvent>[] activities;
     private final Automaton automaton;
     protected final GraphCanvasFX mCanvas;
+    final ListView<String> historyList;
 
     /* Constants */
     private static final String CONTROL_PANEL_HIDE_TEXT = "Hide Control Panel";
@@ -57,26 +64,10 @@ public class RegexpVisApp {
     protected Activity<GraphCanvasEvent> currentActivity;
     protected boolean enterKeyDown;
 
-    enum ActivityType {
-        ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"),
-        ACTIVITY_NFA_TO_REGEXP("Convert NFA to Regular Expression"),
-        ACTIVITY_NFA_TO_DFA("Convert NFA to DFA");
-
-        private final String text;
-
-        private ActivityType(String text) {
-            this.text = text;
-        }
-
-        public String getText() {
-            return this.text;
-        }
-    }
-
     public RegexpVisApp(Stage stage) {
         final VBox root = new VBox();
         final HBox canvasContainer = new HBox();
-        final ListView<String> historyList = new ListView<>();
+        this.historyList = new ListView<>();
         final VBox controlPanel = new VBox();
 
         Scene scene = new Scene(root, 800, 600);
@@ -97,24 +88,44 @@ public class RegexpVisApp {
 
         // --- Menu Edit
         Menu menuEdit = new Menu("Edit");
-        MenuItem menuEditBlah = new MenuItem("Blah");
-        menuEdit.getItems().addAll(new MenuItem("Undo"), new MenuItem("Redo"),
-                menuEditBlah, new MenuItem("Preferences..."));
-        menuEditBlah.setOnAction(new EventHandler<ActionEvent>() {
+        MenuItem menuEditUndo = new MenuItem("Undo");
+        menuEditUndo.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(ActionEvent t) {
-                System.out.println("Hello World!11");
+            public void handle(ActionEvent event) {
+                RegexpVisApp.this.currentActivity.history.prev();
             }
         });
+        MenuItem menuEditRedo = new MenuItem("Redo");
+        menuEditRedo.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                RegexpVisApp.this.currentActivity.history.next();
+            }
+        });
+        final CheckMenuItem menuEditClobberHistory = new CheckMenuItem(
+                "Clobber History");
+        menuEditClobberHistory.setSelected(CommandHistory.CLOBBER_BY_DEFAULT);
+        menuEditClobberHistory.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                boolean clob = RegexpVisApp.this.currentActivity.history
+                        .isClobbered();
+                RegexpVisApp.this.currentActivity.history.setClobbered(!clob);
+                menuEditClobberHistory.setSelected(!clob);
+            }
+        });
+        MenuItem menuEditPreferences = new MenuItem("Preferences...");
+        menuEdit.getItems().addAll(menuEditUndo, menuEditRedo,
+                menuEditClobberHistory, menuEditPreferences);
 
         // --- Menu Activity
         Menu menuActivity = new Menu("Activity");
-        ActivityType[] actTypes = ActivityType.values();
+        Activity.ActivityType[] actTypes = Activity.ActivityType.values();
         this.activityMenuItems = new CheckMenuItem[actTypes.length];
         for (int i = 0; i < actTypes.length; i++) {
             final CheckMenuItem item = new CheckMenuItem(actTypes[i].getText());
             this.activityMenuItems[i] = item;
-            final ActivityType act = actTypes[i];
+            final Activity.ActivityType act = actTypes[i];
             item.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent t) {
@@ -130,10 +141,14 @@ public class RegexpVisApp {
         menuViewHistory.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                historyList.setVisible(!historyList.isVisible());
-                historyList.setManaged(historyList.isVisible());
-                menuViewHistory.setText(historyList.isVisible()
-                        ? HISTORY_LIST_HIDE_TEXT : HISTORY_LIST_SHOW_TEXT);
+                RegexpVisApp.this.historyList
+                        .setVisible(!RegexpVisApp.this.historyList.isVisible());
+                RegexpVisApp.this.historyList
+                        .setManaged(RegexpVisApp.this.historyList.isVisible());
+                menuViewHistory
+                        .setText(RegexpVisApp.this.historyList.isVisible()
+                                ? HISTORY_LIST_HIDE_TEXT
+                                : HISTORY_LIST_SHOW_TEXT);
             }
         });
         final MenuItem menuViewControlPanel = new MenuItem(
@@ -177,12 +192,18 @@ public class RegexpVisApp {
         canvasContainer.getChildren().add(this.mCanvas);
 
         // History list also part of the canvas container
-        for (int i = 0; i < 33; i++) {
-            historyList.getItems().add("Step " + i);
-        }
-        historyList.setMinWidth(HISTORY_LIST_WIDTH_PX);
-        historyList.setMaxWidth(HISTORY_LIST_WIDTH_PX);
-        canvasContainer.getChildren().add(historyList);
+        this.historyList.setMinWidth(HISTORY_LIST_WIDTH_PX);
+        this.historyList.setMaxWidth(HISTORY_LIST_WIDTH_PX);
+        this.historyList.getSelectionModel().selectedIndexProperty()
+                .addListener(new ChangeListener<Number>() {
+                    @Override
+                    public void changed(
+                            ObservableValue<? extends Number> observable,
+                            Number oldValue, Number newValue) {
+                        RegexpVisApp.this.setHistoryIdx(newValue);
+                    }
+                });
+        canvasContainer.getChildren().add(this.historyList);
 
         root.getChildren().add(canvasContainer);
         this.mCanvas.requestFocus(); // Pulls focus away from the text field
@@ -191,19 +212,53 @@ public class RegexpVisApp {
         buttonPanel.setMinSize(0, BUTTON_PANEL_PADDING_PX * 2);
         buttonPanel.setPadding(new Insets(BUTTON_PANEL_PADDING_PX));
         buttonPanel.setAlignment(Pos.CENTER);
-        buttonPanel.getChildren().addAll(new Button("|<<"), new Button("<--"),
-                new Button("Load"), new Button("Save"),
-                new Button("Self-Destruct"), new Button("-->"),
-                new Button(">>|"));
+        Button buttonBackToStart = new Button("|<<");
+        buttonBackToStart.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                RegexpVisApp.this.currentActivity.historyStart();
+            }
+        });
+        Button buttonBack = new Button("<--");
+        buttonBack.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                RegexpVisApp.this.currentActivity.historyPrev();
+            }
+        });
+        Button buttonLoad = new Button("Load");
+        Button buttonSave = new Button("Save");
+        Button buttonForward = new Button("-->");
+        buttonForward.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                // TODO: Breakdown next edge if at end of history?
+                RegexpVisApp.this.currentActivity.historyNext();
+            }
+        });
+        Button buttonForwardToEnd = new Button(">>|");
+        buttonForwardToEnd.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                // TODO: Breakdown all edges if at end of history?
+                RegexpVisApp.this.currentActivity.historyEnd();
+            }
+        });
+        buttonPanel.getChildren().addAll(buttonBackToStart, buttonBack,
+                buttonLoad, buttonSave, buttonForward, buttonForwardToEnd);
         controlPanel.getChildren().add(buttonPanel);
 
+        final HBox inputPanel = new HBox();
         final TextField textField = new TextField(TEXTFIELD_PROMPT);
         textField.setPadding(new Insets(5));
+        HBox.setHgrow(textField, Priority.ALWAYS);
+        Button buttonEnter = new Button("Enter");
+        inputPanel.getChildren().addAll(textField, buttonEnter);
         controlPanel.setPadding(new Insets(CONTROL_PANEL_PADDING_VERTICAL_PX,
                 CONTROL_PANEL_PADDING_HORIZONTAL_PX,
                 CONTROL_PANEL_PADDING_VERTICAL_PX,
                 CONTROL_PANEL_PADDING_HORIZONTAL_PX));
-        controlPanel.getChildren().add(textField);
+        controlPanel.getChildren().add(inputPanel);
         root.getChildren().add(controlPanel);
 
         // Textfield focus listener
@@ -251,6 +306,15 @@ public class RegexpVisApp {
                 }
             }
         });
+        buttonEnter.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String input = textField.getText().trim();
+                if (!input.isEmpty()) {
+                    onEnteredRegexp(input);
+                }
+            }
+        });
 
         this.mCanvas.setOnEdgeClicked(new EventHandler<GraphCanvasEvent>() {
             @Override
@@ -264,22 +328,38 @@ public class RegexpVisApp {
 
         /* Init fields */
         this.automaton = new Automaton();
-        this.activities = new Activity[ActivityType.values().length];
+        this.activities = new Activity[Activity.ActivityType.values().length];
         /* Using ordinals of enum to prevent misordering */
-        this.activities[ActivityType.ACTIVITY_REGEXP_BREAKDOWN
+        this.activities[Activity.ActivityType.ACTIVITY_REGEXP_BREAKDOWN
                 .ordinal()] = new RegexpBreakdownActivity(this.mCanvas,
                         this.automaton);
-        this.activities[ActivityType.ACTIVITY_NFA_TO_DFA
+        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_DFA
                 .ordinal()] = new NfaToDfaActivity(this.mCanvas,
                         this.automaton);
-        this.activities[ActivityType.ACTIVITY_NFA_TO_REGEXP
+        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_REGEXP
                 .ordinal()] = new NfaToRegexpActivity(this.mCanvas,
                         this.automaton);
-        setActivity(ActivityType.ACTIVITY_REGEXP_BREAKDOWN);
+        setActivity(Activity.ActivityType.ACTIVITY_REGEXP_BREAKDOWN);
 
         stage.setTitle(WINDOW_TITLE);
         stage.setScene(scene);
         stage.show();
+    }
+
+    /**
+     * Called by the {@link ListView} component to perform a
+     * {@link CommandHistory} seek when a list item is selected.
+     * 
+     * @param idx
+     *            the historyIdx to seek to
+     */
+    protected void setHistoryIdx(Number value) {
+        int idx = (int) value;
+        // Note: called with value -1 when the history is reset.
+        if (idx >= 0) {
+            this.currentActivity.history.seekIdx(idx);
+            this.historyList.getSelectionModel().select(idx);
+        }
     }
 
     protected static void exitApplication() {
@@ -288,11 +368,27 @@ public class RegexpVisApp {
         System.exit(0);
     }
 
-    protected void setActivity(ActivityType actType) {
+    protected void setActivity(Activity.ActivityType actType) {
         if (actType == null) {
             throw new IllegalArgumentException();
         }
+
+        /* Observe only the current CommandHistory */
+        if (this.currentActivity != null) {
+            this.currentActivity.history.deleteObserver(this);
+        }
         this.currentActivity = this.activities[actType.ordinal()];
+        this.currentActivity.history.addObserver(this);
+
+        /* Update history list */
+        this.historyList.getItems().clear();
+        for (int i = 0; i <= this.currentActivity.history
+                .getHistorySize(); i++) {
+            // 1 extra, so that "Step 0" is the inital state
+            this.historyList.getItems().add("Step " + i);
+            this.historyList.getSelectionModel().select(i);
+        }
+
         /*
          * Set "checked" status of all menu items to reflect the change of
          * activity
@@ -314,7 +410,32 @@ public class RegexpVisApp {
 
     void onEnteredRegexp(String text) {
         if (this.currentActivity != null) {
+            this.historyList.getItems().clear();
+            this.historyList.getItems().add("Step 0");
+            this.historyList.getSelectionModel().select(0);
+            this.currentActivity.history.clear();
             this.currentActivity.onEnteredRegexp(text);
+        }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        /* Called whenever CommandHistory of current Activity changes */
+        if (arg instanceof Integer) {
+            int idx = (int) arg;
+            ObservableList<String> items = this.historyList.getItems();
+            if (idx == CommandHistory.HISTORY_CLOBBERED) {
+                /*
+                 * The last element of the history list was removed, we must
+                 * reflect this change in the UI.
+                 */
+                items.remove(items.size() - 1);
+            } else {
+                if (items.size() <= idx) {
+                    items.add("Step " + idx);
+                }
+                this.historyList.getSelectionModel().select(idx);
+            }
         }
     }
 

@@ -36,7 +36,6 @@ public abstract class BreakdownUICommand extends UICommand {
     @Override
     public void redo() {
         for (UICommand c : this.commands) {
-            System.out.println("BreakdownUICommand: " + c.toString());
             c.redo();
         }
     }

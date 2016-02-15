@@ -1,12 +1,12 @@
 package controller;
 
-import view.GraphCanvasEvent;
-import view.GraphCanvasFX;
-import view.GraphEdge;
 import model.Automaton;
 import model.AutomatonTransition;
 import model.BreakdownCommand;
 import model.TranslationTools;
+import view.GraphCanvasEvent;
+import view.GraphCanvasFX;
+import view.GraphEdge;
 
 /**
  * 
@@ -27,6 +27,13 @@ public class RegexpBreakdownActivity extends Activity<GraphCanvasEvent> {
     }
 
     private void onEdgeDoubleClick(GraphCanvasEvent event) {
+        if (this.history.getHistoryIdx() != this.history.getHistorySize()
+                && !this.history.isClobbered()) {
+            System.out.println("Ignoring breakdown event as we are not at the "
+                    + "end of the history list.");
+            return;
+        }
+
         GraphEdge edge = event.getTargetEdge();
         if (edge == null) {
             return;
@@ -43,11 +50,7 @@ public class RegexpBreakdownActivity extends Activity<GraphCanvasEvent> {
 
         BreakdownCommand cmd = TranslationTools
                 .createBreakdownCommand(this.automaton, trans);
-        UICommand uiCmd = UICommand.fromCommand(this.canvas, cmd);
-        if (uiCmd != null) {
-            uiCmd.redo();
-            // TODO: Add to history
-        }
+        super.executeNewCommand(cmd);
     }
 
 }

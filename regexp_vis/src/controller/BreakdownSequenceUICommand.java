@@ -19,10 +19,12 @@ public class BreakdownSequenceUICommand extends BreakdownUICommand {
          * together for edges to be rendered must be handled differenty.
          */
         int transCount = this.ccmd.getNewTransitionsCount();
-        GraphNode fromNode = graph.lookupNode(
-                this.ccmd.getOriginalTransition().getFrom().getId());
-        GraphNode toNode = graph
-                .lookupNode(this.ccmd.getOriginalTransition().getTo().getId());
+        GraphNode fromNode = graph.lookupNode(this.ccmd.getOriginalTransition()
+                .getFrom().getId());
+        GraphNode toNode = graph.lookupNode(this.ccmd.getOriginalTransition()
+                .getTo().getId());
+        final boolean fromChoice = BreakdownUITools.wasChoiceTransition(cmd);
+
         double dxPerNode = (toNode.getX() - fromNode.getX()) / transCount;
         double dyPerNode = (toNode.getY() - fromNode.getY()) / transCount;
 
@@ -31,12 +33,22 @@ public class BreakdownSequenceUICommand extends BreakdownUICommand {
 
         for (Command tmpCmd : this.ccmd.getCommands()) {
             if (tmpCmd instanceof AddStateCommand) {
-                AddStateCommand oldCommand = (AddStateCommand) tmpCmd;
-                AddStateUICommand newCommand = new AddStateUICommand(graph,
-                        oldCommand, curX, curY);
-                this.commands.add(newCommand);
-                curX += dxPerNode;
-                curY += dyPerNode;
+                if (fromChoice) {
+                    // TODO
+                    AddStateCommand oldCommand = (AddStateCommand) tmpCmd;
+                    AddStateUICommand newCommand = new AddStateUICommand(graph,
+                            oldCommand, curX, curY);
+                    this.commands.add(newCommand);
+                    curX += dxPerNode;
+                    curY += dyPerNode;
+                } else {
+                    AddStateCommand oldCommand = (AddStateCommand) tmpCmd;
+                    AddStateUICommand newCommand = new AddStateUICommand(graph,
+                            oldCommand, curX, curY);
+                    this.commands.add(newCommand);
+                    curX += dxPerNode;
+                    curY += dyPerNode;
+                }
             } else {
                 this.commands.add(UICommand.fromCommand(graph, tmpCmd));
             }
