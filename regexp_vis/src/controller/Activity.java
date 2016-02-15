@@ -12,6 +12,7 @@ import model.BasicRegexp;
 import model.Command;
 import model.CommandHistory;
 import model.InvalidRegexpException;
+import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 import view.GraphEdge;
 import view.GraphNode;
@@ -21,7 +22,7 @@ import view.GraphNode;
  * @author sp611
  *
  */
-public abstract class Activity<T extends Event> {
+public abstract class Activity {
 
     enum ActivityType {
         ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"),
@@ -86,7 +87,9 @@ public abstract class Activity<T extends Event> {
                 re.toString());
     }
 
-    public abstract void processEvent(T event);
+    public abstract void onNodeClicked(GraphCanvasEvent event);
+    public abstract void onEdgeClicked(GraphCanvasEvent event);
+    public abstract void onBackgroundClicked(GraphCanvasEvent event);
 
     protected void executeNewCommand(Command cmd) {
         if (cmd instanceof UICommand) {
