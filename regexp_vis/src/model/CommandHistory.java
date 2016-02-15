@@ -5,14 +5,14 @@ import java.util.Observable;
 
 /**
  * Stores a history of commands for rewind and playback
- * 
+ *
  * Extends {@link Observable}, sending the current value of
  * {@link CommandHistory#mHistoryIdx} to all observers.
  * @see Command
  */
 public class CommandHistory extends Observable {
 
-    public static final boolean CLOBBER_BY_DEFAULT = false;
+    public static final boolean CLOBBER_BY_DEFAULT = true;
 
     /**
      * Value propogated to observers each time the last element of the history
