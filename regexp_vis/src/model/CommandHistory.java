@@ -1,19 +1,34 @@
 package model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Observable;
 
 /**
  * Stores a history of commands for rewind and playback
+ *
+ * Extends {@link Observable}, sending the current value of
+ * {@link CommandHistory#mHistoryIdx} to all observers.
  * @see Command
  */
-public class CommandHistory {
+public class CommandHistory extends Observable {
+
+    public static final boolean CLOBBER_BY_DEFAULT = true;
+
+    /**
+     * Value propogated to observers each time the last element of the history
+     * list is removed.
+     */
+    public static final int HISTORY_CLOBBERED = -2;
+
     private final ArrayList<Command> mCommandList;
     private int mHistoryIdx;
+    private boolean clobber;
 
     public CommandHistory()
     {
         mCommandList = new ArrayList<>();
         mHistoryIdx = 0;
+        clobber = CLOBBER_BY_DEFAULT;
     }
 
     /**
@@ -49,6 +64,8 @@ public class CommandHistory {
         }
 
         mCommandList.get(--mHistoryIdx).undo();
+        this.setChanged();
+        this.notifyObservers(mHistoryIdx);
     }
 
     /**
@@ -61,6 +78,8 @@ public class CommandHistory {
         }
 
         mCommandList.get(mHistoryIdx++).redo();
+        this.setChanged();
+        this.notifyObservers(mHistoryIdx);
     }
 
     /**
@@ -90,6 +109,8 @@ public class CommandHistory {
         while (idx < mHistoryIdx) {
             mCommandList.get(--mHistoryIdx).undo();
         }
+        this.setChanged();
+        this.notifyObservers(mHistoryIdx);
     }
 
     /**
@@ -99,14 +120,39 @@ public class CommandHistory {
      */
     public void executeNewCommand(Command cmd)
     {
-        if (mHistoryIdx != mCommandList.size()) {
-            throw new RuntimeException(
-                "Cannot execute new command while not and the end of the " +
-                "command list");
+        if (mHistoryIdx < mCommandList.size()) {
+            if (clobber) {
+                /* Overwrite (well, remove) history past this point */
+                while (mHistoryIdx < mCommandList.size()) {
+                    mCommandList.remove(mCommandList.size() - 1);
+                    this.setChanged();
+                    this.notifyObservers(HISTORY_CLOBBERED);
+                }
+            } else {
+                throw new RuntimeException(
+                    "Cannot execute new command while not and the end of the " +
+                    "command list");
+            }
         }
 
         mCommandList.add(cmd);
         cmd.redo();
         mHistoryIdx++;
+        this.setChanged();
+        this.notifyObservers(mHistoryIdx);
     }
+
+    public void clear() {
+        mCommandList.clear();
+        mHistoryIdx = 0;
+    }
+
+    public boolean isClobbered() {
+        return this.clobber;
+    }
+
+    public void setClobbered(boolean clobber) {
+        this.clobber = clobber;
+    }
+
 }
