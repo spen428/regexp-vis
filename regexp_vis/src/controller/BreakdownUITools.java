@@ -1,7 +1,15 @@
 package controller;
 
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.AbstractMap.SimpleImmutableEntry;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import org.jcp.xml.dsig.internal.dom.ApacheCanonicalizer;
 
 import javafx.geometry.Point2D;
 import model.AddStateCommand;
@@ -112,13 +120,96 @@ public class BreakdownUITools {
         }
     }
 
+    /**
+     * Compute a set of n coordinates that lie at equidistant points along the
+     * arc of a segment of chord length AB and the given height.
+     * 
+     * @param ax
+     *            x coordinate of A
+     * @param ay
+     *            y coordinate of A
+     * @param bx
+     *            x coordinate of B
+     * @param by
+     *            y coordinate of B
+     * @param numPoints
+     *            the number of points that lie on the arc
+     * @return a {@link Point2D} array of points
+     */
     private static Point2D[] computePoints(double ax, double ay, double bx,
-            double by, int numPoints, boolean above) {
+            double by, int numPoints) {
         return computePoints(ax, ay, bx, by, numPoints, BREAKDOWN_HEIGHT_PX,
-                above);
+                true);
     }
 
-    private static Point2D[] computePoints(double ax, double ay, double bx,
+    /**
+     * Compute a set of n coordinates that lie at equidistant points along the
+     * arc of a segment of chord length AB and the given height.
+     * 
+     * @param ax
+     *            x coordinate of A
+     * @param ay
+     *            y coordinate of A
+     * @param bx
+     *            x coordinate of B
+     * @param by
+     *            y coordinate of B
+     * @param numPoints
+     *            the number of points that lie on the arc
+     * @param height
+     *            the height of the segment
+     * @param above
+     *            whether the segment arcs above or below the line AB
+     * @return a {@link Point2D} array of points
+     */
+    private static Point2D[] computePoints(final double ax, final double ay,
+            final double bx, final double by, final int numPoints,
+            final double height, final boolean above) {
+        if (numPoints < 1) {
+            throw new IllegalArgumentException();
+        }
+
+        final double deltaX = bx - ax;
+        final double deltaY = by - ay;
+        final double mx = (ax + bx) / 2;
+        final double my = (ay + by) / 2;
+        final double chordLength = Math.sqrt(
+                Math.pow(Math.abs(deltaX), 2) + Math.pow(Math.abs(deltaY), 2));
+        final double circleRadius = ((4 * Math.pow(height, 2))
+                + Math.pow(chordLength, 2)) / (8 * height);
+        final double d = (circleRadius - height);
+        final double sectorAngle = 2 * Math.acos(d / circleRadius);
+        final double deltaTheta = sectorAngle / numPoints;
+        final double gradient = Math.atan(deltaY / deltaX);
+
+        final double cx = mx + d * Math.cos(gradient); // wrong
+        final double cy = my + d * Math.sin(gradient); // wrong
+        final double offsetAngle = gradient + Math.PI / 4; // wrong
+
+        Point2D[] points = new Point2D[numPoints];
+
+        /* Using the parametric equation of a circle, find set of points. */
+        double theta = offsetAngle;
+
+        // System.out.printf("A=(%.1f,%.1f), B=(%.1f,%.1f)%n", ax, ay, bx, by);
+        // System.out.printf("AB=%.1f r=%.1f%n", chordLength, circleRadius);
+        for (int i = 0; i < numPoints; i++) {
+            double x = cx + (circleRadius * Math.cos(theta));
+            double y = -cy + (circleRadius * Math.sin(theta));
+            points[i] = new Point2D(x, y);
+            // System.out.printf("Point %d = (%.1f,%.1f)%n", i, x, y);
+            theta += deltaTheta;
+        }
+
+        return points;
+    }
+
+    /**
+     * Iterate
+     * {@link #computeThirdPoint(double, double, double, double, boolean)} over
+     * a set of points.
+     */
+    private static Point2D[] computeTriangles(double ax, double ay, double bx,
             double by, int numPoints, double height, boolean above) {
         if (numPoints < 1) {
             throw new IllegalArgumentException();
@@ -266,7 +357,8 @@ public class BreakdownUITools {
                         fromNode.getY(), toNode.getX(), toNode.getY(), above);
             } else {
                 points = computePoints(fromNode.getX(), fromNode.getY(),
-                        toNode.getX(), toNode.getY(), numAddedStates, above);
+                        toNode.getX(), toNode.getY(), numAddedStates,
+                        BREAKDOWN_HEIGHT_PX, above);
             }
         }
         return points;
@@ -310,7 +402,8 @@ public class BreakdownUITools {
             final double dy = Math.abs(fromNode.getY() - toNode.getY());
             final boolean above = (edgeMid.getY() > dy);
             points = computePoints(fromNode.getX(), fromNode.getY(),
-                    toNode.getX(), toNode.getY(), transCount - 1, above);
+                    toNode.getX(), toNode.getY(), transCount - 1,
+                    BREAKDOWN_HEIGHT_PX, above);
         } else {
             /* Didn't breakdown from a choice, just place along a line */
             double curX = fromNode.getX() + dxPerNode;
