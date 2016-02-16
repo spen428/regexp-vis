@@ -348,6 +348,7 @@ public final class GraphCanvasFX extends Canvas {
     public void setNodeUseFinalStyle(GraphNode n, boolean value) {
         // No layout data update required (for now at least)
         n.mUseFinalStateStyle = value;
+        doRedraw();
     }
 
     /**
@@ -365,6 +366,7 @@ public final class GraphCanvasFX extends Canvas {
             repositionNode(n);
             updateMaxPosNodes();
         }
+        doRedraw();
     }
 
     /**
@@ -375,6 +377,7 @@ public final class GraphCanvasFX extends Canvas {
      */
     public void setNodeBackgroundColour(GraphNode n, Color colour) {
         n.mBackgroundColour = colour;
+        doRedraw();
     }
 
     /**
