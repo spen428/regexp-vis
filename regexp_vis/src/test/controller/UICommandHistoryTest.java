@@ -15,6 +15,7 @@ import model.AddTransitionCommand;
 import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
+import model.BasicRegexp;
 import model.CommandHistory;
 import model.SetIsFinalCommand;
 import test.model.CommandHistoryTest;
@@ -61,17 +62,17 @@ public class UICommandHistoryTest {
 
         // Create the transitions we are going to use
         AddTransitionCommand s_b_0 = new AddTransitionCommand(automaton,
-                automaton.createNewTransition(s.getState(), b.getState(), "1"));
+                automaton.createNewTransition(s.getState(), b.getState(), BasicRegexp.EPSILON_EXPRESSION));
         AddTransitionCommand b_c_0 = new AddTransitionCommand(automaton,
-                automaton.createNewTransition(b.getState(), c.getState(), "2"));
+                automaton.createNewTransition(b.getState(), c.getState(), BasicRegexp.EPSILON_EXPRESSION));
         AddTransitionCommand c_d_0 = new AddTransitionCommand(automaton,
-                automaton.createNewTransition(c.getState(), d.getState(), "3"));
+                automaton.createNewTransition(c.getState(), d.getState(), BasicRegexp.EPSILON_EXPRESSION));
         AddTransitionCommand d_e_0 = new AddTransitionCommand(automaton,
-                automaton.createNewTransition(d.getState(), e.getState(), "4"));
+                automaton.createNewTransition(d.getState(), e.getState(), BasicRegexp.EPSILON_EXPRESSION));
         AddTransitionCommand e_b_0 = new AddTransitionCommand(automaton,
-                automaton.createNewTransition(e.getState(), b.getState(), "5"));
+                automaton.createNewTransition(e.getState(), b.getState(), BasicRegexp.EPSILON_EXPRESSION));
         AddTransitionCommand c_f_0 = new AddTransitionCommand(automaton,
-                automaton.createNewTransition(c.getState(), f.getState(), "!"));
+                automaton.createNewTransition(c.getState(), f.getState(), BasicRegexp.EPSILON_EXPRESSION));
 
         // Build the graph we want through a series of commands
         history.executeNewCommand(

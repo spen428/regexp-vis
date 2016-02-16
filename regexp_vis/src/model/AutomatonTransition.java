@@ -9,11 +9,10 @@ public final class AutomatonTransition {
     private final AutomatonState mFrom;
     private final AutomatonState mTo;
 
-    // TODO(mjn33): Possibly use BasicRegexp in the future
-    private final Object mData;
+    private final BasicRegexp mData;
 
     public AutomatonTransition(int id, AutomatonState from, AutomatonState to,
-        Object data)
+        BasicRegexp data)
     {
         mId = id;
         mFrom = from;
