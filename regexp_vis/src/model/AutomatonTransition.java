@@ -47,7 +47,7 @@ public final class AutomatonTransition {
     /**
      * @return The data associated with this transition
      */
-    public Object getData()
+    public BasicRegexp getData()
     {
         return mData;
     }
