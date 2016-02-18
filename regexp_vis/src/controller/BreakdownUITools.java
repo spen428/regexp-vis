@@ -14,7 +14,6 @@ import model.BreakdownSequenceCommand;
 import model.Command;
 import model.RemoveStateCommand;
 import view.GraphCanvasFX;
-import view.GraphNode;
 
 /**
  * 
@@ -31,22 +30,18 @@ public class BreakdownUITools {
             * GraphCanvasFX.DEFAULT_NODE_RADIUS;
 
     private static Point2D[] computeRectanglePoints(double ax, double ay,
-            double bx, double by, double height, boolean above) {
+            double bx, double by, double h, boolean above) {
+        final int sign = above ? 1 : -1;
         final double deltaX = bx - ax;
         final double deltaY = by - ay;
         final double theta = Math.atan(deltaY / deltaX);
-        final double w = (height * Math.sin(theta));
-        final double n = Math.sqrt(Math.pow(height, 2) - Math.pow(w, 2));
-
-        if (above) {
-            final double cx = (ax - w), cy = (ay + n);
-            final double dx = (bx - w), dy = (by + n);
-            return new Point2D[] { new Point2D(cx, cy), new Point2D(dx, dy) };
-        } else {
-            final double cx = (ax - w), cy = (ay + n);
-            final double dx = (bx - w), dy = (by + n);
-            return new Point2D[] { new Point2D(cx, cy), new Point2D(dx, dy) };
-        }
+        final double w = h * Math.sin(theta) * sign;
+        final double n = Math.sqrt(h * h - w * w) * sign;
+        final double cx = (ax + w);
+        final double cy = (ay - n);
+        final double dx = (bx + w);
+        final double dy = (by - n);
+        return new Point2D[] { new Point2D(cx, cy), new Point2D(dx, dy) };
     }
 
     /**
@@ -61,30 +56,25 @@ public class BreakdownUITools {
      *            x coordinate of B
      * @param by
      *            y coordinate of B
+     * @param h
+     *            the height of the triangle
      * @param above
      *            whether to find the y > midY or the y < midY point
-     * @param height
-     *            the height of the triangle
      * @return {@link Point2D} C
      */
     private static Point2D computeThirdPoint(double ax, double ay, double bx,
-            double by, boolean above, double height) {
+            double by, double h, boolean above) {
+        final int sign = above ? 1 : -1;
         final double dx = bx - ax;
         final double dy = by - ay;
         final double theta = Math.atan(dy / dx); // Slope of line AB
-        final double mx = (ax + (dx / 2)), my = (ay + (dy / 2)); // Midpoint
-        final double w = (height * Math.sin(theta));
-        final double n = (Math.sqrt(Math.pow(height, 2) - Math.pow(w, 2)));
-
-        if (above) {
-            final double cx = (mx + w);
-            final double cy = (my - n);
-            return new Point2D(cx, cy);
-        } else {
-            final double cx = (mx - w);
-            final double cy = (my + n);
-            return new Point2D(cx, cy);
-        }
+        final double mx = ax + (dx / 2); // Midpoint
+        final double my = ay + (dy / 2);
+        final double w = h * Math.sin(theta) * sign;
+        final double n = Math.sqrt(h * h - w * w) * sign;
+        final double cx = (mx + w);
+        final double cy = (my - n);
+        return new Point2D(cx, cy);
     }
 
     /**
@@ -100,8 +90,8 @@ public class BreakdownUITools {
 
         final double deltaX = bx - ax;
         final double deltaY = by - ay;
-        final double dxPerNode = (deltaX / (numPoints + 1));
-        final double dyPerNode = (deltaY / (numPoints + 1));
+        final double dxPerNode = deltaX / (numPoints + 1);
+        final double dyPerNode = deltaY / (numPoints + 1);
 
         double prevX = ax;
         double prevY = ay;
@@ -111,12 +101,8 @@ public class BreakdownUITools {
         Point2D[] points = new Point2D[numPoints];
 
         for (int i = 0; i < numPoints; i++) {
-            points[i] = computeThirdPoint(prevX, prevY, curX, curY, above,
-                    height);
-            System.out.printf(
-                    "A(%.1f,%.1f) B(%.1f,%.1f) C(%.1f,%.1f) dx=%.1f dy=%.1f dxp=%.1f dyp=%.1f%n",
-                    prevX, prevY, curX, curY, points[i].getX(),
-                    points[i].getY(), deltaX, deltaY, dxPerNode, dyPerNode);
+            points[i] = computeThirdPoint(prevX, prevY, curX, curY, height,
+                    above);
             prevX += dxPerNode;
             prevY += dyPerNode;
             curX += dxPerNode;
@@ -189,27 +175,24 @@ public class BreakdownUITools {
                 .getStateTransitions(from);
         final List<AutomatonTransition> toTrs = automaton
                 .getIngoingTransition(to);
-
         final List<AutomatonTransition> between = new LinkedList<>();
         for (AutomatonTransition f : fromTrs) {
             if (toTrs.contains(f)) {
                 between.add(f);
             }
         }
-
         return between;
     }
 
     /**
      * Intelligently place the nodes created by the given
-     * {@link BreakdownIterationCommand} along a line or curve between the two
-     * existing nodes from which this {@link BreakdownIterationCommand} was
-     * generated.
+     * {@link BreakdownCommand} along a line or curve between the two existing
+     * nodes from which this {@link BreakdownCommand} was generated.
      * 
      * @param graph
      *            the {@link GraphCanvasFX}
      * @param cmd
-     *            the {@link BreakdownIterationCommand}
+     *            the {@link BreakdownCommand}
      * @return a {@link Point2D} array of the locations to place the new nodes,
      *         in order starting from the "from" end.
      */
@@ -220,10 +203,12 @@ public class BreakdownUITools {
         final AutomatonState toState = transition.getTo();
         final int numAddedStates = BreakdownUITools.getNumAddedStates(cmd);
         final boolean fromChoice = BreakdownUITools.wasChoiceTransition(cmd);
-        final GraphNode fromNode = graph.lookupNode(fromState.getId());
-        final GraphNode toNode = graph.lookupNode(toState.getId());
-        final double dx = toNode.getX() - fromNode.getX();
-        final double dy = toNode.getY() - fromNode.getY();
+        final double fromX = graph.lookupNode(fromState.getId()).getX();
+        final double fromY = graph.lookupNode(fromState.getId()).getY();
+        final double toX = graph.lookupNode(toState.getId()).getX();
+        final double toY = graph.lookupNode(toState.getId()).getY();
+        final double dx = toX - fromX;
+        final double dy = toY - fromY;
         final double len = Math.sqrt(dx * dx + dy * dy);
 
         Point2D[] points = new Point2D[numAddedStates];
@@ -236,10 +221,10 @@ public class BreakdownUITools {
                         .lookupEdge(cmd.getOriginalTransition().getId())
                         .getEdgeMiddlePoint();
                 above = (edgeMid.getY() > dy);
-                double mx = fromNode.getX() + dx / 2;
-                double my = fromNode.getY() + dy / 2;
-                double ex = (edgeMid.getX() - mx);
-                double ey = (edgeMid.getY() - my);
+                double mx = fromX + dx / 2;
+                double my = fromY + dy / 2;
+                double ex = edgeMid.getX() - mx;
+                double ey = edgeMid.getY() - my;
                 height += Math.sqrt(ex * ex + ey * ey);
             } else if (cmd instanceof BreakdownSequenceCommand) {
                 height = 0;
@@ -248,13 +233,11 @@ public class BreakdownUITools {
             if (cmd instanceof BreakdownIterationCommand && numAddedStates == 2
                     && len <= BREAKDOWN_HEIGHT_PX * 2) {
                 /* A bit too cramped, make a rectangle instead */
-                points = computeRectanglePoints(fromNode.getX(),
-                        fromNode.getY(), toNode.getX(), toNode.getY(), height,
+                points = computeRectanglePoints(fromX, fromY, toX, toY, height,
                         above);
             } else {
-                points = computeTriangles(fromNode.getX(), fromNode.getY(),
-                        toNode.getX(), toNode.getY(), numAddedStates, height,
-                        above);
+                points = computeTriangles(fromX, fromY, toX, toY,
+                        numAddedStates, height, above);
             }
         }
         return points;
