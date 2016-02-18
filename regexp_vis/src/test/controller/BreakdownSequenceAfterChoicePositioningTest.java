@@ -11,8 +11,8 @@ public class BreakdownSequenceAfterChoicePositioningTest extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        TestRegexpVisApp ui = new TestRegexpVisApp(stage, "aaaa|bbbbb");
-        BreakdownTestUtils.breakdownEdges(ui, 0, 2);
+        TestRegexpVisApp ui = new TestRegexpVisApp(stage, "aaaaa|bbbb");
+        BreakdownTestUtils.breakdownEdges(ui, 0, 1, 2);
     }
 
 }
