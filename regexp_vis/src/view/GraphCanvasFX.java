@@ -260,7 +260,7 @@ public final class GraphCanvasFX extends Canvas {
 
     /**
      * Reposition a node in the bounds it's allowed to be in.
-     * 
+     *
      * @param n The node to reposition
      */
     private void repositionNode(GraphNode n) {
@@ -413,6 +413,7 @@ public final class GraphCanvasFX extends Canvas {
         }
 
         mGraph.remove(id);
+        doRedraw();
     }
 
     /**
@@ -465,6 +466,10 @@ public final class GraphCanvasFX extends Canvas {
         // And remove it
         NodeEdgePair pair = mGraph.get(oldEdge.mFrom.getId());
         pair.removeEdge(oldEdge);
+        // TODO: be smarter about this (do minimum amount of layout
+        // recalculation necessary)
+        updateAllLayoutData();
+        doRedraw();
     }
 
     /**
@@ -562,10 +567,10 @@ public final class GraphCanvasFX extends Canvas {
 
     /**
      * Update the layout data for an edge that is a line, which the drawing code
-     * uses later. The idea is to do more computationally expensive operations 
-     * here, an only re-perform them when necessary, opposed to doing that for 
+     * uses later. The idea is to do more computationally expensive operations
+     * here, an only re-perform them when necessary, opposed to doing that for
      * each time we redraw. E.g. moving one node will not change the layout data
-     * for many other edges. 
+     * for many other edges.
      *
      * @param edge The edge to update the layout data for
      * @param textAngle The calculated angle the edge label text should be
@@ -636,11 +641,11 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Update the layout data for an edge that is an arc. See 
+     * Update the layout data for an edge that is an arc. See
      * updateEdgeLineLayoutData() for more information
      *
      * @param edge The edge to update the layout data for
-     * @param height How high the arc should bend at the midpoint. Negative 
+     * @param height How high the arc should bend at the midpoint. Negative
      * values allowed, in which case the arc bends in the opposite direction
      * @param textAngle The calculated angle the edge label text should be
      * rotated by
@@ -786,7 +791,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Update the layout data for the looped edge of a node (node from == node 
+     * Update the layout data for the looped edge of a node (node from == node
      * to). See updateEdgeLineLayoutData() for more information.
      *
      * @param n The node for which the edges belong to
@@ -851,7 +856,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Update the layout data for all edges between two nodes, in both 
+     * Update the layout data for all edges between two nodes, in both
      * directions. See updateEdgeLineLayoutData() for more information.
      *
      * @param pair1 The node-edge pair for a node
@@ -941,8 +946,8 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Update all layout data, usually this is not needed but for simplicity 
-     * sake / debugging this can be used to ensure layout data gets updated 
+     * Update all layout data, usually this is not needed but for simplicity
+     * sake / debugging this can be used to ensure layout data gets updated
      * properly. See updateEdgeLineLayoutData() for more information.
      */
     private void updateAllLayoutData() {
@@ -965,7 +970,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Draw an edge which is a line, layout data calculated in 
+     * Draw an edge which is a line, layout data calculated in
      * updateEdgeLineLayoutData().
      *
      * @param edge The edge to draw
@@ -999,7 +1004,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Draw an edge which is an arc, layout data calculated in 
+     * Draw an edge which is an arc, layout data calculated in
      * updateEdgeArcLayoutData().
      *
      * @param edge The edge to draw
@@ -1035,7 +1040,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Draw an edge, checks the type of the edge to call the correct drawing 
+     * Draw an edge, checks the type of the edge to call the correct drawing
      * method.
      *
      * @param edge The edge to draw
@@ -1053,7 +1058,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Draw the looped edges for a GraphNode, layout data calculated in 
+     * Draw the looped edges for a GraphNode, layout data calculated in
      * updateEdgesLoopedLayoutData().
      *
      * @param n The graph node the edges belong to
@@ -1137,7 +1142,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Draw a node, no corresponding function to update layout data, as non is 
+     * Draw a node, no corresponding function to update layout data, as non is
      * needed yet.
      *
      * @param n The node to draw
@@ -1403,7 +1408,7 @@ public final class GraphCanvasFX extends Canvas {
      * @param y The y coordinate of the hit test
      * @return The node which was hit, or null if no node was hit
      */
-    private GraphNode findNodeHit(double x, double y) {
+    public GraphNode findNodeHit(double x, double y) {
         for (NodeEdgePair pair : mGraph.values()) {
             if (nodeHitTest(pair.mNode, x, y)) {
                 return pair.mNode;
