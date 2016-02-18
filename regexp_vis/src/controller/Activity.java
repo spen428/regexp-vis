@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import javafx.event.Event;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.MouseEvent;
 import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
@@ -18,7 +20,7 @@ import view.GraphEdge;
 import view.GraphNode;
 
 /**
- * 
+ *
  * @author sp611
  *
  */
@@ -49,6 +51,12 @@ public abstract class Activity {
         this.canvas = canvas;
         this.automaton = automaton;
         this.history = new CommandHistory();
+    }
+
+    Activity(GraphCanvasFX canvas, Automaton automaton, CommandHistory history) {
+        this.canvas = canvas;
+        this.automaton = automaton;
+        this.history = history;
     }
 
     public void onEnteredRegexp(String text) {
@@ -90,6 +98,8 @@ public abstract class Activity {
     public abstract void onNodeClicked(GraphCanvasEvent event);
     public abstract void onEdgeClicked(GraphCanvasEvent event);
     public abstract void onBackgroundClicked(GraphCanvasEvent event);
+    public abstract void onContextMenuRequested(ContextMenuEvent event);
+    public abstract void onHideContextMenu(MouseEvent event);
 
     protected void executeNewCommand(Command cmd) {
         if (cmd instanceof UICommand) {

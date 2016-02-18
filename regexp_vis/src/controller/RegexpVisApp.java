@@ -20,8 +20,10 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -333,6 +335,22 @@ public class RegexpVisApp implements Observer {
             }
         });
 
+        this.mCanvas.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED,
+        new EventHandler<ContextMenuEvent>() {
+            @Override
+            public void handle(ContextMenuEvent event) {
+                onContextMenuRequested(event);
+            }
+        });
+
+        this.mCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED,
+        new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                onHideContextMenu(event);
+            }
+        });
+
         /* Init fields */
         this.automaton = new Automaton();
         this.activities = new Activity[Activity.ActivityType.values().length];
@@ -356,7 +374,7 @@ public class RegexpVisApp implements Observer {
     /**
      * Called by the {@link ListView} component to perform a
      * {@link CommandHistory} seek when a list item is selected.
-     * 
+     *
      * @param idx
      *            the historyIdx to seek to
      */
@@ -420,6 +438,18 @@ public class RegexpVisApp implements Observer {
     private void onBackgroundClicked(GraphCanvasEvent event) {
         if (this.currentActivity != null) {
             this.currentActivity.onBackgroundClicked(event);
+        }
+    }
+
+    private void onContextMenuRequested(ContextMenuEvent event) {
+        if (this.currentActivity != null) {
+            this.currentActivity.onContextMenuRequested(event);
+        }
+    }
+
+    private void onHideContextMenu(MouseEvent event) {
+        if (this.currentActivity != null) {
+            this.currentActivity.onHideContextMenu(event);
         }
     }
 
