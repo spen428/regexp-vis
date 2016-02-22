@@ -50,6 +50,8 @@ public class GraphEdge {
 
     Point2D mMiddlePoint;
     Color mLineColour;
+    
+    boolean hoverTrue;
 
     public GraphEdge(int id, GraphNode from, GraphNode to, String text,
             Color lineColour)
