@@ -1,5 +1,8 @@
 package controller;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -27,9 +30,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import model.Automaton;
 import model.CommandHistory;
+import model.InvalidRegexpException;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 
@@ -41,6 +46,7 @@ public class RegexpVisApp implements Observer {
     private final Automaton automaton;
     protected final GraphCanvasFX mCanvas;
     final ListView<String> historyList;
+    final Stage stage;
 
     /* Constants */
     private static final String CONTROL_PANEL_HIDE_TEXT = "Hide Control Panel";
@@ -70,6 +76,7 @@ public class RegexpVisApp implements Observer {
         final HBox canvasContainer = new HBox();
         this.historyList = new ListView<>();
         final VBox controlPanel = new VBox();
+        this.stage = stage;
 
         Scene scene = new Scene(root, 800, 600);
 
@@ -84,8 +91,22 @@ public class RegexpVisApp implements Observer {
                 exitApplication();
             }
         });
-        menuFile.getItems().addAll(new MenuItem("Import Graph..."),
-                new MenuItem("Export Graph..."), exit);
+
+        MenuItem menuFileImport = new MenuItem("Import Graph...");
+        menuFileImport.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                onImportGraph(event);
+            }
+
+        });
+        MenuItem menuFileExport = new MenuItem("Export Graph...");
+        menuFileExport.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                onExportGraph(event);
+            }
+
+        });
+        menuFile.getItems().addAll(menuFileImport, menuFileExport, exit);
 
         // --- Menu Edit
         Menu menuEdit = new Menu("Edit");
@@ -450,6 +471,79 @@ public class RegexpVisApp implements Observer {
     private void onHideContextMenu(MouseEvent event) {
         if (this.currentActivity != null) {
             this.currentActivity.onHideContextMenu(event);
+        }
+    }
+
+    private void onImportGraph(ActionEvent event) {
+        // Based on the nice example snippet in the JavaFX documentation
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Import Automaton Graph File");
+        // Choose .txt, our file format is text based as this just makes it
+        // easier to edit with text editors.
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Automaton Graph Files", "*.txt"),
+                new FileChooser.ExtensionFilter("All Files", "*.*"));
+
+        File selectedFile = fileChooser.showOpenDialog(this.stage);
+        if (selectedFile == null) {
+            // No file selected, exit early
+            return;
+        }
+
+        // TODO: implement ways for the activities to respond to an import,
+        // and possibly abort the attempt without any loss of data.
+        try {
+            GraphExportFile f = new GraphExportFile(selectedFile);
+            f.loadFile(automaton, mCanvas);
+
+            // TODO: part of this idea here
+            //if (this.currentActivity != null) {
+            //    this.currentActivity.onGraphFileImport();
+            //}
+        } catch (BadGraphExportFileException e) {
+            new Alert(AlertType.ERROR,
+                    "Failed to load file, file isn't a valid automaton graph file.")
+                    .showAndWait();
+        } catch (FileNotFoundException e) {
+            new Alert(AlertType.ERROR,
+                    "Failed to load file, could not find file: "
+                            + selectedFile.getPath()).showAndWait();
+        } catch (IOException e) {
+            new Alert(AlertType.ERROR,
+                    "Failed to load file, unexpected I/O error.")
+                    .showAndWait();
+        } catch (InvalidRegexpException e) {
+            new Alert(AlertType.ERROR,
+                    "Failed to load file, file contains an invalid regexp.")
+                    .showAndWait();
+        }
+    }
+
+
+
+    private void onExportGraph(ActionEvent event) {
+        // Based on the nice example snippet in the JavaFX documentation
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Automaton Graph File");
+        // Choose .txt, our file format is text based as this just makes it
+        // easier to edit with text editors.
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Automaton Graph Files", "*.txt"),
+                new FileChooser.ExtensionFilter("All Files", "*.*"));
+
+        File selectedFile = fileChooser.showSaveDialog(this.stage);
+        if (selectedFile == null) {
+            // No file selected, exit early
+            return;
+        }
+
+        try {
+            GraphExportFile f = new GraphExportFile(automaton, mCanvas);
+            f.writeFile(selectedFile);
+        } catch (IOException e) {
+            new Alert(AlertType.ERROR,
+                    "Failed to save file, unexpected I/O error.")
+                    .showAndWait();
         }
     }
 
