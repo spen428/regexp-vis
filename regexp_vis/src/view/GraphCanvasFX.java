@@ -1,7 +1,11 @@
 package view;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -22,7 +26,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Affine;
 
 public final class GraphCanvasFX extends Canvas {
-    private static class NodeEdgePair {
+    public static class NodeEdgePair {
         final GraphNode mNode;
         /**
          * Edges which come from this node to another, different node
@@ -53,6 +57,21 @@ public final class GraphCanvasFX extends Canvas {
             } else {
                 mEdges.remove(e);
             }
+        }
+
+        public GraphNode getNode()
+        {
+            return mNode;
+        }
+
+        public List<GraphEdge> getEdges()
+        {
+            return Collections.unmodifiableList(mEdges);
+        }
+
+        public List<GraphEdge> getLoopedEdges()
+        {
+            return Collections.unmodifiableList(mLoopedEdges);
         }
     }
 
@@ -229,6 +248,37 @@ public final class GraphCanvasFX extends Canvas {
 
     public final void setOnCreatedEdge(EventHandler<GraphCanvasEvent> handler) {
         mCreatedEdgeHandler = handler;
+    }
+
+    /**
+     * Provides an iterator over the graph, containing all node + edges
+     * pairs. Modification will result in an exception being thrown. The same as
+     * what is done in the Automaton class.
+     *
+     * @return The iterator
+     */
+    public Iterator<NodeEdgePair> graphIterator() {
+        Iterator<Map.Entry<Integer, NodeEdgePair>> mEntrySetIterator = mGraph
+                .entrySet().iterator();
+        return new Iterator<NodeEdgePair>() {
+            @Override
+            public boolean hasNext() {
+                return mEntrySetIterator.hasNext();
+            }
+
+            @Override
+            public NodeEdgePair next() {
+                Map.Entry<Integer, NodeEdgePair> entry = mEntrySetIterator
+                        .next();
+                return entry.getValue();
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException(
+                        "remove() not supported.");
+            }
+        };
     }
 
     public GraphNode lookupNode(int id) {
