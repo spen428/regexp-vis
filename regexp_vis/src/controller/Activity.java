@@ -95,6 +95,20 @@ public abstract class Activity {
                 re.toString());
     }
 
+    /**
+     * Called by RegexpVisApp when we have just changed to this activity
+     */
+    public void onStarted() {
+
+    }
+
+    /**
+     * Called by RegexpVisApp when we have just changed away from this activity
+     */
+    public void onEnded() {
+
+    }
+
     public abstract void onNodeClicked(GraphCanvasEvent event);
     public abstract void onEdgeClicked(GraphCanvasEvent event);
     public abstract void onBackgroundClicked(GraphCanvasEvent event);
@@ -113,6 +127,10 @@ public abstract class Activity {
         if (uiCmd != null) {
             this.history.executeNewCommand(uiCmd);
         }
+    }
+
+    protected void executeNewUICommand(UICommand uiCmd) {
+        this.history.executeNewCommand(uiCmd);
     }
 
     // Expose CommandHistory methods, except for executeNewCommand()

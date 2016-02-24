@@ -403,7 +403,7 @@ public class RegexpVisApp implements Observer {
         int idx = (int) value;
         // Note: called with value -1 when the history is reset.
         if (idx >= 0) {
-            this.currentActivity.history.seekIdx(idx);
+            this.currentActivity.historySeek(idx);
             this.historyList.getSelectionModel().select(idx);
         }
     }
@@ -419,11 +419,18 @@ public class RegexpVisApp implements Observer {
             throw new IllegalArgumentException();
         }
 
+        Activity newActivity = this.activities[actType.ordinal()];
+        if (this.currentActivity == newActivity) {
+            // Don't do anything, current activity hasn't actually changed
+            return;
+        }
+
         /* Observe only the current CommandHistory */
         if (this.currentActivity != null) {
             this.currentActivity.history.deleteObserver(this);
+            this.currentActivity.onEnded();
         }
-        this.currentActivity = this.activities[actType.ordinal()];
+        this.currentActivity = newActivity;
         this.currentActivity.history.addObserver(this);
 
         /* Update history list */
@@ -442,6 +449,8 @@ public class RegexpVisApp implements Observer {
         for (int i = 0; i < this.activityMenuItems.length; i++) {
             this.activityMenuItems[i].setSelected(i == actType.ordinal());
         }
+
+        this.currentActivity.onStarted();
     }
 
     private void onNodeClicked(GraphCanvasEvent event) {
