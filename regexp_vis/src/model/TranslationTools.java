@@ -1,11 +1,12 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public final class TranslationTools {
     /**
@@ -50,14 +51,15 @@ public final class TranslationTools {
     }
 
     /**
-     * Creates BreakdownCommand(s) for all transitions in this automaton. After
-     * executing these commands there may be more transitions to breakdown. Null
-     * is returned if there are no more transitions to breakdown.
+     * Creates a list of all transitions that need to be broken down for
+     * converting from regexp to NFA. Null is returned if there are no more
+     * transitions to break down.
      *
      * @param automaton The automaton to breakdown the transitions for
-     * @return The list of BreakdownCommands to breakdown all transitions
+     * @return The list of AutomatonTransition(s) that need to be broken down
      */
-    public static List<Command> breakdownAllTransitions(Automaton automaton)
+    public static List<AutomatonTransition> getAllTransitionsToBreakdown(
+            Automaton automaton)
     {
         ArrayList<AutomatonTransition> allTodoTrans = new ArrayList<>();
 
@@ -74,14 +76,9 @@ public final class TranslationTools {
 
         if (allTodoTrans.isEmpty()) {
             return null;
+        } else {
+            return allTodoTrans;
         }
-
-        ArrayList<Command> commands = new ArrayList<>();
-        for (AutomatonTransition t : allTodoTrans) {
-            commands.add(createBreakdownCommand(automaton, t));
-        }
-
-        return commands;
     }
 
     /**
@@ -129,41 +126,43 @@ public final class TranslationTools {
     }
 
     /**
-     * Part of calcEpsilonReachableStates(), for a state it discovers epsilon
-     * reachable states we haven't visited yet.
+     * Part of calcReachableStates(), for a state it discovers reachable states
+     * through transitions, with a given predicate on the transitions.
      *
      * @param automaton The automaton the state belongs to
      * @param state The state to use to look for adjacent nodes connected
-     * through epsilon transitions
+     * through transitions
      * @param newDiscovered The set which this method will add newly discovered
      * states to
      * @param visited The set of states which we have already visited, and thus
      * will not be added to the "newDiscovered" set
+     * @param pred A predicate which tests if we should follow a specific
+     * transition or not
      */
-    private static void discoverEpsilonReachableStates(Automaton automaton,
+    private static void discoverReachableStates(Automaton automaton,
             AutomatonState state, Set<AutomatonState> newDiscovered,
-            Set<AutomatonState> visited)
+            Set<AutomatonState> visited, Predicate<AutomatonTransition> pred)
     {
         List<AutomatonTransition> transitions = automaton
                 .getStateTransitions(state);
         for (AutomatonTransition t : transitions) {
-            BasicRegexp re = (BasicRegexp) t.getData();
-            AutomatonState to = t.getTo();
-            if (re.getChar() == BasicRegexp.EPSILON_CHAR
-                    && !visited.contains(to)) {
+            if (pred.test(t) && !visited.contains(t.getTo())) {
                 newDiscovered.add(t.getTo());
             }
         }
     }
 
     /**
+     *
      * @param automaton The automaton the state belongs to
-     * @param state The state which we want to find the epsilon closure of
-     * @return The set of states which are in this state's epsilon closure
-     * (including the state itself)
+     * @param state The state which we want to start the search from
+     * @param pred A predicate which tests if we should follow a specific
+     * transition or not
+     * @return The set of states which are reachable through the transitions
+     * subject to the given predicate
      */
-    public static Set<AutomatonState> calcEpsilonReachableStates(
-            Automaton automaton, AutomatonState state)
+    public static Set<AutomatonState> calcReachableStates(Automaton automaton,
+            AutomatonState state, Predicate<AutomatonTransition> pred)
     {
         Set<AutomatonState> visited = new HashSet<>();
         Set<AutomatonState> discovered = new HashSet<>();
@@ -174,8 +173,8 @@ public final class TranslationTools {
             visited.addAll(discovered);
 
             for (AutomatonState s2 : discovered) {
-                discoverEpsilonReachableStates(automaton, s2, newDiscovered,
-                        visited);
+                discoverReachableStates(automaton, s2, newDiscovered,
+                        visited, pred);
             }
 
             // Efficiency trick, just swap the references and clear the old set
@@ -188,5 +187,66 @@ public final class TranslationTools {
         }
 
         return visited;
+    }
+
+    /**
+     * @param automaton The automaton in question
+     * @return The set of unreachable states for this automaton, the set is
+     * empty if all states are reachable
+     */
+    public static Set<AutomatonState> automatonCalcUnreachableStates(
+            Automaton automaton)
+    {
+        Set<AutomatonState> allStates = new HashSet<>();
+        Iterator<Automaton.StateTransitionsPair> it = automaton.graphIterator();
+        while (it.hasNext()) {
+            Automaton.StateTransitionsPair pair = it.next();
+            allStates.add(pair.getState());
+        }
+
+        Set<AutomatonState> reachable = calcReachableStates(automaton,
+                automaton.getStartState(), t -> true);
+
+        allStates.removeAll(reachable);
+        return allStates;
+    }
+
+    /**
+     * @param automaton The automaton the state belongs to
+     * @param state The state which we want to find the epsilon closure of
+     * @return The set of states which are in this state's epsilon closure
+     * (including the state itself)
+     */
+    public static Set<AutomatonState> calcEpsilonReachableStates(
+            Automaton automaton, AutomatonState state)
+    {
+        return calcReachableStates(automaton, state,
+                t -> t.getData().getChar() == BasicRegexp.EPSILON_CHAR);
+    }
+
+    /**
+     * Returns the list of character transitions which are non-deterministic,
+     * sorted.
+     *
+     * @param automaton The automaton the state belongs to
+     * @param state The state to check for non-deterministic transitions
+     * @return A list of characters for which transitions are non-deterministic,
+     * if there is no non-determinism this list is empty.
+     */
+    public List<Character> calcNonDeterministicTrans(Automaton a,
+            AutomatonState state)
+    {
+        ArrayList<Character> list = new ArrayList<>();
+        HashSet<Character> found = new HashSet<>();
+        for (AutomatonTransition t : a.getStateTransitions(state)) {
+            if (found.contains(t.getData().getChar())) {
+                list.add(t.getData().getChar());
+            } else {
+                found.add(t.getData().getChar());
+            }
+        }
+
+        Collections.sort(list);
+        return list;
     }
 }

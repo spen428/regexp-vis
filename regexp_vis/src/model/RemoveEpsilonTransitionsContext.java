@@ -119,6 +119,28 @@ public class RemoveEpsilonTransitionsContext {
     }
 
     /**
+     * @param automaton The automaton to check
+     * @return True if any equivalent states exist for any state in the given
+     * automaton, false otherwise.
+     */
+    public boolean equivalentStatesExist(Automaton automaton)
+    {
+        for (Set<AutomatonState> equivalentStates : mEquivalentStatesList) {
+            int count = 0;
+            for (AutomatonState state : equivalentStates) {
+                if (automaton.stateExists(state)) {
+                    count++;
+                }
+            }
+            if (count > 1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @param a The first state to compare
      * @param b The second state to compare
      * @return True if the two states are equivalent, false otherwise

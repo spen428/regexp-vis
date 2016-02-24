@@ -3,6 +3,7 @@ package model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -26,8 +27,18 @@ public class RemoveEquivalentStatesCommand extends Command {
         mCtx = ctx;
         mTargetState = state;
 
-        Set<AutomatonState> equivalentStates = ctx
-                .getEquivalentStates(mTargetState);
+        // Get set of equivalent states, also remove ones that don't exist, e.g.
+        // removed because they were unreachable
+        Set<AutomatonState> equivalentStates = new HashSet<>(
+                ctx.getEquivalentStates(mTargetState));
+        Iterator<AutomatonState> equivStatesIt = equivalentStates.iterator();
+        while (equivStatesIt.hasNext()) {
+            AutomatonState s2 = equivStatesIt.next();
+            if (!automaton.stateExists(s2)) {
+                equivStatesIt.remove();
+            }
+        }
+
 
         // Transitions in-going to any one of these equivalent states
         ArrayList<AutomatonTransition> trans = new ArrayList<>();
