@@ -59,6 +59,11 @@ public abstract class Activity {
         this.history = history;
     }
 
+    /**
+     * Called by RegexpVisApp after entering a regular expression.
+     *
+     * @param text The regexp the user entered
+     */
     public void onEnteredRegexp(String text) {
         System.out.printf("Entered regexp: %s%n", text);
         BasicRegexp re = null;
@@ -93,6 +98,28 @@ public abstract class Activity {
         this.canvas.setNodeUseFinalStyle(endNode, true);
         GraphEdge edge = this.canvas.addEdge(trans.getId(), startNode, endNode,
                 re.toString());
+    }
+
+    /**
+     * Called by RegexpVisApp when we load a new graph from a file, the activity
+     * can decide to do nothing, pre-process the file or just load file as
+     * normal.
+     *
+     * @param file The graph export file we read from disk, not loaded yet
+     */
+    public void onGraphFileImport(GraphExportFile file) {
+
+    }
+
+    /**
+     * Called by RegexpVisApp when we are about to change from a another
+     * activity to this one.
+     *
+     * @return true if we can start this activity, false otherwise in which case
+     * the switching of activities will be aborted.
+     */
+    public boolean onPreStarted() {
+        return true;
     }
 
     /**

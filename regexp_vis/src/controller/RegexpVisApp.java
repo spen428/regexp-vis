@@ -424,6 +424,10 @@ public class RegexpVisApp implements Observer {
             // Don't do anything, current activity hasn't actually changed
             return;
         }
+        if (this.currentActivity != null && !this.currentActivity.onPreStarted()) {
+            // Can't switch to this activity, abort
+            return;
+        }
 
         /* Observe only the current CommandHistory */
         if (this.currentActivity != null) {
@@ -499,16 +503,11 @@ public class RegexpVisApp implements Observer {
             return;
         }
 
-        // TODO: implement ways for the activities to respond to an import,
-        // and possibly abort the attempt without any loss of data.
         try {
             GraphExportFile f = new GraphExportFile(selectedFile);
-            f.loadFile(automaton, mCanvas);
-
-            // TODO: part of this idea here
-            //if (this.currentActivity != null) {
-            //    this.currentActivity.onGraphFileImport();
-            //}
+            if (this.currentActivity != null) {
+                this.currentActivity.onGraphFileImport(f);
+            }
         } catch (BadGraphExportFileException e) {
             new Alert(AlertType.ERROR,
                     "Failed to load file, file isn't a valid automaton graph file.")
@@ -520,10 +519,6 @@ public class RegexpVisApp implements Observer {
         } catch (IOException e) {
             new Alert(AlertType.ERROR,
                     "Failed to load file, unexpected I/O error.")
-                    .showAndWait();
-        } catch (InvalidRegexpException e) {
-            new Alert(AlertType.ERROR,
-                    "Failed to load file, file contains an invalid regexp.")
                     .showAndWait();
         }
     }

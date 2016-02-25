@@ -38,7 +38,7 @@ public class GraphExportFile {
      */
     static final class AutomatonTransitionEntry {
         public int fromId, toId;
-        public String data;
+        public BasicRegexp data;
     }
 
     /**
@@ -122,7 +122,7 @@ public class GraphExportFile {
                 AutomatonTransitionEntry entry = new AutomatonTransitionEntry();
                 entry.fromId = idMap.get(t.getFrom().getId());
                 entry.toId = idMap.get(t.getTo().getId());
-                entry.data = t.getData().toString();
+                entry.data = t.getData();
                 mTransitionEntries.add(entry);
             }
         }
@@ -152,12 +152,8 @@ public class GraphExportFile {
      *
      * @param automaton The automaton to add to
      * @param canvas The canvas to add to
-     * @throws InvalidRegexpException If the GraphExportFile contains a regexp
-     * that cannot be parsed. Minimal exception safety guarantee, the automaton
-     * and canvas are in an unspecified state.
      */
     public void loadFile(Automaton automaton, GraphCanvasFX canvas)
-        throws InvalidRegexpException
     {
         // Mapping from indexes into mStateEntries to AutomatonState IDs
         AutomatonState[] idxStateMap = new AutomatonState[mStateEntries.size()];
@@ -179,8 +175,7 @@ public class GraphExportFile {
         for (AutomatonTransitionEntry entry : mTransitionEntries) {
             AutomatonState stateFrom = idxStateMap[entry.fromId];
             AutomatonState stateTo = idxStateMap[entry.toId];
-            BasicRegexp re = BasicRegexp.parseRegexp(entry.data);
-            idxTransMap[i] = automaton.createNewTransition(stateFrom, stateTo, re);
+            idxTransMap[i] = automaton.createNewTransition(stateFrom, stateTo, entry.data);
             i++;
         }
 
@@ -280,7 +275,14 @@ public class GraphExportFile {
             throw new BadGraphExportFileException(
                     "Couldn't parse transition data string");
         }
-        entry.data = s.nextLine();
+        // The regexp is the data until the end of the line
+        String text = s.nextLine();
+        try {
+            entry.data = BasicRegexp.parseRegexp(text);
+        } catch (InvalidRegexpException e) {
+            throw new BadGraphExportFileException(
+                    "Couldn't parse regexp in file");
+        }
         return entry;
     }
 
@@ -331,7 +333,7 @@ public class GraphExportFile {
         strLine.append(" ");
         strLine.append(entry.toId);
         strLine.append(" ");
-        strLine.append(entry.data);
+        strLine.append(entry.data.toString());
         w.write(strLine.toString());
         w.newLine();
     }
