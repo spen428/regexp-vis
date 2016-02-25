@@ -233,7 +233,7 @@ public final class TranslationTools {
      * @return A list of characters for which transitions are non-deterministic,
      * if there is no non-determinism this list is empty.
      */
-    public List<Character> calcNonDeterministicTrans(Automaton a,
+    public static List<Character> calcNonDeterministicTrans(Automaton a,
             AutomatonState state)
     {
         ArrayList<Character> list = new ArrayList<>();
@@ -248,5 +248,45 @@ public final class TranslationTools {
 
         Collections.sort(list);
         return list;
+    }
+
+    /**
+     * @param automaton The automaton the state belongs to
+     * @param state The state to check for non-deterministic transitions
+     * @return True if the state has out-going non-deterministic transition(s),
+     * false otherwise
+     */
+    public static boolean stateHasNonDeterminism(Automaton automaton,
+            AutomatonState state)
+    {
+        List<AutomatonTransition> trans = automaton.getStateTransitions(state);
+        HashSet<Character> found = new HashSet<>();
+        for (AutomatonTransition t : trans) {
+            if (found.contains(t.getData().getChar())) {
+                return true;
+            } else {
+                found.add(t.getData().getChar());
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param automaton The automaton in question
+     * @return True if the automaton has any state which has out-going
+     * non-deterministic transition(s), false otherwise
+     */
+    public static boolean automatonHasNonDeterminism(Automaton automaton)
+    {
+        Iterator<Automaton.StateTransitionsPair> it = automaton.graphIterator();
+        while (it.hasNext()) {
+            Automaton.StateTransitionsPair pair = it.next();
+            if (stateHasNonDeterminism(automaton, pair.getState())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
