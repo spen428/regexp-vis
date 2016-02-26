@@ -554,17 +554,17 @@ public final class GraphCanvasFX extends Canvas {
     /**
      * The default colour we are using to render the background of nodes
      */
-    private final static Color DEFAULT_NODE_BACKGROUND_COLOUR = Color.WHITE;
+    public final static Color DEFAULT_NODE_BACKGROUND_COLOUR = Color.WHITE;
     /**
      * The default colour we are using to render the lines/arcs for edges
      */
-    private final static Color DEFAULT_EDGE_LINE_COLOUR = Color.BLACK;
+    public final static Color DEFAULT_EDGE_LINE_COLOUR = Color.BLACK;
     /**
      * The colour we are using to render the lines/arcs for "temporary" edges,
      * when in "create edge mode". "Temporary" since they are not a permanent
      * addition to the graph.
      */
-    private final static Color TEMPORARY_EDGE_LINE_COLOUR = Color.GREY;
+    public final static Color TEMPORARY_EDGE_LINE_COLOUR = Color.GREY;
     /**
      * The default colour we are using to render the labels for edges
      */
@@ -577,50 +577,50 @@ public final class GraphCanvasFX extends Canvas {
      * The ID value we use for the temporary edge, negative since we don't want
      * it to conflict with externally added edges.
      */
-    private final static int TEMPORARY_EDGE_ID = -1;
+    public final static int TEMPORARY_EDGE_ID = -1;
     /**
      * The default radius for nodes
      */
-    private final static double DEFAULT_NODE_RADIUS = 20;
+    public final static double DEFAULT_NODE_RADIUS = 20;
     /**
      * The distance between the two lines for the double border style of final
      * states
      */
-    private final static double FINAL_STATE_BORDER_GAP = 3;
+    public final static double FINAL_STATE_BORDER_GAP = 3;
     /**
      * How long the line pointing to the initial node should be (not including
      * the arrow)
      */
-    private final static double INITIAL_STATE_LINE_LENGTH = 50;
+    public final static double INITIAL_STATE_LINE_LENGTH = 50;
     /**
      * How long arrows should be
      */
-    private final static double ARROW_LENGTH = 20;
+    public final static double ARROW_LENGTH = 20;
     /**
      * How wide a base arrows should have
      */
-    private final static double ARROW_WIDTH = 10;
+    public final static double ARROW_WIDTH = 10;
     /**
      * How high the text should be rendered above an arc (centre point)
      */
-    private final static double TEXT_POS_HEIGHT = 10;
+    public final static double TEXT_POS_HEIGHT = 10;
     /**
      * The base distance looping edges should be from the node itself
      */
-    private final static double ARC_LOOP_BASE_DISTANCE = 30;
+    public final static double ARC_LOOP_BASE_DISTANCE = 30;
     /**
      * The desired gap between arcs
      */
-    private final static double ARC_GAP_SIZE = 30;
+    public final static double ARC_GAP_SIZE = 30;
     /**
      * For looped edges, the cosine of half the angle of the arcs
      */
-    private final static double ARC_LOOP_COS_HALF_ANGLE = Math.sqrt(3) * 0.5;
+    public final static double ARC_LOOP_COS_HALF_ANGLE = Math.sqrt(3) * 0.5;
     /**
      * When we resize and discover the canvas is too small, multiply all x / y
      * coordinates by this factor.
      */
-    private final static double RESIZE_SHRINK_FACTOR = 0.90;
+    public final static double RESIZE_SHRINK_FACTOR = 0.90;
 
     /**
      * Update the layout data for an edge that is a line, which the drawing code
