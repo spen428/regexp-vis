@@ -7,7 +7,7 @@ import model.Command;
 import view.GraphCanvasFX;
 
 /**
- * 
+ *
  * @author sp611
  *
  */
@@ -19,7 +19,7 @@ public class BreakdownIterationUICommand extends BreakdownUICommand {
         super(graph, cmd);
         this.ccmd = cmd;
 
-        Point2D[] points = BreakdownUITools.placeNodes(graph, this.ccmd);
+        Point2D[] points = BreakdownUITools.placeNodes2(graph, this.ccmd);
         int added = 0;
 
         for (Command c : cmd.getCommands()) {

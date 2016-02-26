@@ -16,7 +16,7 @@ import model.RemoveStateCommand;
 import view.GraphCanvasFX;
 
 /**
- * 
+ *
  * @author sp611
  *
  */
@@ -47,7 +47,7 @@ public class BreakdownUITools {
     /**
      * Calculate the third point of triangle ABC, where points A and B lie on
      * the base of the triangle.
-     * 
+     *
      * @param ax
      *            x coordinate of A
      * @param ay
@@ -144,7 +144,7 @@ public class BreakdownUITools {
      * Checks whether the original transition of the given
      * {@link BreakdownCommand} was one of a number of choices that go from
      * transition.from to transition.to.
-     * 
+     *
      * @param cmd
      *            the command
      * @return true if the transition was part of a choice
@@ -159,7 +159,7 @@ public class BreakdownUITools {
     /**
      * Returns a list of all {@link AutomatonTransition} that go directly
      * between two given {@link AutomatonState}.
-     * 
+     *
      * @param automaton
      *            the {@link Automaton} that the states and transitions belong
      *            to
@@ -188,7 +188,7 @@ public class BreakdownUITools {
      * Intelligently place the nodes created by the given
      * {@link BreakdownCommand} along a line or curve between the two existing
      * nodes from which this {@link BreakdownCommand} was generated.
-     * 
+     *
      * @param graph
      *            the {@link GraphCanvasFX}
      * @param cmd
@@ -220,6 +220,7 @@ public class BreakdownUITools {
                 Point2D edgeMid = graph
                         .lookupEdge(cmd.getOriginalTransition().getId())
                         .getEdgeMiddlePoint();
+
                 above = (edgeMid.getY() > dy);
                 double mx = fromX + dx / 2;
                 double my = fromY + dy / 2;
@@ -240,6 +241,46 @@ public class BreakdownUITools {
                         numAddedStates, height, above);
             }
         }
+        return points;
+    }
+
+    public static Point2D[] placeNodes2(GraphCanvasFX canvas, BreakdownCommand cmd) {
+        final AutomatonTransition transition = cmd.getOriginalTransition();
+        final AutomatonState fromState = transition.getFrom();
+        final AutomatonState toState = transition.getTo();
+        final int numAddedStates = BreakdownUITools.getNumAddedStates(cmd);
+        final int transCount = numAddedStates + 1;
+        final double fromX = canvas.lookupNode(fromState.getId()).getX();
+        final double fromY = canvas.lookupNode(fromState.getId()).getY();
+        final double toX = canvas.lookupNode(toState.getId()).getX();
+        final double toY = canvas.lookupNode(toState.getId()).getY();
+
+        final double midPointX = 0.5 * (fromX + toX);
+        final double midPointY = 0.5 * (fromY + toY);
+
+        double dxPerNode = (toX - fromX) / transCount;
+        double dyPerNode = (toY - fromY) / transCount;
+
+        Point2D middlePoint = canvas
+                .lookupEdge(cmd.getOriginalTransition().getId())
+                .getEdgeMiddlePoint();
+        Point2D offsetVec = middlePoint.subtract(midPointX, midPointY);
+
+        Point2D[] points = new Point2D[numAddedStates];
+
+        double curX = offsetVec.getX() + fromX;
+        double curY = offsetVec.getY() + fromY;
+
+        int i = 0;
+        for (Command tmpCmd : cmd.getCommands()) {
+            if (tmpCmd instanceof AddStateCommand) {
+                curX += dxPerNode;
+                curY += dyPerNode;
+                points[i] = new Point2D(curX, curY);
+                i++;
+            }
+        }
+
         return points;
     }
 
