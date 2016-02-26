@@ -15,10 +15,15 @@ public class CommandHistory extends Observable {
     public static final boolean CLOBBER_BY_DEFAULT = true;
 
     /**
-     * Value propogated to observers each time the last element of the history
+     * Value propagated to observers each time the last element of the history
      * list is removed.
      */
     public static final int HISTORY_CLOBBERED = -2;
+    /**
+     * Value propagated to observers each time the history cleared of all
+     * commands
+     */
+    public static final int HISTORY_CLEARED = -3;
 
     private final ArrayList<Command> mCommandList;
     private int mHistoryIdx;
@@ -145,6 +150,8 @@ public class CommandHistory extends Observable {
     public void clear() {
         mCommandList.clear();
         mHistoryIdx = 0;
+        this.setChanged();
+        this.notifyObservers(HISTORY_CLEARED);
     }
 
     public boolean isClobbered() {

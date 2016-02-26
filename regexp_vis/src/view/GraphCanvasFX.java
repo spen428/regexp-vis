@@ -281,6 +281,13 @@ public final class GraphCanvasFX extends Canvas {
         };
     }
 
+    /**
+     * @return The number of nodes in the graph
+     */
+    public int getNumNodes() {
+        return mGraph.size();
+    }
+
     public GraphNode lookupNode(int id) {
         NodeEdgePair pair = mGraph.get(id);
         if (pair == null) {

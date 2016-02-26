@@ -573,6 +573,10 @@ public class RegexpVisApp implements Observer {
                  * reflect this change in the UI.
                  */
                 items.remove(items.size() - 1);
+            } else if (idx == CommandHistory.HISTORY_CLEARED) {
+                this.historyList.getItems().clear();
+                this.historyList.getItems().add("Step 0");
+                this.historyList.getSelectionModel().select(0);
             } else {
                 if (items.size() <= idx) {
                     items.add("Step " + idx);

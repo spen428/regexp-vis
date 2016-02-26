@@ -105,6 +105,14 @@ public class Automaton {
     }
 
     /**
+     * @return The number of states in this automaton.
+     */
+    public int getNumStates()
+    {
+        return mGraph.size();
+    }
+
+    /**
      * For debugging purposes, prints out the current state of the Automaton.
      */
     public void debugPrint()
@@ -167,7 +175,7 @@ public class Automaton {
 
     /**
      * @param id The ID of the state to find
-     * @return The AutomatonState with the given ID, or null if no such state 
+     * @return The AutomatonState with the given ID, or null if no such state
      * exists
      */
     public AutomatonState getStateById(int id)
@@ -182,7 +190,7 @@ public class Automaton {
 
     /**
      * @param id The ID of the transition to find
-     * @return The AutomatonTransition with the given ID, or null if no such 
+     * @return The AutomatonTransition with the given ID, or null if no such
      * transition exists
      */
     public AutomatonTransition getTransitionById(int id)
@@ -413,7 +421,7 @@ public class Automaton {
         if (pair == null) {
             return null;
         }
-        
+
         return pair.getState();
     }
 
