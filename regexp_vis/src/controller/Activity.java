@@ -65,6 +65,8 @@ public abstract class Activity {
      * @param text The regexp the user entered
      */
     public void onEnteredRegexp(String text) {
+        historyClear();
+
         System.out.printf("Entered regexp: %s%n", text);
         BasicRegexp re = null;
         try {
@@ -136,6 +138,15 @@ public abstract class Activity {
 
     }
 
+    /**
+     * Called by RegexpVisApp when the state of the CommandHistory changes.
+     *
+     * @param obj The object the observer got passed
+     */
+    public void onHistoryChanged(Object obj) {
+
+    }
+
     public abstract void onNodeClicked(GraphCanvasEvent event);
     public abstract void onEdgeClicked(GraphCanvasEvent event);
     public abstract void onBackgroundClicked(GraphCanvasEvent event);
@@ -179,6 +190,10 @@ public abstract class Activity {
 
     void historyEnd() {
         this.history.seekIdx(this.history.getHistorySize());
+    }
+
+    void historyClear() {
+        this.history.clear();
     }
 
 }

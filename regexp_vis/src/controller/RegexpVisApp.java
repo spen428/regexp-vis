@@ -114,14 +114,14 @@ public class RegexpVisApp implements Observer {
         menuEditUndo.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                RegexpVisApp.this.currentActivity.history.prev();
+                RegexpVisApp.this.currentActivity.historyPrev();
             }
         });
         MenuItem menuEditRedo = new MenuItem("Redo");
         menuEditRedo.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                RegexpVisApp.this.currentActivity.history.next();
+                RegexpVisApp.this.currentActivity.historyNext();
             }
         });
         final CheckMenuItem menuEditClobberHistory = new CheckMenuItem(
@@ -553,16 +553,15 @@ public class RegexpVisApp implements Observer {
 
     private void onEnteredRegexp(String text) {
         if (this.currentActivity != null) {
-            this.historyList.getItems().clear();
-            this.historyList.getItems().add("Step 0");
-            this.historyList.getSelectionModel().select(0);
-            this.currentActivity.history.clear();
             this.currentActivity.onEnteredRegexp(text);
         }
     }
 
     @Override
     public void update(Observable o, Object arg) {
+        if (this.currentActivity != null) {
+            this.currentActivity.onHistoryChanged(arg);
+        }
         /* Called whenever CommandHistory of current Activity changes */
         if (arg instanceof Integer) {
             int idx = (int) arg;
