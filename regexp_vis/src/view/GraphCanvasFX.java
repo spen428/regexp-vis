@@ -96,10 +96,6 @@ public final class GraphCanvasFX extends Canvas {
      */
     private Font mNodeFont;
     /**
-     * The colour we are using to render the labels for edges
-     */
-    private Color mEdgeLabelColour;
-    /**
      * The colour we are using to draw the background of nodes
      */
     private Color mNodeBorderColour;
@@ -162,6 +158,10 @@ public final class GraphCanvasFX extends Canvas {
      * is.
      */
     private Point2D mTempEdgeTo;
+    /**
+     * The edge currently being hovered over.
+     */
+    private GraphEdge mHoverEdge;
 
     public GraphCanvasFX() {
         super();
@@ -171,7 +171,6 @@ public final class GraphCanvasFX extends Canvas {
         mGC = getGraphicsContext2D();
         mLabelFont = Font.font("Consolas", 16.0);
         mNodeFont = Font.font("Consolas", 16.0);
-        mEdgeLabelColour = Color.BLACK;
         mNodeBorderColour = Color.BLACK;
         mNodeTextColour = Color.BLACK;
 
@@ -501,6 +500,14 @@ public final class GraphCanvasFX extends Canvas {
      * addition to the graph.
      */
     private final static Color TEMPORARY_EDGE_LINE_COLOUR = Color.GREY;
+    /**
+     * The default colour we are using to render the labels for edges
+     */
+    private final static Color DEFAULT_EDGE_LABEL_COLOUR = Color.BLACK;
+    /**
+     * the color for hovering a selected edge
+     */
+    private final static Color HOVERED_EDGE_LABEL_COLOUR = Color.BLUE;
     /**
      * The ID value we use for the temporary edge, negative since we don't want
      * it to conflict with externally added edges.
@@ -961,7 +968,11 @@ public final class GraphCanvasFX extends Canvas {
      * @param edge The edge to draw
      */
     private void drawEdgeLine(GraphEdge edge) {
-        mGC.setFill(mEdgeLabelColour);
+        if (edge.mIsHoveredOver) {
+            mGC.setFill(HOVERED_EDGE_LABEL_COLOUR);
+        } else {
+            mGC.setFill(DEFAULT_EDGE_LABEL_COLOUR);
+        }
         mGC.setFontSmoothingType(FontSmoothingType.LCD);
         mGC.setFont(mLabelFont);
         mGC.setTextAlign(TextAlignment.CENTER);
@@ -991,7 +1002,11 @@ public final class GraphCanvasFX extends Canvas {
      * @param edge The edge to draw
      */
     private void drawEdgeArc(GraphEdge edge) {
-        mGC.setFill(mEdgeLabelColour);
+        if (edge.mIsHoveredOver) {
+            mGC.setFill(HOVERED_EDGE_LABEL_COLOUR);
+        } else {
+            mGC.setFill(DEFAULT_EDGE_LABEL_COLOUR);
+        }
         mGC.setFontSmoothingType(FontSmoothingType.LCD);
         mGC.setFont(mLabelFont);
         mGC.setTextAlign(TextAlignment.CENTER);
@@ -1077,7 +1092,6 @@ public final class GraphCanvasFX extends Canvas {
             prevEdge = edge;
         }
 
-        mGC.setFill(mEdgeLabelColour);
         mGC.setFontSmoothingType(FontSmoothingType.LCD);
         mGC.setFont(mLabelFont);
         mGC.setTextAlign(TextAlignment.CENTER);
@@ -1087,6 +1101,11 @@ public final class GraphCanvasFX extends Canvas {
             if (edge.mText != null) {
                 GraphUtils.setGcRotation(mGC, -edge.mTextAngle, edge.mTextX,
                         edge.mTextY);
+                if (edge.mIsHoveredOver) {
+                    mGC.setFill(HOVERED_EDGE_LABEL_COLOUR);
+                } else {
+                    mGC.setFill(DEFAULT_EDGE_LABEL_COLOUR);
+                }
                 mGC.fillText(edge.mText, edge.mTextX, edge.mTextY);
             }
         }
@@ -1138,8 +1157,8 @@ public final class GraphCanvasFX extends Canvas {
             double arrowBaseX = n.mX - n.mRadius - ARROW_LENGTH;
             double arrowTipX = n.mX - n.mRadius;
 
-            mGC.setFill(mEdgeLabelColour);
-            mGC.setStroke(mEdgeLabelColour);
+            mGC.setFill(DEFAULT_EDGE_LABEL_COLOUR);
+            mGC.setStroke(DEFAULT_EDGE_LABEL_COLOUR);
             mGC.strokeLine(startX, n.mY, arrowBaseX, n.mY);
             GraphUtils.fillArrowHead(mGC, arrowBaseX, n.mY, arrowTipX, n.mY,
                     ARROW_WIDTH);
@@ -1223,6 +1242,34 @@ public final class GraphCanvasFX extends Canvas {
     private void onMouseMoved(MouseEvent event) {
         if (mCreateEdgeModeActive) {
             handleTemporaryEdge(event);
+        } else {
+            // Update the currently hovered over edge
+            if (mHoverEdge != null){
+                mHoverEdge.mIsHoveredOver = false;
+            }
+            GraphEdge e = null;
+            double x = event.getX();
+            double y = event.getY();
+            boolean redraw = false;
+
+            // Nodes block edge highlighting
+            GraphNode n = findNodeHit(x, y);
+            if (n == null) {
+                e = findEdgeLabelHit(x, y);
+            }
+            if (e != mHoverEdge) {
+                // Edge has changed, need to redraw
+                redraw = true;
+            }
+
+            mHoverEdge = e;
+            if (mHoverEdge != null) {
+                mHoverEdge.mIsHoveredOver = true;
+            }
+            if (redraw) {
+                doRedraw();
+            }
+
         }
     }
 
@@ -1372,12 +1419,12 @@ public final class GraphCanvasFX extends Canvas {
     private GraphEdge findEdgeLabelHit(double x, double y) {
         for (NodeEdgePair pair : mGraph.values()) {
             for (GraphEdge e : pair.mLoopedEdges) {
-                if (edgeLabelHitTest(e, mDownX, mDownY)) {
+                if (edgeLabelHitTest(e, x, y)) {
                     return e;
                 }
             }
             for (GraphEdge e : pair.mEdges) {
-                if (edgeLabelHitTest(e, mDownX, mDownY)) {
+                if (edgeLabelHitTest(e, x, y)) {
                     return e;
                 }
             }
