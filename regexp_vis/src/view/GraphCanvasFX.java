@@ -158,9 +158,8 @@ public final class GraphCanvasFX extends Canvas {
      * is.
      */
     private Point2D mTempEdgeTo;
-    
     /**
-     * 
+     * The edge currently being hovered over.
      */
     private GraphEdge mHoverEdge;
 
@@ -969,9 +968,9 @@ public final class GraphCanvasFX extends Canvas {
      * @param edge The edge to draw
      */
     private void drawEdgeLine(GraphEdge edge) {
-        if(edge.hoverTrue) {
+        if (edge.mIsHoveredOver) {
             mGC.setFill(HOVERED_EDGE_LABEL_COLOUR);
-        } else { 
+        } else {
             mGC.setFill(DEFAULT_EDGE_LABEL_COLOUR);
         }
         mGC.setFontSmoothingType(FontSmoothingType.LCD);
@@ -1003,9 +1002,9 @@ public final class GraphCanvasFX extends Canvas {
      * @param edge The edge to draw
      */
     private void drawEdgeArc(GraphEdge edge) {
-        if(edge.hoverTrue) {
+        if (edge.mIsHoveredOver) {
             mGC.setFill(HOVERED_EDGE_LABEL_COLOUR);
-        } else { 
+        } else {
             mGC.setFill(DEFAULT_EDGE_LABEL_COLOUR);
         }
         mGC.setFontSmoothingType(FontSmoothingType.LCD);
@@ -1102,9 +1101,9 @@ public final class GraphCanvasFX extends Canvas {
             if (edge.mText != null) {
                 GraphUtils.setGcRotation(mGC, -edge.mTextAngle, edge.mTextX,
                         edge.mTextY);
-                if(edge.hoverTrue) {
+                if (edge.mIsHoveredOver) {
                     mGC.setFill(HOVERED_EDGE_LABEL_COLOUR);
-                } else { 
+                } else {
                     mGC.setFill(DEFAULT_EDGE_LABEL_COLOUR);
                 }
                 mGC.fillText(edge.mText, edge.mTextX, edge.mTextY);
@@ -1243,33 +1242,34 @@ public final class GraphCanvasFX extends Canvas {
     private void onMouseMoved(MouseEvent event) {
         if (mCreateEdgeModeActive) {
             handleTemporaryEdge(event);
-        }
-        else{
-            
-            if(mHoverEdge != null){
-                mHoverEdge.hoverTrue = false;
+        } else {
+            // Update the currently hovered over edge
+            if (mHoverEdge != null){
+                mHoverEdge.mIsHoveredOver = false;
             }
             GraphEdge e = null;
-            double x= event.getX();
-            double y= event.getY();
+            double x = event.getX();
+            double y = event.getY();
             boolean redraw = false;
+
+            // Nodes block edge highlighting
             GraphNode n = findNodeHit(x, y);
-            if(n == null){
+            if (n == null) {
                 e = findEdgeLabelHit(x, y);
             }
             if (e != mHoverEdge) {
+                // Edge has changed, need to redraw
                 redraw = true;
             }
+
             mHoverEdge = e;
-            
-           if(mHoverEdge != null){
-               
-               mHoverEdge.hoverTrue = true;
-           }
-           if (redraw) {
-               doRedraw();
-           }
-            
+            if (mHoverEdge != null) {
+                mHoverEdge.mIsHoveredOver = true;
+            }
+            if (redraw) {
+                doRedraw();
+            }
+
         }
     }
 
