@@ -568,11 +568,11 @@ public final class GraphCanvasFX extends Canvas {
     /**
      * The default colour we are using to render the labels for edges
      */
-    private final static Color DEFAULT_EDGE_LABEL_COLOUR = Color.BLACK;
+    public final static Color DEFAULT_EDGE_LABEL_COLOUR = Color.BLACK;
     /**
-     * the color for hovering a selected edge
+     * The colour for hovering over an edge.
      */
-    private final static Color HOVERED_EDGE_LABEL_COLOUR = Color.BLUE;
+    public final static Color HOVERED_EDGE_LABEL_COLOUR = Color.BLUE;
     /**
      * The ID value we use for the temporary edge, negative since we don't want
      * it to conflict with externally added edges.
