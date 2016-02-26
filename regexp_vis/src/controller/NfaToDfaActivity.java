@@ -38,15 +38,13 @@ public class NfaToDfaActivity extends Activity {
 
     private RemoveEpsilonTransitionsActivity removeEpsilonActivity;
     private RemoveNonDeterminismActivity removeNonDeterminismActivity;
-    private Activity activeActivity;
+    private ISubActivity subActivity;
 
     public NfaToDfaActivity(GraphCanvasFX canvas, Automaton automaton) {
         super(canvas, automaton);
-        this.removeEpsilonActivity = new RemoveEpsilonTransitionsActivity(
-                canvas, automaton, this.history);
-        this.removeNonDeterminismActivity = new RemoveNonDeterminismActivity(
-                canvas, automaton, this.history);
-        this.activeActivity = removeEpsilonActivity;
+        this.removeEpsilonActivity = new RemoveEpsilonTransitionsActivity();
+        this.removeNonDeterminismActivity = new RemoveNonDeterminismActivity();
+        this.subActivity = removeEpsilonActivity;
     }
 
     /**
@@ -81,7 +79,7 @@ public class NfaToDfaActivity extends Activity {
         // Check if nothing needs to be done, fast-track to removal of
         // non-determinism
         if (removeEpsilonActivity.checkActivityDone()) {
-            activeActivity = removeNonDeterminismActivity;
+            subActivity = removeNonDeterminismActivity;
             removeNonDeterminismActivity.recreateContext();
 
             if (this.canvas.getNumNodes() == 0) {
@@ -111,7 +109,7 @@ public class NfaToDfaActivity extends Activity {
     @Override
     public void onStarted() {
         // Start off removing epsilon transitions
-        activeActivity = removeEpsilonActivity;
+        subActivity = removeEpsilonActivity;
         ensureNotHybridAutomaton();
         initiateActivity();
     }
@@ -119,7 +117,7 @@ public class NfaToDfaActivity extends Activity {
     @Override
     public void onGraphFileImport(GraphExportFile file) {
         // Start off removing epsilon transitions
-        activeActivity = removeEpsilonActivity;
+        subActivity = removeEpsilonActivity;
         this.canvas.removeAllNodes();
         this.automaton.clear();
         file.loadFile(this.automaton, canvas);
@@ -147,34 +145,34 @@ public class NfaToDfaActivity extends Activity {
 
     @Override
     public void onNodeClicked(GraphCanvasEvent event) {
-        activeActivity.onNodeClicked(event);
+
     }
 
     @Override
     public void onEdgeClicked(GraphCanvasEvent event) {
-        activeActivity.onEdgeClicked(event);
+
     }
 
     @Override
     public void onBackgroundClicked(GraphCanvasEvent event) {
-        activeActivity.onBackgroundClicked(event);
+
     }
 
     @Override
     public void onContextMenuRequested(ContextMenuEvent event) {
-        activeActivity.onContextMenuRequested(event);
+        subActivity.onContextMenuRequested(event);
     }
 
     @Override
     public void onHideContextMenu(MouseEvent event) {
-        activeActivity.onHideContextMenu(event);
+        subActivity.onHideContextMenu(event);
     }
 
     private void onRemoveEpsilonTransitionsDone() {
         // Called by RemoveEpsilonTransitionsActivity when the activity is
         // finished
         historyClear();
-        this.activeActivity = removeNonDeterminismActivity;
+        this.subActivity = removeNonDeterminismActivity;
         removeNonDeterminismActivity.recreateContext();
         if (removeNonDeterminismActivity.checkActivityDone()) {
             // No non-determinism
@@ -206,16 +204,25 @@ public class NfaToDfaActivity extends Activity {
     @Override
     public void onEnteredRegexp(String text) {
         // Start off removing epsilon transitions
-        activeActivity = removeEpsilonActivity;
+        subActivity = removeEpsilonActivity;
         super.onEnteredRegexp(text);
         ensureNotHybridAutomaton();
         initiateActivity();
     }
 
-    // IDEA(mjn33): It might be better for these to not inherit Activity since,
-    // they aren't managed like regular activities, instead they are managed by
-    // NfaToDfaActivity
-    public class RemoveEpsilonTransitionsActivity extends Activity {
+    /**
+     * Interface for sub-activities of this Activity, which aren't managed by
+     * the regular Activity system in RegexpVisApp. This makes more sense
+     * semantically than inheriting from Activity.
+     */
+    private interface ISubActivity {
+        void recreateContext();
+        boolean checkActivityDone();
+        void onContextMenuRequested(ContextMenuEvent event);
+        void onHideContextMenu(MouseEvent event);
+    }
+
+    private class RemoveEpsilonTransitionsActivity implements ISubActivity {
         private ContextMenu contextMenu;
         private MenuItem itemShowReachable;
         private MenuItem itemRemoveOutgoing;
@@ -236,29 +243,9 @@ public class NfaToDfaActivity extends Activity {
          */
         public final Color REACHABLE_STATE_BACKGROUND_COLOUR = Color.LIGHTGREEN;
 
-        public RemoveEpsilonTransitionsActivity(GraphCanvasFX canvas,
-                Automaton automaton, CommandHistory history) {
-            super(canvas, automaton, history);
-        }
-
-        private void recreateContext() {
+        public void recreateContext() {
             // Called by NfaToDfaActivity
-            ctx = new RemoveEpsilonTransitionsContext(this.automaton);
-        }
-
-        @Override
-        public void onNodeClicked(GraphCanvasEvent event) {
-
-        }
-
-        @Override
-        public void onEdgeClicked(GraphCanvasEvent event) {
-
-        }
-
-        @Override
-        public void onBackgroundClicked(GraphCanvasEvent event) {
-
+            ctx = new RemoveEpsilonTransitionsContext(automaton);
         }
 
         /**
@@ -312,12 +299,12 @@ public class NfaToDfaActivity extends Activity {
          * </ol>
          * @return True if this activity is done, false otherwise
          */
-        private boolean checkActivityDone() {
+        public boolean checkActivityDone() {
             return !TranslationTools
-                    .automatonHasEpsilonTransitions(this.automaton)
-                    && !ctx.equivalentStatesExist(this.automaton)
+                    .automatonHasEpsilonTransitions(automaton)
+                    && !ctx.equivalentStatesExist(automaton)
                     && TranslationTools.automatonCalcUnreachableStates(
-                            this.automaton).isEmpty();
+                            automaton).isEmpty();
 
         }
 
@@ -326,21 +313,21 @@ public class NfaToDfaActivity extends Activity {
             resetNodeHighlighting();
 
             Set<AutomatonState> set = TranslationTools
-                    .calcEpsilonReachableStates(this.automaton,
+                    .calcEpsilonReachableStates(automaton,
                             this.rightClickedState);
             for (AutomatonState s : set) {
-                GraphNode n = this.canvas.lookupNode(s.getId());
-                this.canvas.setNodeBackgroundColour(n,
+                GraphNode n = canvas.lookupNode(s.getId());
+                canvas.setNodeBackgroundColour(n,
                         REACHABLE_STATE_BACKGROUND_COLOUR);
             }
         }
 
         private void onRemoveOutgoing(ActionEvent event) {
             RemoveEpsilonTransitionsCommand cmd = new RemoveEpsilonTransitionsCommand(
-                    this.automaton, this.rightClickedState);
+                    automaton, this.rightClickedState);
             RemoveEpsilonTransitionsUICommand uiCmd = new RemoveEpsilonTransitionsUICommand(
-                    this.canvas, cmd);
-            super.executeNewUICommand(uiCmd);
+                    canvas, cmd);
+            executeNewUICommand(uiCmd);
 
             // Transfers to removing non-determinism if we are finished
             if (checkActivityDone()) {
@@ -350,10 +337,10 @@ public class NfaToDfaActivity extends Activity {
 
         private void onRemoveEquivalent(ActionEvent event) {
             RemoveEquivalentStatesCommand cmd = new RemoveEquivalentStatesCommand(
-                    this.automaton, ctx, this.rightClickedState);
+                    automaton, this.ctx, this.rightClickedState);
             RemoveEquivalentStatesUICommand uiCmd = new RemoveEquivalentStatesUICommand(
-                    this.canvas, cmd);
-            super.executeNewUICommand(uiCmd);
+                    canvas, cmd);
+            executeNewUICommand(uiCmd);
 
             // Transfers to removing non-determinism if we are finished
             if (checkActivityDone()) {
@@ -363,10 +350,10 @@ public class NfaToDfaActivity extends Activity {
 
         private void onRemoveUnreachable(ActionEvent event) {
             RemoveStateCleanlyCommand cmd = new RemoveStateCleanlyCommand(
-                    this.automaton, this.rightClickedState);
+                    automaton, this.rightClickedState);
             RemoveUnreachableStateUICommand uiCmd = new RemoveUnreachableStateUICommand(
-                    this.canvas, cmd);
-            super.executeNewUICommand(uiCmd);
+                    canvas, cmd);
+            executeNewUICommand(uiCmd);
 
             // Transfers to removing non-determinism if we are finished
             if (checkActivityDone()) {
@@ -378,12 +365,12 @@ public class NfaToDfaActivity extends Activity {
         public void onContextMenuRequested(ContextMenuEvent event) {
             createContextMenu();
             // Query which node the context menu hit
-            GraphNode nodeHit = this.canvas.findNodeHit(event.getX(),
+            GraphNode nodeHit = canvas.findNodeHit(event.getX(),
                     event.getY());
             if (nodeHit == null) {
                 this.rightClickedState = null;
             } else {
-                this.rightClickedState = this.automaton.getStateById(nodeHit
+                this.rightClickedState = automaton.getStateById(nodeHit
                         .getId());
             }
 
@@ -404,7 +391,7 @@ public class NfaToDfaActivity extends Activity {
                 // actually ones to remove, so disable the menu item if this is
                 // the case
                 boolean canRemoveOutgoing = TranslationTools
-                        .stateHasEpsilonTransitions(this.automaton,
+                        .stateHasEpsilonTransitions(automaton,
                                 this.rightClickedState);
                 itemRemoveOutgoing.setDisable(!canRemoveOutgoing);
 
@@ -412,19 +399,19 @@ public class NfaToDfaActivity extends Activity {
                 // out-going epsilon transitions, and some equivalent states do
                 // actually exist
                 boolean canRemoveEquivalent = !canRemoveOutgoing
-                        && this.ctx.equivalentStatesExist(this.automaton,
+                        && this.ctx.equivalentStatesExist(automaton,
                                 this.rightClickedState);
                 itemRemoveEquivalent.setDisable(!canRemoveEquivalent);
 
                 // IDEA(mjn33): cache this result?
                 boolean canRemoveUnreachable = TranslationTools
-                        .automatonCalcUnreachableStates(this.automaton)
+                        .automatonCalcUnreachableStates(automaton)
                         .contains(this.rightClickedState);
                 itemRemoveUnreachable.setDisable(!canRemoveUnreachable);
 
             }
 
-            contextMenu.show(this.canvas, event.getScreenX(),
+            contextMenu.show(canvas, event.getScreenX(),
                     event.getScreenY());
             event.consume();
         }
@@ -437,7 +424,7 @@ public class NfaToDfaActivity extends Activity {
         }
     }
 
-    public class RemoveNonDeterminismActivity extends Activity {
+    private class RemoveNonDeterminismActivity implements ISubActivity {
         private ContextMenu contextMenu;
         private MenuItem itemRemoveUnreachable;
         /**
@@ -449,13 +436,8 @@ public class NfaToDfaActivity extends Activity {
          */
         private RemoveNonDeterminismContext ctx;
 
-        public RemoveNonDeterminismActivity(GraphCanvasFX canvas,
-                Automaton automaton, CommandHistory history) {
-            super(canvas, automaton, history);
-        }
-
-        private void recreateContext() {
-            ctx = new RemoveNonDeterminismContext(this.automaton);
+        public void recreateContext() {
+            ctx = new RemoveNonDeterminismContext(automaton);
         }
 
         private void createContextMenu() {
@@ -487,12 +469,12 @@ public class NfaToDfaActivity extends Activity {
             });
             contextMenu.getItems().add(itemRemoveUnreachable);
             boolean canRemoveUnreachable = TranslationTools
-                    .automatonCalcUnreachableStates(this.automaton)
+                    .automatonCalcUnreachableStates(automaton)
                     .contains(this.rightClickedState);
             itemRemoveUnreachable.setDisable(!canRemoveUnreachable);
 
             List<Character> charList = TranslationTools
-                    .calcNonDeterministicTrans(this.automaton,
+                    .calcNonDeterministicTrans(automaton,
                             this.rightClickedState);
 
             // This item informs the user that there is no non-determinism for
@@ -527,34 +509,18 @@ public class NfaToDfaActivity extends Activity {
          * </ol>
          * @return True if this activity is done, false otherwise
          */
-        private boolean checkActivityDone() {
+        public boolean checkActivityDone() {
             return TranslationTools.automatonCalcUnreachableStates(
-                    this.automaton).isEmpty()
-                    && !TranslationTools
-                            .automatonHasNonDeterminism(this.automaton);
-        }
-
-        @Override
-        public void onNodeClicked(GraphCanvasEvent event) {
-
-        }
-
-        @Override
-        public void onEdgeClicked(GraphCanvasEvent event) {
-
-        }
-
-        @Override
-        public void onBackgroundClicked(GraphCanvasEvent event) {
-
+                    automaton).isEmpty()
+                    && !TranslationTools.automatonHasNonDeterminism(automaton);
         }
 
         private void onRemoveNonDeterminism(ActionEvent event, char c) {
             RemoveNonDeterminismCommand cmd = new RemoveNonDeterminismCommand(
                     this.ctx, this.rightClickedState, c);
             RemoveNonDeterminismUICommand uiCmd = new RemoveNonDeterminismUICommand(
-                    this.canvas, cmd);
-            super.executeNewUICommand(uiCmd);
+                    canvas, cmd);
+            executeNewUICommand(uiCmd);
 
             if (checkActivityDone()) {
                 onRemoveNonDeterminismDone();
@@ -563,10 +529,10 @@ public class NfaToDfaActivity extends Activity {
 
         private void onRemoveUnreachable(ActionEvent event) {
             RemoveStateCleanlyCommand cmd = new RemoveStateCleanlyCommand(
-                    this.automaton, this.rightClickedState);
+                    automaton, this.rightClickedState);
             RemoveUnreachableStateUICommand uiCmd = new RemoveUnreachableStateUICommand(
-                    this.canvas, cmd);
-            super.executeNewUICommand(uiCmd);
+                    canvas, cmd);
+            executeNewUICommand(uiCmd);
 
             if (checkActivityDone()) {
                 onRemoveNonDeterminismDone();
@@ -577,19 +543,18 @@ public class NfaToDfaActivity extends Activity {
         public void onContextMenuRequested(ContextMenuEvent event) {
             createContextMenu();
             // Query which node the context menu hit
-            GraphNode nodeHit = this.canvas.findNodeHit(event.getX(),
+            GraphNode nodeHit = canvas.findNodeHit(event.getX(),
                     event.getY());
             if (nodeHit == null) {
                 this.rightClickedState = null;
             } else {
-                this.rightClickedState = this.automaton.getStateById(nodeHit
+                this.rightClickedState = automaton.getStateById(nodeHit
                         .getId());
             }
             // Update menu items now we have found the node hit
             updateContextMenuItems();
 
-            contextMenu.show(this.canvas, event.getScreenX(),
-                    event.getScreenY());
+            contextMenu.show(canvas, event.getScreenX(), event.getScreenY());
             event.consume();
         }
 
