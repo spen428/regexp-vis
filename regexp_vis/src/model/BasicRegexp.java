@@ -189,6 +189,21 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        BasicRegexp other = (BasicRegexp) obj;
+        return this.compareTo(other) == 0;
+    }
+
     /**
      * @return true if this is a single character expression, false
      * otherwise
