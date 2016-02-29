@@ -43,7 +43,7 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
     /**
      * Character used to represent epsilon / lambda / etc.
      */
-    public static final char EPSILON_CHAR = '\0';
+    public static final char EPSILON_CHAR = '\u03b5';
 
     /**
      * Expression used to represent epsilon / lambda / etc. Here so we don't
@@ -614,7 +614,7 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
             return subExprOptimised;
         case PLUS:
         case OPTION:
-            return new BasicRegexp(subExprOptimised.mOperands.get(0), 
+            return new BasicRegexp(subExprOptimised.mOperands.get(0),
                 RegexpOperator.STAR);
         case SEQUENCE:
         case CHOICE: {
@@ -669,7 +669,7 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         case PLUS:
             return subExprOptimised;
         case OPTION:
-            return new BasicRegexp(subExprOptimised.mOperands.get(0), 
+            return new BasicRegexp(subExprOptimised.mOperands.get(0),
                 RegexpOperator.STAR);
         case SEQUENCE: {
             // IDEA(mjn33): Improve optimisations, when I have the time. PLUS

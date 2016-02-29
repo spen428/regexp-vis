@@ -18,6 +18,12 @@ public final class AutomatonState {
         this(id, false);
     }
 
+    @Override
+    public String toString()
+    {
+        return Integer.toString(mId) + (mIsFinal ? " [final]" : "");
+    }
+
     /**
      * @return The unique id for this state in an automaton
      */
