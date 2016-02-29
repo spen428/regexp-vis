@@ -258,7 +258,7 @@ public final class GraphCanvasFX extends Canvas {
      * @return The iterator
      */
     public Iterator<NodeEdgePair> graphIterator() {
-        Iterator<Map.Entry<Integer, NodeEdgePair>> mEntrySetIterator = mGraph
+        final Iterator<Map.Entry<Integer, NodeEdgePair>> mEntrySetIterator = mGraph
                 .entrySet().iterator();
         return new Iterator<NodeEdgePair>() {
             @Override

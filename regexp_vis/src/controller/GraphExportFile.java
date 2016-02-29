@@ -188,7 +188,8 @@ public class GraphExportFile {
             if (state == automaton.getStartState()) {
                 canvas.setNodeUseStartStyle(n, true);
             } else {
-                automaton.addStateWithTransitions(state, new LinkedList<>());
+                automaton.addStateWithTransitions(state,
+                        new LinkedList<AutomatonTransition>());
             }
             // Same for the final states
             canvas.setNodeUseFinalStyle(n, state.isFinal());
