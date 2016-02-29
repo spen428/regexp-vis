@@ -33,6 +33,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import model.Automaton;
+import model.Command;
 import model.CommandHistory;
 import model.InvalidRegexpException;
 import view.GraphCanvasEvent;
@@ -167,10 +168,9 @@ public class RegexpVisApp implements Observer {
                         .setVisible(!RegexpVisApp.this.historyList.isVisible());
                 RegexpVisApp.this.historyList
                         .setManaged(RegexpVisApp.this.historyList.isVisible());
-                menuViewHistory
-                        .setText(RegexpVisApp.this.historyList.isVisible()
-                                ? HISTORY_LIST_HIDE_TEXT
-                                : HISTORY_LIST_SHOW_TEXT);
+                menuViewHistory.setText(RegexpVisApp.this.historyList
+                        .isVisible() ? HISTORY_LIST_HIDE_TEXT
+                        : HISTORY_LIST_SHOW_TEXT);
             }
         });
         final MenuItem menuViewControlPanel = new MenuItem(
@@ -180,8 +180,8 @@ public class RegexpVisApp implements Observer {
             public void handle(ActionEvent t) {
                 controlPanel.setVisible(!controlPanel.isVisible());
                 controlPanel.setManaged(controlPanel.isVisible());
-                menuViewControlPanel.setText(controlPanel.isVisible()
-                        ? CONTROL_PANEL_HIDE_TEXT : CONTROL_PANEL_SHOW_TEXT);
+                menuViewControlPanel.setText(controlPanel.isVisible() ? CONTROL_PANEL_HIDE_TEXT
+                        : CONTROL_PANEL_SHOW_TEXT);
             }
         });
         menuView.getItems().addAll(menuViewHistory, menuViewControlPanel);
@@ -349,28 +349,29 @@ public class RegexpVisApp implements Observer {
                 onEdgeClicked(event);
             }
         });
-        this.mCanvas.setOnBackgroundClicked(new EventHandler<GraphCanvasEvent>() {
-            @Override
-            public void handle(GraphCanvasEvent event) {
-                onBackgroundClicked(event);
-            }
-        });
+        this.mCanvas
+                .setOnBackgroundClicked(new EventHandler<GraphCanvasEvent>() {
+                    @Override
+                    public void handle(GraphCanvasEvent event) {
+                        onBackgroundClicked(event);
+                    }
+                });
 
         this.mCanvas.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED,
-        new EventHandler<ContextMenuEvent>() {
-            @Override
-            public void handle(ContextMenuEvent event) {
-                onContextMenuRequested(event);
-            }
-        });
+                new EventHandler<ContextMenuEvent>() {
+                    @Override
+                    public void handle(ContextMenuEvent event) {
+                        onContextMenuRequested(event);
+                    }
+                });
 
         this.mCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED,
-        new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                onHideContextMenu(event);
-            }
-        });
+                new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent event) {
+                        onHideContextMenu(event);
+                    }
+                });
 
         /* Init fields */
         this.automaton = new Automaton();
@@ -378,13 +379,11 @@ public class RegexpVisApp implements Observer {
         /* Using ordinals of enum to prevent misordering */
         this.activities[Activity.ActivityType.ACTIVITY_REGEXP_BREAKDOWN
                 .ordinal()] = new RegexpBreakdownActivity(this.mCanvas,
-                        this.automaton);
-        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_DFA
-                .ordinal()] = new NfaToDfaActivity(this.mCanvas,
-                        this.automaton);
-        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_REGEXP
-                .ordinal()] = new NfaToRegexpActivity(this.mCanvas,
-                        this.automaton);
+                this.automaton);
+        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_DFA.ordinal()] = new NfaToDfaActivity(
+                this.mCanvas, this.automaton);
+        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_REGEXP.ordinal()] = new NfaToRegexpActivity(
+                this.mCanvas, this.automaton);
         setActivity(Activity.ActivityType.ACTIVITY_REGEXP_BREAKDOWN);
 
         stage.setTitle(WINDOW_TITLE);
@@ -424,7 +423,8 @@ public class RegexpVisApp implements Observer {
             // Don't do anything, current activity hasn't actually changed
             return;
         }
-        if (this.currentActivity != null && !this.currentActivity.onPreStarted()) {
+        if (this.currentActivity != null
+                && !this.currentActivity.onPreStarted()) {
             // Can't switch to this activity, abort
             return;
         }
@@ -439,8 +439,7 @@ public class RegexpVisApp implements Observer {
 
         /* Update history list */
         this.historyList.getItems().clear();
-        for (int i = 0; i <= this.currentActivity.history
-                .getHistorySize(); i++) {
+        for (int i = 0; i <= this.currentActivity.history.getHistorySize(); i++) {
             // 1 extra, so that "Step 0" is the inital state
             this.historyList.getItems().add("Step " + i);
             this.historyList.getSelectionModel().select(i);
@@ -494,7 +493,8 @@ public class RegexpVisApp implements Observer {
         // Choose .txt, our file format is text based as this just makes it
         // easier to edit with text editors.
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Automaton Graph Files", "*.txt"),
+                new FileChooser.ExtensionFilter("Automaton Graph Files",
+                        "*.txt"),
                 new FileChooser.ExtensionFilter("All Files", "*.*"));
 
         File selectedFile = fileChooser.showOpenDialog(this.stage);
@@ -518,12 +518,9 @@ public class RegexpVisApp implements Observer {
                             + selectedFile.getPath()).showAndWait();
         } catch (IOException e) {
             new Alert(AlertType.ERROR,
-                    "Failed to load file, unexpected I/O error.")
-                    .showAndWait();
+                    "Failed to load file, unexpected I/O error.").showAndWait();
         }
     }
-
-
 
     private void onExportGraph(ActionEvent event) {
         // Based on the nice example snippet in the JavaFX documentation
@@ -532,7 +529,8 @@ public class RegexpVisApp implements Observer {
         // Choose .txt, our file format is text based as this just makes it
         // easier to edit with text editors.
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Automaton Graph Files", "*.txt"),
+                new FileChooser.ExtensionFilter("Automaton Graph Files",
+                        "*.txt"),
                 new FileChooser.ExtensionFilter("All Files", "*.*"));
 
         File selectedFile = fileChooser.showSaveDialog(this.stage);
@@ -546,8 +544,7 @@ public class RegexpVisApp implements Observer {
             f.writeFile(selectedFile);
         } catch (IOException e) {
             new Alert(AlertType.ERROR,
-                    "Failed to save file, unexpected I/O error.")
-                    .showAndWait();
+                    "Failed to save file, unexpected I/O error.").showAndWait();
         }
     }
 
@@ -576,12 +573,12 @@ public class RegexpVisApp implements Observer {
                 this.historyList.getItems().clear();
                 this.historyList.getItems().add("Step 0");
                 this.historyList.getSelectionModel().select(0);
-            } else {
-                if (items.size() <= idx) {
-                    items.add("Step " + idx);
-                }
-                this.historyList.getSelectionModel().select(idx);
             }
+        } else if (arg instanceof Command) {
+            if (items.size() <= idx) {
+                items.add("Step " + idx);
+            }
+            this.historyList.getSelectionModel().select(idx);
         }
     }
 
