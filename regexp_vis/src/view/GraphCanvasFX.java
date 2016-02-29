@@ -1,7 +1,11 @@
 package view;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -22,7 +26,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Affine;
 
 public final class GraphCanvasFX extends Canvas {
-    private static class NodeEdgePair {
+    public static class NodeEdgePair {
         final GraphNode mNode;
         /**
          * Edges which come from this node to another, different node
@@ -53,6 +57,21 @@ public final class GraphCanvasFX extends Canvas {
             } else {
                 mEdges.remove(e);
             }
+        }
+
+        public GraphNode getNode()
+        {
+            return mNode;
+        }
+
+        public List<GraphEdge> getEdges()
+        {
+            return Collections.unmodifiableList(mEdges);
+        }
+
+        public List<GraphEdge> getLoopedEdges()
+        {
+            return Collections.unmodifiableList(mLoopedEdges);
         }
     }
 
@@ -231,6 +250,44 @@ public final class GraphCanvasFX extends Canvas {
         mCreatedEdgeHandler = handler;
     }
 
+    /**
+     * Provides an iterator over the graph, containing all node + edges
+     * pairs. Modification will result in an exception being thrown. The same as
+     * what is done in the Automaton class.
+     *
+     * @return The iterator
+     */
+    public Iterator<NodeEdgePair> graphIterator() {
+        final Iterator<Map.Entry<Integer, NodeEdgePair>> mEntrySetIterator = mGraph
+                .entrySet().iterator();
+        return new Iterator<NodeEdgePair>() {
+            @Override
+            public boolean hasNext() {
+                return mEntrySetIterator.hasNext();
+            }
+
+            @Override
+            public NodeEdgePair next() {
+                Map.Entry<Integer, NodeEdgePair> entry = mEntrySetIterator
+                        .next();
+                return entry.getValue();
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException(
+                        "remove() not supported.");
+            }
+        };
+    }
+
+    /**
+     * @return The number of nodes in the graph
+     */
+    public int getNumNodes() {
+        return mGraph.size();
+    }
+
     public GraphNode lookupNode(int id) {
         NodeEdgePair pair = mGraph.get(id);
         if (pair == null) {
@@ -260,7 +317,7 @@ public final class GraphCanvasFX extends Canvas {
 
     /**
      * Reposition a node in the bounds it's allowed to be in.
-     * 
+     *
      * @param n The node to reposition
      */
     private void repositionNode(GraphNode n) {
@@ -348,6 +405,7 @@ public final class GraphCanvasFX extends Canvas {
     public void setNodeUseFinalStyle(GraphNode n, boolean value) {
         // No layout data update required (for now at least)
         n.mUseFinalStateStyle = value;
+        doRedraw();
     }
 
     /**
@@ -365,6 +423,7 @@ public final class GraphCanvasFX extends Canvas {
             repositionNode(n);
             updateMaxPosNodes();
         }
+        doRedraw();
     }
 
     /**
@@ -375,6 +434,7 @@ public final class GraphCanvasFX extends Canvas {
      */
     public void setNodeBackgroundColour(GraphNode n, Color colour) {
         n.mBackgroundColour = colour;
+        doRedraw();
     }
 
     /**
@@ -410,6 +470,7 @@ public final class GraphCanvasFX extends Canvas {
         }
 
         mGraph.remove(id);
+        doRedraw();
     }
 
     /**
@@ -462,6 +523,10 @@ public final class GraphCanvasFX extends Canvas {
         // And remove it
         NodeEdgePair pair = mGraph.get(oldEdge.mFrom.getId());
         pair.removeEdge(oldEdge);
+        // TODO: be smarter about this (do minimum amount of layout
+        // recalculation necessary)
+        updateAllLayoutData();
+        doRedraw();
     }
 
     /**
@@ -489,30 +554,30 @@ public final class GraphCanvasFX extends Canvas {
     /**
      * The default colour we are using to render the background of nodes
      */
-    private final static Color DEFAULT_NODE_BACKGROUND_COLOUR = Color.WHITE;
+    public final static Color DEFAULT_NODE_BACKGROUND_COLOUR = Color.WHITE;
     /**
      * The default colour we are using to render the lines/arcs for edges
      */
-    private final static Color DEFAULT_EDGE_LINE_COLOUR = Color.BLACK;
+    public final static Color DEFAULT_EDGE_LINE_COLOUR = Color.BLACK;
     /**
      * The colour we are using to render the lines/arcs for "temporary" edges,
      * when in "create edge mode". "Temporary" since they are not a permanent
      * addition to the graph.
      */
-    private final static Color TEMPORARY_EDGE_LINE_COLOUR = Color.GREY;
+    public final static Color TEMPORARY_EDGE_LINE_COLOUR = Color.GREY;
     /**
      * The default colour we are using to render the labels for edges
      */
-    private final static Color DEFAULT_EDGE_LABEL_COLOUR = Color.BLACK;
+    public final static Color DEFAULT_EDGE_LABEL_COLOUR = Color.BLACK;
     /**
-     * the color for hovering a selected edge
+     * The colour for hovering over an edge.
      */
-    private final static Color HOVERED_EDGE_LABEL_COLOUR = Color.BLUE;
+    public final static Color HOVERED_EDGE_LABEL_COLOUR = Color.BLUE;
     /**
      * The ID value we use for the temporary edge, negative since we don't want
      * it to conflict with externally added edges.
      */
-    private final static int TEMPORARY_EDGE_ID = -1;
+    public final static int TEMPORARY_EDGE_ID = -1;
     /**
      * The default radius for nodes
      */
@@ -521,48 +586,48 @@ public final class GraphCanvasFX extends Canvas {
      * The distance between the two lines for the double border style of final
      * states
      */
-    private final static double FINAL_STATE_BORDER_GAP = 3;
+    public final static double FINAL_STATE_BORDER_GAP = 3;
     /**
      * How long the line pointing to the initial node should be (not including
      * the arrow)
      */
-    private final static double INITIAL_STATE_LINE_LENGTH = 50;
+    public final static double INITIAL_STATE_LINE_LENGTH = 50;
     /**
      * How long arrows should be
      */
-    private final static double ARROW_LENGTH = 20;
+    public final static double ARROW_LENGTH = 20;
     /**
      * How wide a base arrows should have
      */
-    private final static double ARROW_WIDTH = 10;
+    public final static double ARROW_WIDTH = 10;
     /**
      * How high the text should be rendered above an arc (centre point)
      */
-    private final static double TEXT_POS_HEIGHT = 10;
+    public final static double TEXT_POS_HEIGHT = 10;
     /**
      * The base distance looping edges should be from the node itself
      */
-    private final static double ARC_LOOP_BASE_DISTANCE = 30;
+    public final static double ARC_LOOP_BASE_DISTANCE = 30;
     /**
      * The desired gap between arcs
      */
-    private final static double ARC_GAP_SIZE = 30;
+    public final static double ARC_GAP_SIZE = 30;
     /**
      * For looped edges, the cosine of half the angle of the arcs
      */
-    private final static double ARC_LOOP_COS_HALF_ANGLE = Math.sqrt(3) * 0.5;
+    public final static double ARC_LOOP_COS_HALF_ANGLE = Math.sqrt(3) * 0.5;
     /**
      * When we resize and discover the canvas is too small, multiply all x / y
      * coordinates by this factor.
      */
-    private final static double RESIZE_SHRINK_FACTOR = 0.90;
+    public final static double RESIZE_SHRINK_FACTOR = 0.90;
 
     /**
      * Update the layout data for an edge that is a line, which the drawing code
-     * uses later. The idea is to do more computationally expensive operations 
-     * here, an only re-perform them when necessary, opposed to doing that for 
+     * uses later. The idea is to do more computationally expensive operations
+     * here, an only re-perform them when necessary, opposed to doing that for
      * each time we redraw. E.g. moving one node will not change the layout data
-     * for many other edges. 
+     * for many other edges.
      *
      * @param edge The edge to update the layout data for
      * @param textAngle The calculated angle the edge label text should be
@@ -633,11 +698,11 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Update the layout data for an edge that is an arc. See 
+     * Update the layout data for an edge that is an arc. See
      * updateEdgeLineLayoutData() for more information
      *
      * @param edge The edge to update the layout data for
-     * @param height How high the arc should bend at the midpoint. Negative 
+     * @param height How high the arc should bend at the midpoint. Negative
      * values allowed, in which case the arc bends in the opposite direction
      * @param textAngle The calculated angle the edge label text should be
      * rotated by
@@ -783,7 +848,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Update the layout data for the looped edge of a node (node from == node 
+     * Update the layout data for the looped edge of a node (node from == node
      * to). See updateEdgeLineLayoutData() for more information.
      *
      * @param n The node for which the edges belong to
@@ -848,7 +913,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Update the layout data for all edges between two nodes, in both 
+     * Update the layout data for all edges between two nodes, in both
      * directions. See updateEdgeLineLayoutData() for more information.
      *
      * @param pair1 The node-edge pair for a node
@@ -938,8 +1003,8 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Update all layout data, usually this is not needed but for simplicity 
-     * sake / debugging this can be used to ensure layout data gets updated 
+     * Update all layout data, usually this is not needed but for simplicity
+     * sake / debugging this can be used to ensure layout data gets updated
      * properly. See updateEdgeLineLayoutData() for more information.
      */
     private void updateAllLayoutData() {
@@ -962,7 +1027,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Draw an edge which is a line, layout data calculated in 
+     * Draw an edge which is a line, layout data calculated in
      * updateEdgeLineLayoutData().
      *
      * @param edge The edge to draw
@@ -996,7 +1061,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Draw an edge which is an arc, layout data calculated in 
+     * Draw an edge which is an arc, layout data calculated in
      * updateEdgeArcLayoutData().
      *
      * @param edge The edge to draw
@@ -1032,7 +1097,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Draw an edge, checks the type of the edge to call the correct drawing 
+     * Draw an edge, checks the type of the edge to call the correct drawing
      * method.
      *
      * @param edge The edge to draw
@@ -1050,7 +1115,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Draw the looped edges for a GraphNode, layout data calculated in 
+     * Draw the looped edges for a GraphNode, layout data calculated in
      * updateEdgesLoopedLayoutData().
      *
      * @param n The graph node the edges belong to
@@ -1134,7 +1199,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
-     * Draw a node, no corresponding function to update layout data, as non is 
+     * Draw a node, no corresponding function to update layout data, as non is
      * needed yet.
      *
      * @param n The node to draw
@@ -1400,7 +1465,7 @@ public final class GraphCanvasFX extends Canvas {
      * @param y The y coordinate of the hit test
      * @return The node which was hit, or null if no node was hit
      */
-    private GraphNode findNodeHit(double x, double y) {
+    public GraphNode findNodeHit(double x, double y) {
         for (NodeEdgePair pair : mGraph.values()) {
             if (nodeHitTest(pair.mNode, x, y)) {
                 return pair.mNode;

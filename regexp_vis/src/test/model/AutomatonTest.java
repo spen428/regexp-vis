@@ -14,6 +14,7 @@ import org.junit.Test;
 import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
+import model.BasicRegexp;
 
 public class AutomatonTest {
     private Automaton mAutomaton;
@@ -60,9 +61,9 @@ public class AutomatonTest {
         assertFalse(mAutomaton.hasOutgoingTransition(mState3));
 
         AutomatonTransition t1 = mAutomaton.createNewTransition(
-            mState1, mState2, new Object());
+            mState1, mState2, BasicRegexp.EPSILON_EXPRESSION);
         AutomatonTransition t2 = mAutomaton.createNewTransition(
-            mState2, mState3, new Object());
+            mState2, mState3, BasicRegexp.EPSILON_EXPRESSION);
 
         mAutomaton.addTransition(t1);
         mAutomaton.addTransition(t2);
@@ -82,9 +83,9 @@ public class AutomatonTest {
         assertFalse(mAutomaton.hasIngoingTransition(mState3));
 
         AutomatonTransition t1 = mAutomaton.createNewTransition(
-            mState1, mState2, new Object());
+            mState1, mState2, BasicRegexp.EPSILON_EXPRESSION);
         AutomatonTransition t2 = mAutomaton.createNewTransition(
-            mState2, mState3, new Object());
+            mState2, mState3, BasicRegexp.EPSILON_EXPRESSION);
 
         mAutomaton.addTransition(t1);
         mAutomaton.addTransition(t2);
@@ -99,9 +100,9 @@ public class AutomatonTest {
     public void testHasIngoingTransition_duplicate()
     {
         AutomatonTransition t1 = mAutomaton.createNewTransition(
-            mState1, mState2, new Object());
+            mState1, mState2, BasicRegexp.EPSILON_EXPRESSION);
         AutomatonTransition t2 = mAutomaton.createNewTransition(
-            mState1, mState2, new Object());
+            mState1, mState2, BasicRegexp.EPSILON_EXPRESSION);
 
         mAutomaton.addTransition(t1);
         mAutomaton.addTransition(t2);
@@ -126,9 +127,9 @@ public class AutomatonTest {
         assertTrue(mAutomaton.getIngoingTransition(mState3).isEmpty());
 
         AutomatonTransition t1 = mAutomaton.createNewTransition(
-            mState1, mState2, new Object());
+            mState1, mState2, BasicRegexp.EPSILON_EXPRESSION);
         AutomatonTransition t2 = mAutomaton.createNewTransition(
-            mState2, mState3, new Object());
+            mState2, mState3, BasicRegexp.EPSILON_EXPRESSION);
 
         mAutomaton.addTransition(t1);
         mAutomaton.addTransition(t2);
@@ -145,9 +146,9 @@ public class AutomatonTest {
     public void testGetIngoingTransition_duplicate()
     {
         AutomatonTransition t1 = mAutomaton.createNewTransition(
-            mState1, mState2, new Object());
+            mState1, mState2, BasicRegexp.EPSILON_EXPRESSION);
         AutomatonTransition t2 = mAutomaton.createNewTransition(
-            mState1, mState2, new Object());
+            mState1, mState2, BasicRegexp.EPSILON_EXPRESSION);
 
         mAutomaton.addTransition(t1);
         mAutomaton.addTransition(t2);
@@ -172,9 +173,9 @@ public class AutomatonTest {
         assertTrue(mAutomaton.getStateTransitions(mState3).isEmpty());
 
         AutomatonTransition t1 = mAutomaton.createNewTransition(
-            mState1, mState2, new Object());
+            mState1, mState2, BasicRegexp.EPSILON_EXPRESSION);
         AutomatonTransition t2 = mAutomaton.createNewTransition(
-            mState2, mState3, new Object());
+            mState2, mState3, BasicRegexp.EPSILON_EXPRESSION);
 
         mAutomaton.addTransition(t1);
         mAutomaton.addTransition(t2);
@@ -191,7 +192,7 @@ public class AutomatonTest {
     public void testGetStateTransitions_duplicate()
     {
         AutomatonTransition t1 = mAutomaton.createNewTransition(
-            mState1, mState2, new Object());
+            mState1, mState2, BasicRegexp.EPSILON_EXPRESSION);
 
         mAutomaton.addTransition(t1);
 
@@ -223,7 +224,7 @@ public class AutomatonTest {
     @Test
     public void testCreateNewTransition()
     {
-        Object obj = new Object();
+        BasicRegexp obj = BasicRegexp.EPSILON_EXPRESSION;
         AutomatonTransition state1 = mAutomaton.createNewTransition(mState1, mState2, obj);
 
         assertEquals(state1.getFrom(), mState1);
@@ -325,7 +326,7 @@ public class AutomatonTest {
     public void testAddTransition_duplicate()
     {
         AutomatonTransition t1 = mAutomaton.createNewTransition(
-            mState1, mState2, new Object());
+            mState1, mState2, BasicRegexp.EPSILON_EXPRESSION);
 
         mAutomaton.addTransition(t1);
 
@@ -333,7 +334,7 @@ public class AutomatonTest {
         // Test that adding a transition through a duplicate state
         // throws
         AutomatonTransition t2 = mAutomaton.createNewTransition(
-                s, mState2, new Object());
+                s, mState2, BasicRegexp.EPSILON_EXPRESSION);
 
         boolean caught = false;
         try {
@@ -353,7 +354,7 @@ public class AutomatonTest {
     public void testAddTransition_duplicateTrans()
     {
         AutomatonTransition t1 = mAutomaton.createNewTransition(
-                mState1, mState2, new Object());
+                mState1, mState2, BasicRegexp.EPSILON_EXPRESSION);
 
         mAutomaton.addTransition(t1);
 
@@ -374,7 +375,7 @@ public class AutomatonTest {
     public void testRemoveTransition()
     {
         AutomatonTransition t1 = mAutomaton.createNewTransition(
-                mState1, mState2, new Object());
+                mState1, mState2, BasicRegexp.EPSILON_EXPRESSION);
 
         mAutomaton.addTransition(t1);
         mAutomaton.removeTransition(t1);
@@ -387,7 +388,7 @@ public class AutomatonTest {
     public void testRemoveTransition_nonExistentTrans()
     {
         AutomatonTransition t1 = mAutomaton.createNewTransition(
-                mState1, mState2, new Object());
+                mState1, mState2, BasicRegexp.EPSILON_EXPRESSION);
 
         // Test that removing a non-existent transition throws
         boolean caught = false;
@@ -402,7 +403,7 @@ public class AutomatonTest {
     @Test
     public void testRemoveTransition_duplicateTrans()
     {
-        Object tmpObj = new Object();
+        BasicRegexp tmpObj = BasicRegexp.EPSILON_EXPRESSION;
         AutomatonTransition t1 = mAutomaton.createNewTransition(
                 mState1, mState2, tmpObj);
         AutomatonTransition t2 = mAutomaton.createNewTransition(

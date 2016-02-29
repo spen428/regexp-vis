@@ -1,5 +1,8 @@
 package controller;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -20,14 +23,18 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import model.Automaton;
 import model.CommandHistory;
+import model.InvalidRegexpException;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 
@@ -39,6 +46,7 @@ public class RegexpVisApp implements Observer {
     private final Automaton automaton;
     protected final GraphCanvasFX mCanvas;
     final ListView<String> historyList;
+    final Stage stage;
 
     /* Constants */
     private static final String CONTROL_PANEL_HIDE_TEXT = "Hide Control Panel";
@@ -68,6 +76,7 @@ public class RegexpVisApp implements Observer {
         final HBox canvasContainer = new HBox();
         this.historyList = new ListView<>();
         final VBox controlPanel = new VBox();
+        this.stage = stage;
 
         Scene scene = new Scene(root, 800, 600);
 
@@ -82,8 +91,22 @@ public class RegexpVisApp implements Observer {
                 exitApplication();
             }
         });
-        menuFile.getItems().addAll(new MenuItem("Import Graph..."),
-                new MenuItem("Export Graph..."), exit);
+
+        MenuItem menuFileImport = new MenuItem("Import Graph...");
+        menuFileImport.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                onImportGraph(event);
+            }
+
+        });
+        MenuItem menuFileExport = new MenuItem("Export Graph...");
+        menuFileExport.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                onExportGraph(event);
+            }
+
+        });
+        menuFile.getItems().addAll(menuFileImport, menuFileExport, exit);
 
         // --- Menu Edit
         Menu menuEdit = new Menu("Edit");
@@ -91,14 +114,14 @@ public class RegexpVisApp implements Observer {
         menuEditUndo.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                RegexpVisApp.this.currentActivity.history.prev();
+                RegexpVisApp.this.currentActivity.historyPrev();
             }
         });
         MenuItem menuEditRedo = new MenuItem("Redo");
         menuEditRedo.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                RegexpVisApp.this.currentActivity.history.next();
+                RegexpVisApp.this.currentActivity.historyNext();
             }
         });
         final CheckMenuItem menuEditClobberHistory = new CheckMenuItem(
@@ -333,6 +356,22 @@ public class RegexpVisApp implements Observer {
             }
         });
 
+        this.mCanvas.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED,
+        new EventHandler<ContextMenuEvent>() {
+            @Override
+            public void handle(ContextMenuEvent event) {
+                onContextMenuRequested(event);
+            }
+        });
+
+        this.mCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED,
+        new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                onHideContextMenu(event);
+            }
+        });
+
         /* Init fields */
         this.automaton = new Automaton();
         this.activities = new Activity[Activity.ActivityType.values().length];
@@ -356,7 +395,7 @@ public class RegexpVisApp implements Observer {
     /**
      * Called by the {@link ListView} component to perform a
      * {@link CommandHistory} seek when a list item is selected.
-     * 
+     *
      * @param idx
      *            the historyIdx to seek to
      */
@@ -364,7 +403,7 @@ public class RegexpVisApp implements Observer {
         int idx = (int) value;
         // Note: called with value -1 when the history is reset.
         if (idx >= 0) {
-            this.currentActivity.history.seekIdx(idx);
+            this.currentActivity.historySeek(idx);
             this.historyList.getSelectionModel().select(idx);
         }
     }
@@ -380,11 +419,22 @@ public class RegexpVisApp implements Observer {
             throw new IllegalArgumentException();
         }
 
+        Activity newActivity = this.activities[actType.ordinal()];
+        if (this.currentActivity == newActivity) {
+            // Don't do anything, current activity hasn't actually changed
+            return;
+        }
+        if (this.currentActivity != null && !this.currentActivity.onPreStarted()) {
+            // Can't switch to this activity, abort
+            return;
+        }
+
         /* Observe only the current CommandHistory */
         if (this.currentActivity != null) {
             this.currentActivity.history.deleteObserver(this);
+            this.currentActivity.onEnded();
         }
-        this.currentActivity = this.activities[actType.ordinal()];
+        this.currentActivity = newActivity;
         this.currentActivity.history.addObserver(this);
 
         /* Update history list */
@@ -403,6 +453,8 @@ public class RegexpVisApp implements Observer {
         for (int i = 0; i < this.activityMenuItems.length; i++) {
             this.activityMenuItems[i].setSelected(i == actType.ordinal());
         }
+
+        this.currentActivity.onStarted();
     }
 
     private void onNodeClicked(GraphCanvasEvent event) {
@@ -423,18 +475,93 @@ public class RegexpVisApp implements Observer {
         }
     }
 
+    private void onContextMenuRequested(ContextMenuEvent event) {
+        if (this.currentActivity != null) {
+            this.currentActivity.onContextMenuRequested(event);
+        }
+    }
+
+    private void onHideContextMenu(MouseEvent event) {
+        if (this.currentActivity != null) {
+            this.currentActivity.onHideContextMenu(event);
+        }
+    }
+
+    private void onImportGraph(ActionEvent event) {
+        // Based on the nice example snippet in the JavaFX documentation
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Import Automaton Graph File");
+        // Choose .txt, our file format is text based as this just makes it
+        // easier to edit with text editors.
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Automaton Graph Files", "*.txt"),
+                new FileChooser.ExtensionFilter("All Files", "*.*"));
+
+        File selectedFile = fileChooser.showOpenDialog(this.stage);
+        if (selectedFile == null) {
+            // No file selected, exit early
+            return;
+        }
+
+        try {
+            GraphExportFile f = new GraphExportFile(selectedFile);
+            if (this.currentActivity != null) {
+                this.currentActivity.onGraphFileImport(f);
+            }
+        } catch (BadGraphExportFileException e) {
+            new Alert(AlertType.ERROR,
+                    "Failed to load file, file isn't a valid automaton graph file.")
+                    .showAndWait();
+        } catch (FileNotFoundException e) {
+            new Alert(AlertType.ERROR,
+                    "Failed to load file, could not find file: "
+                            + selectedFile.getPath()).showAndWait();
+        } catch (IOException e) {
+            new Alert(AlertType.ERROR,
+                    "Failed to load file, unexpected I/O error.")
+                    .showAndWait();
+        }
+    }
+
+
+
+    private void onExportGraph(ActionEvent event) {
+        // Based on the nice example snippet in the JavaFX documentation
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Automaton Graph File");
+        // Choose .txt, our file format is text based as this just makes it
+        // easier to edit with text editors.
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Automaton Graph Files", "*.txt"),
+                new FileChooser.ExtensionFilter("All Files", "*.*"));
+
+        File selectedFile = fileChooser.showSaveDialog(this.stage);
+        if (selectedFile == null) {
+            // No file selected, exit early
+            return;
+        }
+
+        try {
+            GraphExportFile f = new GraphExportFile(automaton, mCanvas);
+            f.writeFile(selectedFile);
+        } catch (IOException e) {
+            new Alert(AlertType.ERROR,
+                    "Failed to save file, unexpected I/O error.")
+                    .showAndWait();
+        }
+    }
+
     private void onEnteredRegexp(String text) {
         if (this.currentActivity != null) {
-            this.historyList.getItems().clear();
-            this.historyList.getItems().add("Step 0");
-            this.historyList.getSelectionModel().select(0);
-            this.currentActivity.history.clear();
             this.currentActivity.onEnteredRegexp(text);
         }
     }
 
     @Override
     public void update(Observable o, Object arg) {
+        if (this.currentActivity != null) {
+            this.currentActivity.onHistoryChanged(arg);
+        }
         /* Called whenever CommandHistory of current Activity changes */
         if (arg instanceof Integer) {
             int idx = (int) arg;
@@ -445,6 +572,10 @@ public class RegexpVisApp implements Observer {
                  * reflect this change in the UI.
                  */
                 items.remove(items.size() - 1);
+            } else if (idx == CommandHistory.HISTORY_CLEARED) {
+                this.historyList.getItems().clear();
+                this.historyList.getItems().add("Step 0");
+                this.historyList.getSelectionModel().select(0);
             } else {
                 if (items.size() <= idx) {
                     items.add("Step " + idx);

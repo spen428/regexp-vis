@@ -13,6 +13,7 @@ import model.AddTransitionCommand;
 import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
+import model.BasicRegexp;
 import model.CommandHistory;
 import model.SetIsFinalCommand;
 
@@ -44,14 +45,14 @@ public class CommandHistoryTest {
         AutomatonState f = automaton.createNewState();
 
         // Create the transitions we are going to use
-        AutomatonTransition start_b_0 = automaton.createNewTransition(start, b, "1");
+        AutomatonTransition start_b_0 = automaton.createNewTransition(start, b, BasicRegexp.EPSILON_EXPRESSION);
 
-        AutomatonTransition b_c_0 = automaton.createNewTransition(b, c, "2");
-        AutomatonTransition c_d_0 = automaton.createNewTransition(c, d, "3");
-        AutomatonTransition d_e_0 = automaton.createNewTransition(d, e, "4");
-        AutomatonTransition e_b_0 = automaton.createNewTransition(e, b, "5");
+        AutomatonTransition b_c_0 = automaton.createNewTransition(b, c, BasicRegexp.EPSILON_EXPRESSION);
+        AutomatonTransition c_d_0 = automaton.createNewTransition(c, d, BasicRegexp.EPSILON_EXPRESSION);
+        AutomatonTransition d_e_0 = automaton.createNewTransition(d, e, BasicRegexp.EPSILON_EXPRESSION);
+        AutomatonTransition e_b_0 = automaton.createNewTransition(e, b, BasicRegexp.EPSILON_EXPRESSION);
 
-        AutomatonTransition c_f_0 = automaton.createNewTransition(c, f, "!");
+        AutomatonTransition c_f_0 = automaton.createNewTransition(c, f, BasicRegexp.EPSILON_EXPRESSION);
 
         // Build the automaton we want through a series of commands
         history.executeNewCommand(new AddStateCommand(automaton, b));

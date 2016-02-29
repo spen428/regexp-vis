@@ -1,5 +1,7 @@
 package controller;
 
+import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.MouseEvent;
 import model.Automaton;
 import model.AutomatonTransition;
 import model.BreakdownCommand;
@@ -9,7 +11,7 @@ import view.GraphCanvasFX;
 import view.GraphEdge;
 
 /**
- * 
+ *
  * @author sp611
  *
  */
@@ -33,6 +35,16 @@ public class RegexpBreakdownActivity extends Activity {
 
     @Override
     public void onBackgroundClicked(GraphCanvasEvent event) {
+
+    }
+
+    @Override
+    public void onContextMenuRequested(ContextMenuEvent event) {
+
+    }
+
+    @Override
+    public void onHideContextMenu(MouseEvent event) {
 
     }
 

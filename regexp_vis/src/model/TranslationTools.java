@@ -1,6 +1,23 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+
 public final class TranslationTools {
+    /**
+     * Factory function, creates the appropriate breakdown command for a
+     * transition.
+     *
+     * @param automaton The automaton the transition belongs to
+     * @param transition The transition to break down
+     * @return The command to break down this transition, or null if this
+     * transition cannot be broken down further
+     */
     public static BreakdownCommand createBreakdownCommand(Automaton automaton,
         AutomatonTransition transition)
     {
@@ -31,5 +48,245 @@ public final class TranslationTools {
                 "BUG: Translation not implemented for operator "
                             + re.getOperator().toString());
         }
+    }
+
+    /**
+     * Creates a list of all transitions that need to be broken down for
+     * converting from regexp to NFA. Null is returned if there are no more
+     * transitions to break down.
+     *
+     * @param automaton The automaton to breakdown the transitions for
+     * @return The list of AutomatonTransition(s) that need to be broken down
+     */
+    public static List<AutomatonTransition> getAllTransitionsToBreakdown(
+            Automaton automaton)
+    {
+        ArrayList<AutomatonTransition> allTodoTrans = new ArrayList<>();
+
+        Iterator<Automaton.StateTransitionsPair> it = automaton.graphIterator();
+        while (it.hasNext()) {
+            Automaton.StateTransitionsPair pair = it.next();
+            List<AutomatonTransition> stateTrans = pair.getTransitions();
+            for (AutomatonTransition t : stateTrans) {
+                if (!t.getData().isSingleChar()) {
+                    allTodoTrans.add(t);
+                }
+            }
+        }
+
+        if (allTodoTrans.isEmpty()) {
+            return null;
+        } else {
+            return allTodoTrans;
+        }
+    }
+
+    /**
+     * @param automaton The automaton of the state
+     * @param state The state in question
+     * @return True if a state has out-going epsilon transitions, false
+     * otherwise
+     */
+    public static boolean stateHasEpsilonTransitions(Automaton automaton,
+            AutomatonState state)
+    {
+        List<AutomatonTransition> stateTrans = automaton
+                .getStateTransitions(state);
+        for (AutomatonTransition t : stateTrans) {
+            BasicRegexp re = t.getData();
+            if (re.isSingleChar() && re.getChar() == BasicRegexp.EPSILON_CHAR) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param automaton
+     * @return True if the automaton has any epsilon transitions, false
+     * otherwise
+     */
+    public static boolean automatonHasEpsilonTransitions(Automaton automaton)
+    {
+        Iterator<Automaton.StateTransitionsPair> it = automaton.graphIterator();
+        while (it.hasNext()) {
+            Automaton.StateTransitionsPair pair = it.next();
+            List<AutomatonTransition> stateTrans = pair.getTransitions();
+            for (AutomatonTransition t : stateTrans) {
+                BasicRegexp re = t.getData();
+                if (re.isSingleChar()
+                        && re.getChar() == BasicRegexp.EPSILON_CHAR) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Part of calcReachableStates(), for a state it discovers reachable states
+     * through transitions, with a given predicate on the transitions.
+     *
+     * @param automaton The automaton the state belongs to
+     * @param state The state to use to look for adjacent nodes connected
+     * through transitions
+     * @param newDiscovered The set which this method will add newly discovered
+     * states to
+     * @param visited The set of states which we have already visited, and thus
+     * will not be added to the "newDiscovered" set
+     * @param pred A predicate which tests if we should follow a specific
+     * transition or not
+     */
+    private static void discoverReachableStates(Automaton automaton,
+            AutomatonState state, Set<AutomatonState> newDiscovered,
+            Set<AutomatonState> visited, Predicate<AutomatonTransition> pred)
+    {
+        List<AutomatonTransition> transitions = automaton
+                .getStateTransitions(state);
+        for (AutomatonTransition t : transitions) {
+            if (pred.test(t) && !visited.contains(t.getTo())) {
+                newDiscovered.add(t.getTo());
+            }
+        }
+    }
+
+    /**
+     *
+     * @param automaton The automaton the state belongs to
+     * @param state The state which we want to start the search from
+     * @param pred A predicate which tests if we should follow a specific
+     * transition or not
+     * @return The set of states which are reachable through the transitions
+     * subject to the given predicate
+     */
+    public static Set<AutomatonState> calcReachableStates(Automaton automaton,
+            AutomatonState state, Predicate<AutomatonTransition> pred)
+    {
+        Set<AutomatonState> visited = new HashSet<>();
+        Set<AutomatonState> discovered = new HashSet<>();
+        discovered.add(state);
+        Set<AutomatonState> newDiscovered = new HashSet<>();
+
+        while (discovered.size() > 0) {
+            visited.addAll(discovered);
+
+            for (AutomatonState s2 : discovered) {
+                discoverReachableStates(automaton, s2, newDiscovered,
+                        visited, pred);
+            }
+
+            // Efficiency trick, just swap the references and clear the old set
+            // for reuse as the new set
+            Set<AutomatonState> tmpSwap = discovered;
+            discovered = newDiscovered;
+            newDiscovered = tmpSwap;
+            newDiscovered.clear();
+
+        }
+
+        return visited;
+    }
+
+    /**
+     * @param automaton The automaton in question
+     * @return The set of unreachable states for this automaton, the set is
+     * empty if all states are reachable
+     */
+    public static Set<AutomatonState> automatonCalcUnreachableStates(
+            Automaton automaton)
+    {
+        Set<AutomatonState> allStates = new HashSet<>();
+        Iterator<Automaton.StateTransitionsPair> it = automaton.graphIterator();
+        while (it.hasNext()) {
+            Automaton.StateTransitionsPair pair = it.next();
+            allStates.add(pair.getState());
+        }
+
+        Set<AutomatonState> reachable = calcReachableStates(automaton,
+                automaton.getStartState(), t -> true);
+
+        allStates.removeAll(reachable);
+        return allStates;
+    }
+
+    /**
+     * @param automaton The automaton the state belongs to
+     * @param state The state which we want to find the epsilon closure of
+     * @return The set of states which are in this state's epsilon closure
+     * (including the state itself)
+     */
+    public static Set<AutomatonState> calcEpsilonReachableStates(
+            Automaton automaton, AutomatonState state)
+    {
+        return calcReachableStates(automaton, state,
+                t -> t.getData().getChar() == BasicRegexp.EPSILON_CHAR);
+    }
+
+    /**
+     * Returns the list of character transitions which are non-deterministic,
+     * sorted.
+     *
+     * @param automaton The automaton the state belongs to
+     * @param state The state to check for non-deterministic transitions
+     * @return A list of characters for which transitions are non-deterministic,
+     * if there is no non-determinism this list is empty.
+     */
+    public static List<Character> calcNonDeterministicTrans(Automaton a,
+            AutomatonState state)
+    {
+        ArrayList<Character> list = new ArrayList<>();
+        HashSet<Character> found = new HashSet<>();
+        for (AutomatonTransition t : a.getStateTransitions(state)) {
+            if (found.contains(t.getData().getChar())) {
+                list.add(t.getData().getChar());
+            } else {
+                found.add(t.getData().getChar());
+            }
+        }
+
+        Collections.sort(list);
+        return list;
+    }
+
+    /**
+     * @param automaton The automaton the state belongs to
+     * @param state The state to check for non-deterministic transitions
+     * @return True if the state has out-going non-deterministic transition(s),
+     * false otherwise
+     */
+    public static boolean stateHasNonDeterminism(Automaton automaton,
+            AutomatonState state)
+    {
+        List<AutomatonTransition> trans = automaton.getStateTransitions(state);
+        HashSet<Character> found = new HashSet<>();
+        for (AutomatonTransition t : trans) {
+            if (found.contains(t.getData().getChar())) {
+                return true;
+            } else {
+                found.add(t.getData().getChar());
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param automaton The automaton in question
+     * @return True if the automaton has any state which has out-going
+     * non-deterministic transition(s), false otherwise
+     */
+    public static boolean automatonHasNonDeterminism(Automaton automaton)
+    {
+        Iterator<Automaton.StateTransitionsPair> it = automaton.graphIterator();
+        while (it.hasNext()) {
+            Automaton.StateTransitionsPair pair = it.next();
+            if (stateHasNonDeterminism(automaton, pair.getState())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

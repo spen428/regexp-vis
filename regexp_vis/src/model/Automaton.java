@@ -105,6 +105,14 @@ public class Automaton {
     }
 
     /**
+     * @return The number of states in this automaton.
+     */
+    public int getNumStates()
+    {
+        return mGraph.size();
+    }
+
+    /**
      * For debugging purposes, prints out the current state of the Automaton.
      */
     public void debugPrint()
@@ -163,6 +171,39 @@ public class Automaton {
         } else {
             return null;
         }
+    }
+
+    /**
+     * @param id The ID of the state to find
+     * @return The AutomatonState with the given ID, or null if no such state
+     * exists
+     */
+    public AutomatonState getStateById(int id)
+    {
+        StateTransitionsPair pair = mGraph.get(id);
+        if (pair != null) {
+            return pair.mState;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @param id The ID of the transition to find
+     * @return The AutomatonTransition with the given ID, or null if no such
+     * transition exists
+     */
+    public AutomatonTransition getTransitionById(int id)
+    {
+        // TODO: improve efficiency, possibly using a map to lookup based on ID
+        for (StateTransitionsPair pair : mGraph.values()) {
+            for (AutomatonTransition t : pair.mTransitions) {
+                if (t.getId() == id) {
+                    return t;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -272,7 +313,7 @@ public class Automaton {
      * @return The newly created transition object
      */
     public AutomatonTransition createNewTransition(AutomatonState from,
-        AutomatonState to, Object data)
+        AutomatonState to, BasicRegexp data)
     {
         return new AutomatonTransition(mTransCounter++, from, to, data);
     }
@@ -380,7 +421,7 @@ public class Automaton {
         if (pair == null) {
             return null;
         }
-        
+
         return pair.getState();
     }
 
