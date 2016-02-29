@@ -14,7 +14,7 @@ public class BreakdownSequenceUICommand extends BreakdownUICommand {
         super(graph, cmd);
         this.ccmd = cmd;
 
-        Point2D[] points = BreakdownUITools.placeNodes2(graph, this.ccmd);
+        Point2D[] points = BreakdownUITools.placeNodes(graph, this.ccmd);
         int added = 0;
 
         for (Command c : this.ccmd.getCommands()) {

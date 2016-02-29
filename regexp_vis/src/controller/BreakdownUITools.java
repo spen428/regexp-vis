@@ -196,7 +196,7 @@ public class BreakdownUITools {
      * @return a {@link Point2D} array of the locations to place the new nodes,
      *         in order starting from the "from" end.
      */
-    public static Point2D[] placeNodes(GraphCanvasFX graph,
+    public static Point2D[] placeNodesOld(GraphCanvasFX graph,
             BreakdownCommand cmd) {
         final AutomatonTransition transition = cmd.getOriginalTransition();
         final AutomatonState fromState = transition.getFrom();
@@ -244,7 +244,7 @@ public class BreakdownUITools {
         return points;
     }
 
-    public static Point2D[] placeNodes2(GraphCanvasFX canvas, BreakdownCommand cmd) {
+    public static Point2D[] placeNodes(GraphCanvasFX canvas, BreakdownCommand cmd) {
         final AutomatonTransition transition = cmd.getOriginalTransition();
         final AutomatonState fromState = transition.getFrom();
         final AutomatonState toState = transition.getTo();
