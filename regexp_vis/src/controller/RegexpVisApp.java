@@ -591,9 +591,8 @@ public class RegexpVisApp implements Observer {
                 this.historyList.getSelectionModel().select(0);
             }
         } else if (arg instanceof BreakdownUICommand) {
-            String s = String.format("Step %d: %s", items.size(),
-                    ((BreakdownUICommand) arg).getDescription());
-            items.add(createListViewLabel(s));
+            String text = ((BreakdownUICommand) arg).getDescription();
+            items.add(createListViewLabel(text));
             this.historyList.getSelectionModel().select(items.size() - 1);
         }
     }
