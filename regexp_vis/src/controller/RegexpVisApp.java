@@ -18,6 +18,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -44,7 +45,7 @@ public class RegexpVisApp implements Observer {
     private final Activity[] activities;
     private final Automaton automaton;
     protected final GraphCanvasFX mCanvas;
-    final ListView<String> historyList;
+    final ListView<Label> historyList;
     final Stage stage;
 
     /* Constants */
@@ -58,6 +59,7 @@ public class RegexpVisApp implements Observer {
     private static final int CONTROL_PANEL_PADDING_HORIZONTAL_PX = 35;
     private static final int CONTROL_PANEL_PADDING_VERTICAL_PX = 20;
     private static final int HISTORY_LIST_WIDTH_PX = 140;
+    private static final double LISTVIEW_LABEL_WIDTH_OFFSET = -20;
     protected static final String ABOUT_HEADER = "Regular Expression Visualiser"
             + " (v" + Main.VERSION + ")";
     protected static final String ABOUT_CONTENT = "Authors:\n\n"
@@ -75,6 +77,7 @@ public class RegexpVisApp implements Observer {
         final VBox root = new VBox();
         final HBox canvasContainer = new HBox();
         this.historyList = new ListView<>();
+        this.historyList.setPadding(new Insets(0));
         final VBox controlPanel = new VBox();
         this.stage = stage;
 
@@ -444,12 +447,14 @@ public class RegexpVisApp implements Observer {
         this.historyList.getItems().clear();
         for (int i = 0; i <= this.currentActivity.history
                 .getHistorySize(); i++) {
+            String text;
             if (i == 0) {
-                this.historyList.getItems().add(HISTORY_INITIAL_STATE_TEXT);
+                text = HISTORY_INITIAL_STATE_TEXT;
             } else {
-                // TODO: command text for here
-                this.historyList.getItems().add("Step " + i);
+                // TODO: get command text for here
+                text = "Step " + i;
             }
+            this.historyList.getItems().add(createListViewLabel(text));
             this.historyList.getSelectionModel().select(i);
         }
 
@@ -570,7 +575,7 @@ public class RegexpVisApp implements Observer {
             this.currentActivity.onHistoryChanged(arg);
         }
 
-        ObservableList<String> items = this.historyList.getItems();
+        ObservableList<Label> items = this.historyList.getItems();
         if (arg instanceof Integer) {
             int idx = (int) arg;
             if (idx == CommandHistory.HISTORY_CLOBBERED) {
@@ -581,15 +586,28 @@ public class RegexpVisApp implements Observer {
                 items.remove(items.size() - 1);
             } else if (idx == CommandHistory.HISTORY_CLEARED) {
                 this.historyList.getItems().clear();
-                this.historyList.getItems().add(HISTORY_INITIAL_STATE_TEXT);
+                this.historyList.getItems()
+                        .add(createListViewLabel(HISTORY_INITIAL_STATE_TEXT));
                 this.historyList.getSelectionModel().select(0);
             }
         } else if (arg instanceof BreakdownUICommand) {
             String s = String.format("Step %d: %s", items.size(),
                     ((BreakdownUICommand) arg).getDescription());
-            items.add(s);
+            items.add(createListViewLabel(s));
             this.historyList.getSelectionModel().select(items.size() - 1);
         }
+    }
+
+    private Label createListViewLabel(String text) {
+        Label label = new Label(text);
+        label.setPadding(new Insets(0));
+        label.setWrapText(true);
+        label.setMinWidth(
+                this.historyList.getMinWidth() + LISTVIEW_LABEL_WIDTH_OFFSET);
+        label.setMaxWidth(
+                this.historyList.getMaxWidth() + LISTVIEW_LABEL_WIDTH_OFFSET);
+        // TODO: Bind to historyList resize
+        return label;
     }
 
 }
