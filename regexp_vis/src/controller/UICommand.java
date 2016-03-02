@@ -100,8 +100,4 @@ public abstract class UICommand extends Command {
                 + " is not a subclass of BreakdownCommand.");
     }
 
-    public String getDescription() {
-        return "null";
-    }
-
 }

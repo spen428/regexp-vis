@@ -35,4 +35,8 @@ public class AddTransitionUICommand extends UICommand {
         this.cmd.undo();
     }
 
+    public AutomatonTransition getTransition() {
+        return this.ccmd.getTransition();
+    }
+
 }

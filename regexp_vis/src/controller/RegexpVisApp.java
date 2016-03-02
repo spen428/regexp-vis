@@ -48,6 +48,7 @@ public class RegexpVisApp implements Observer {
     final Stage stage;
 
     /* Constants */
+    private static final String HISTORY_INITIAL_STATE_TEXT = "Initial state";
     private static final String CONTROL_PANEL_HIDE_TEXT = "Hide Control Panel";
     private static final String CONTROL_PANEL_SHOW_TEXT = "Show Control Panel";
     private static final String HISTORY_LIST_HIDE_TEXT = "Hide History List";
@@ -443,7 +444,12 @@ public class RegexpVisApp implements Observer {
         this.historyList.getItems().clear();
         for (int i = 0; i <= this.currentActivity.history
                 .getHistorySize(); i++) {
-            this.historyList.getItems().add("Step " + i);
+            if (i == 0) {
+                this.historyList.getItems().add(HISTORY_INITIAL_STATE_TEXT);
+            } else {
+                // TODO: command text for here
+                this.historyList.getItems().add("Step " + i);
+            }
             this.historyList.getSelectionModel().select(i);
         }
 
@@ -575,13 +581,12 @@ public class RegexpVisApp implements Observer {
                 items.remove(items.size() - 1);
             } else if (idx == CommandHistory.HISTORY_CLEARED) {
                 this.historyList.getItems().clear();
-                this.historyList.getItems().add("Start");
+                this.historyList.getItems().add(HISTORY_INITIAL_STATE_TEXT);
                 this.historyList.getSelectionModel().select(0);
             }
-        } else if (arg instanceof UICommand) {
-            UICommand cmd = (UICommand) arg;
+        } else if (arg instanceof BreakdownUICommand) {
             String s = String.format("Step %d: %s", items.size(),
-                    cmd.getDescription());
+                    ((BreakdownUICommand) arg).getDescription());
             items.add(s);
             this.historyList.getSelectionModel().select(items.size() - 1);
         }
