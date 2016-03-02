@@ -123,21 +123,22 @@ public class RegexpVisApp implements Observer {
                 RegexpVisApp.this.currentActivity.historyNext();
             }
         });
-        final CheckMenuItem menuEditClobberHistory = new CheckMenuItem(
-                "Clobber History");
-        menuEditClobberHistory.setSelected(CommandHistory.CLOBBER_BY_DEFAULT);
-        menuEditClobberHistory.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent t) {
-                boolean clob = RegexpVisApp.this.currentActivity.history
-                        .isClobbered();
-                RegexpVisApp.this.currentActivity.history.setClobbered(!clob);
-                menuEditClobberHistory.setSelected(!clob);
-            }
-        });
+        // final CheckMenuItem menuEditClobberHistory = new CheckMenuItem(
+        // "Clobber History");
+        // menuEditClobberHistory.setSelected(CommandHistory.CLOBBER_BY_DEFAULT);
+        // menuEditClobberHistory.setOnAction(new EventHandler<ActionEvent>() {
+        // @Override
+        // public void handle(ActionEvent t) {
+        // boolean clob = RegexpVisApp.this.currentActivity.history
+        // .isClobbered();
+        // RegexpVisApp.this.currentActivity.history.setClobbered(!clob);
+        // menuEditClobberHistory.setSelected(!clob);
+        // }
+        // });
         MenuItem menuEditPreferences = new MenuItem("Preferences...");
         menuEdit.getItems().addAll(menuEditUndo, menuEditRedo,
-                menuEditClobberHistory, menuEditPreferences);
+                // menuEditClobberHistory,
+                menuEditPreferences);
 
         // --- Menu Activity
         Menu menuActivity = new Menu("Activity");
