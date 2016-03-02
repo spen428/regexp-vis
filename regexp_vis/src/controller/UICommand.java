@@ -99,4 +99,9 @@ public abstract class UICommand extends Command {
         throw new IllegalArgumentException(cmd.getClass().toString()
                 + " is not a subclass of BreakdownCommand.");
     }
+
+    public String getDescription() {
+        return "null";
+    }
+
 }
