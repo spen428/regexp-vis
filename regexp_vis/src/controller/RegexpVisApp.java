@@ -590,8 +590,8 @@ public class RegexpVisApp implements Observer {
                         .add(createListViewLabel(HISTORY_INITIAL_STATE_TEXT));
                 this.historyList.getSelectionModel().select(0);
             }
-        } else if (arg instanceof BreakdownUICommand) {
-            String text = ((BreakdownUICommand) arg).getDescription();
+        } else if (arg instanceof UICommand) {
+            String text = ((UICommand) arg).getDescription();
             items.add(createListViewLabel(text));
             this.historyList.getSelectionModel().select(items.size() - 1);
         }
