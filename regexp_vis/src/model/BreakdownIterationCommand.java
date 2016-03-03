@@ -155,12 +155,13 @@ public class BreakdownIterationCommand extends BreakdownCommand {
         return mIsolationLevel;
     }
 
-    private boolean hasEpsilonTrans(AutomatonState state)
+    private boolean hasEpsilonTrans(AutomatonState from, AutomatonState to)
     {
         for (AutomatonTransition tmp : getAutomaton()
-                .getStateTransitions(state)) {
+                .getStateTransitions(from)) {
             BasicRegexp tmpRe = (BasicRegexp)tmp.getData();
-            if (tmpRe.equals(BasicRegexp.EPSILON_EXPRESSION)) {
+            if (tmp.getTo() == to &&
+                    tmpRe.equals(BasicRegexp.EPSILON_EXPRESSION)) {
                 return true;
             }
         }
@@ -187,7 +188,7 @@ public class BreakdownIterationCommand extends BreakdownCommand {
         // Transition which skips over the iteration (only for STAR)
         if (re.getOperator() == BasicRegexp.RegexpOperator.STAR) {
             // Don't create another epsilon transition if one already exists
-            if (!hasEpsilonTrans(start)) {
+            if (!hasEpsilonTrans(start, end)) {
                 epsilonSkipTrans = automaton.createNewTransition(start, end,
                         BasicRegexp.EPSILON_EXPRESSION);
             }
@@ -229,7 +230,7 @@ public class BreakdownIterationCommand extends BreakdownCommand {
         // Transition which skips over the iteration (only for STAR)
         if (re.getOperator() == BasicRegexp.RegexpOperator.STAR) {
             // Don't create another epsilon transition if one already exists
-            if (!hasEpsilonTrans(start)) {
+            if (!hasEpsilonTrans(start, end)) {
                 epsilonSkipTrans = automaton.createNewTransition(start, end,
                         BasicRegexp.EPSILON_EXPRESSION);
             }
@@ -275,7 +276,7 @@ public class BreakdownIterationCommand extends BreakdownCommand {
         // Transition which skips over the iteration (only for STAR)
         if (re.getOperator() == BasicRegexp.RegexpOperator.STAR) {
             // Don't create another epsilon transition if one already exists
-            if (!hasEpsilonTrans(start)) {
+            if (!hasEpsilonTrans(start, end)) {
                 epsilonSkipTrans = automaton.createNewTransition(start, end,
                         BasicRegexp.EPSILON_EXPRESSION);
             }
@@ -314,13 +315,13 @@ public class BreakdownIterationCommand extends BreakdownCommand {
         // PLUS
         if (re.getOperator() == BasicRegexp.RegexpOperator.STAR) {
             // Don't create another epsilon transition if one already exists
-            if (!hasEpsilonTrans(start)) {
+            if (!hasEpsilonTrans(start, end)) {
                 epsilonSkipTrans = automaton.createNewTransition(start, end,
                         BasicRegexp.EPSILON_EXPRESSION);
             }
         } else {
             // Don't create another epsilon transition if one already exists
-            if (!hasEpsilonTrans(start)) {
+            if (!hasEpsilonTrans(end, start)) {
                 epsilonSkipTrans = automaton.createNewTransition(end, start,
                         BasicRegexp.EPSILON_EXPRESSION);
             }
