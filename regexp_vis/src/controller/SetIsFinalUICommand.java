@@ -13,10 +13,12 @@ import view.GraphNode;
 public class SetIsFinalUICommand extends UICommand {
 
     private final SetIsFinalCommand ccmd;
+    private final boolean originalFinality;
 
     public SetIsFinalUICommand(GraphCanvasFX graph, SetIsFinalCommand cmd) {
         super(graph, cmd);
         this.ccmd = cmd;
+        this.originalFinality = this.ccmd.getState().isFinal();
     }
 
     @Override
@@ -32,6 +34,13 @@ public class SetIsFinalUICommand extends UICommand {
     @Override
     public void undo() {
         redo();
+    }
+
+    @Override
+    public String getDescription() {
+        return String.format("Made state %d %sfinal",
+                this.ccmd.getState().getId(),
+                !this.originalFinality ? "" : "non-");
     }
 
 }

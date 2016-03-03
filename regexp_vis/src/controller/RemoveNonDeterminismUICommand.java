@@ -16,11 +16,12 @@ import view.GraphNode;
 
 public class RemoveNonDeterminismUICommand extends UICommand {
     private ArrayList<UICommand> commands;
+    private final RemoveNonDeterminismCommand ccmd;
 
     public RemoveNonDeterminismUICommand(GraphCanvasFX graph,
-            RemoveNonDeterminismCommand cmd)
-    {
+            RemoveNonDeterminismCommand cmd) {
         super(graph, cmd);
+        this.ccmd = cmd;
         this.commands = new ArrayList<>();
 
         AddStateCommand newStateCmd = cmd.getNewStateCommand();
@@ -50,8 +51,8 @@ public class RemoveNonDeterminismUICommand extends UICommand {
                 location = location.add(targetNode.getX(), targetNode.getY());
                 location = location.multiply(0.5);
 
-                this.commands.add(new AddStateUICommand(graph, newStateCmd,
-                        location));
+                this.commands.add(
+                        new AddStateUICommand(graph, newStateCmd, location));
             } else {
                 this.commands.add(UICommand.fromCommand(graph, c));
             }
@@ -82,5 +83,11 @@ public class RemoveNonDeterminismUICommand extends UICommand {
 
     public List<UICommand> getCommands() {
         return Collections.unmodifiableList(this.commands);
+    }
+
+    @Override
+    public String getDescription() {
+        return "Removed non-determinism from state "
+                + this.ccmd.getState().toString();
     }
 }

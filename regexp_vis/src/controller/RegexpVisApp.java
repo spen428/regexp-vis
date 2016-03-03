@@ -3,6 +3,7 @@ package controller;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -18,6 +19,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -33,8 +35,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import model.Automaton;
+import model.Command;
 import model.CommandHistory;
-import model.InvalidRegexpException;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 
@@ -45,10 +47,11 @@ public class RegexpVisApp implements Observer {
     private final Activity[] activities;
     private final Automaton automaton;
     protected final GraphCanvasFX mCanvas;
-    final ListView<String> historyList;
+    final ListView<Label> historyList;
     final Stage stage;
 
     /* Constants */
+    private static final String HISTORY_INITIAL_STATE_TEXT = "Initial state";
     private static final String CONTROL_PANEL_HIDE_TEXT = "Hide Control Panel";
     private static final String CONTROL_PANEL_SHOW_TEXT = "Show Control Panel";
     private static final String HISTORY_LIST_HIDE_TEXT = "Hide History List";
@@ -58,6 +61,7 @@ public class RegexpVisApp implements Observer {
     private static final int CONTROL_PANEL_PADDING_HORIZONTAL_PX = 35;
     private static final int CONTROL_PANEL_PADDING_VERTICAL_PX = 20;
     private static final int HISTORY_LIST_WIDTH_PX = 140;
+    private static final double LISTVIEW_LABEL_WIDTH_OFFSET = -20;
     protected static final String ABOUT_HEADER = "Regular Expression Visualiser"
             + " (v" + Main.VERSION + ")";
     protected static final String ABOUT_CONTENT = "Authors:\n\n"
@@ -75,6 +79,7 @@ public class RegexpVisApp implements Observer {
         final VBox root = new VBox();
         final HBox canvasContainer = new HBox();
         this.historyList = new ListView<>();
+        this.historyList.setPadding(new Insets(0));
         final VBox controlPanel = new VBox();
         this.stage = stage;
 
@@ -124,21 +129,22 @@ public class RegexpVisApp implements Observer {
                 RegexpVisApp.this.currentActivity.historyNext();
             }
         });
-        final CheckMenuItem menuEditClobberHistory = new CheckMenuItem(
-                "Clobber History");
-        menuEditClobberHistory.setSelected(CommandHistory.CLOBBER_BY_DEFAULT);
-        menuEditClobberHistory.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent t) {
-                boolean clob = RegexpVisApp.this.currentActivity.history
-                        .isClobbered();
-                RegexpVisApp.this.currentActivity.history.setClobbered(!clob);
-                menuEditClobberHistory.setSelected(!clob);
-            }
-        });
+        // final CheckMenuItem menuEditClobberHistory = new CheckMenuItem(
+        // "Clobber History");
+        // menuEditClobberHistory.setSelected(CommandHistory.CLOBBER_BY_DEFAULT);
+        // menuEditClobberHistory.setOnAction(new EventHandler<ActionEvent>() {
+        // @Override
+        // public void handle(ActionEvent t) {
+        // boolean clob = RegexpVisApp.this.currentActivity.history
+        // .isClobbered();
+        // RegexpVisApp.this.currentActivity.history.setClobbered(!clob);
+        // menuEditClobberHistory.setSelected(!clob);
+        // }
+        // });
         MenuItem menuEditPreferences = new MenuItem("Preferences...");
         menuEdit.getItems().addAll(menuEditUndo, menuEditRedo,
-                menuEditClobberHistory, menuEditPreferences);
+                // menuEditClobberHistory,
+                menuEditPreferences);
 
         // --- Menu Activity
         Menu menuActivity = new Menu("Activity");
@@ -248,8 +254,20 @@ public class RegexpVisApp implements Observer {
                 RegexpVisApp.this.currentActivity.historyPrev();
             }
         });
-        Button buttonLoad = new Button("Load");
-        Button buttonSave = new Button("Save");
+        Button buttonLoad = new Button("Import");
+        buttonLoad.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                onImportGraph(event);
+            }
+        });
+        Button buttonSave = new Button("Export");
+        buttonSave.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                onExportGraph(event);
+            }
+        });
         Button buttonForward = new Button("-->");
         buttonForward.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -349,28 +367,29 @@ public class RegexpVisApp implements Observer {
                 onEdgeClicked(event);
             }
         });
-        this.mCanvas.setOnBackgroundClicked(new EventHandler<GraphCanvasEvent>() {
-            @Override
-            public void handle(GraphCanvasEvent event) {
-                onBackgroundClicked(event);
-            }
-        });
+        this.mCanvas
+                .setOnBackgroundClicked(new EventHandler<GraphCanvasEvent>() {
+                    @Override
+                    public void handle(GraphCanvasEvent event) {
+                        onBackgroundClicked(event);
+                    }
+                });
 
         this.mCanvas.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED,
-        new EventHandler<ContextMenuEvent>() {
-            @Override
-            public void handle(ContextMenuEvent event) {
-                onContextMenuRequested(event);
-            }
-        });
+                new EventHandler<ContextMenuEvent>() {
+                    @Override
+                    public void handle(ContextMenuEvent event) {
+                        onContextMenuRequested(event);
+                    }
+                });
 
         this.mCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED,
-        new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                onHideContextMenu(event);
-            }
-        });
+                new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent event) {
+                        onHideContextMenu(event);
+                    }
+                });
 
         /* Init fields */
         this.automaton = new Automaton();
@@ -419,12 +438,21 @@ public class RegexpVisApp implements Observer {
             throw new IllegalArgumentException();
         }
 
+        /*
+         * Set "checked" status of all menu items to reflect the change of
+         * activity
+         */
+        for (int i = 0; i < this.activityMenuItems.length; i++) {
+            this.activityMenuItems[i].setSelected(i == actType.ordinal());
+        }
+
         Activity newActivity = this.activities[actType.ordinal()];
         if (this.currentActivity == newActivity) {
             // Don't do anything, current activity hasn't actually changed
             return;
         }
-        if (this.currentActivity != null && !this.currentActivity.onPreStarted()) {
+        if (this.currentActivity != null
+                && !this.currentActivity.onPreStarted()) {
             // Can't switch to this activity, abort
             return;
         }
@@ -439,19 +467,20 @@ public class RegexpVisApp implements Observer {
 
         /* Update history list */
         this.historyList.getItems().clear();
-        for (int i = 0; i <= this.currentActivity.history
-                .getHistorySize(); i++) {
-            // 1 extra, so that "Step 0" is the inital state
-            this.historyList.getItems().add("Step " + i);
+        List<Command> cmds = this.currentActivity.history.getCommands();
+        for (int i = 0; i <= cmds.size(); i++) {
+            String text;
+            if (i == 0) {
+                text = HISTORY_INITIAL_STATE_TEXT;
+            } else {
+                if (cmds.get(i - 1) instanceof UICommand) {
+                    text = ((UICommand) cmds.get(i - 1)).getDescription();
+                } else {
+                    text = "Step " + i;
+                }
+            }
+            this.historyList.getItems().add(createListViewLabel(text));
             this.historyList.getSelectionModel().select(i);
-        }
-
-        /*
-         * Set "checked" status of all menu items to reflect the change of
-         * activity
-         */
-        for (int i = 0; i < this.activityMenuItems.length; i++) {
-            this.activityMenuItems[i].setSelected(i == actType.ordinal());
         }
 
         this.currentActivity.onStarted();
@@ -493,8 +522,9 @@ public class RegexpVisApp implements Observer {
         fileChooser.setTitle("Import Automaton Graph File");
         // Choose .txt, our file format is text based as this just makes it
         // easier to edit with text editors.
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Automaton Graph Files", "*.txt"),
+        fileChooser.getExtensionFilters()
+                .addAll(new FileChooser.ExtensionFilter("Automaton Graph Files",
+                        "*.txt"),
                 new FileChooser.ExtensionFilter("All Files", "*.*"));
 
         File selectedFile = fileChooser.showOpenDialog(this.stage);
@@ -511,19 +541,16 @@ public class RegexpVisApp implements Observer {
         } catch (BadGraphExportFileException e) {
             new Alert(AlertType.ERROR,
                     "Failed to load file, file isn't a valid automaton graph file.")
-                    .showAndWait();
+                            .showAndWait();
         } catch (FileNotFoundException e) {
             new Alert(AlertType.ERROR,
                     "Failed to load file, could not find file: "
                             + selectedFile.getPath()).showAndWait();
         } catch (IOException e) {
             new Alert(AlertType.ERROR,
-                    "Failed to load file, unexpected I/O error.")
-                    .showAndWait();
+                    "Failed to load file, unexpected I/O error.").showAndWait();
         }
     }
-
-
 
     private void onExportGraph(ActionEvent event) {
         // Based on the nice example snippet in the JavaFX documentation
@@ -531,8 +558,9 @@ public class RegexpVisApp implements Observer {
         fileChooser.setTitle("Export Automaton Graph File");
         // Choose .txt, our file format is text based as this just makes it
         // easier to edit with text editors.
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Automaton Graph Files", "*.txt"),
+        fileChooser.getExtensionFilters()
+                .addAll(new FileChooser.ExtensionFilter("Automaton Graph Files",
+                        "*.txt"),
                 new FileChooser.ExtensionFilter("All Files", "*.*"));
 
         File selectedFile = fileChooser.showSaveDialog(this.stage);
@@ -546,8 +574,7 @@ public class RegexpVisApp implements Observer {
             f.writeFile(selectedFile);
         } catch (IOException e) {
             new Alert(AlertType.ERROR,
-                    "Failed to save file, unexpected I/O error.")
-                    .showAndWait();
+                    "Failed to save file, unexpected I/O error.").showAndWait();
         }
     }
 
@@ -559,13 +586,15 @@ public class RegexpVisApp implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
+        /* Called whenever CommandHistory of current Activity changes */
+
         if (this.currentActivity != null) {
             this.currentActivity.onHistoryChanged(arg);
         }
-        /* Called whenever CommandHistory of current Activity changes */
+
+        ObservableList<Label> items = this.historyList.getItems();
         if (arg instanceof Integer) {
             int idx = (int) arg;
-            ObservableList<String> items = this.historyList.getItems();
             if (idx == CommandHistory.HISTORY_CLOBBERED) {
                 /*
                  * The last element of the history list was removed, we must
@@ -574,15 +603,29 @@ public class RegexpVisApp implements Observer {
                 items.remove(items.size() - 1);
             } else if (idx == CommandHistory.HISTORY_CLEARED) {
                 this.historyList.getItems().clear();
-                this.historyList.getItems().add("Step 0");
+                this.historyList.getItems()
+                        .add(createListViewLabel(HISTORY_INITIAL_STATE_TEXT));
                 this.historyList.getSelectionModel().select(0);
             } else {
-                if (items.size() <= idx) {
-                    items.add("Step " + idx);
-                }
                 this.historyList.getSelectionModel().select(idx);
             }
+        } else if (arg instanceof UICommand) {
+            String text = ((UICommand) arg).getDescription();
+            items.add(createListViewLabel(text));
+            this.historyList.getSelectionModel().select(items.size() - 1);
         }
+    }
+
+    private Label createListViewLabel(String text) {
+        Label label = new Label(text);
+        label.setPadding(new Insets(0));
+        label.setWrapText(true);
+        label.setMinWidth(
+                this.historyList.getMinWidth() + LISTVIEW_LABEL_WIDTH_OFFSET);
+        label.setMaxWidth(
+                this.historyList.getMaxWidth() + LISTVIEW_LABEL_WIDTH_OFFSET);
+        // TODO: Bind to historyList resize
+        return label;
     }
 
 }

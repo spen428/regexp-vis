@@ -46,4 +46,9 @@ public class AddStateUICommand extends UICommand {
         this.ccmd.undo();
     }
 
+    @Override
+    public String getDescription() {
+        return "Added state " + this.ccmd.getState().toString();
+    }
+
 }

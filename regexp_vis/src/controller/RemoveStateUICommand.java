@@ -45,4 +45,9 @@ public class RemoveStateUICommand extends UICommand {
         this.cmd.undo();
     }
 
+    @Override
+    public String getDescription() {
+        return "Removed state " + this.ccmd.getState().toString();
+    }
+
 }

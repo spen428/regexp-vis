@@ -11,11 +11,12 @@ import view.GraphCanvasFX;
 
 public class RemoveEpsilonTransitionsUICommand extends UICommand {
     private ArrayList<UICommand> commands;
+    private final RemoveEpsilonTransitionsCommand ccmd;
 
     public RemoveEpsilonTransitionsUICommand(GraphCanvasFX graph,
-            RemoveEpsilonTransitionsCommand cmd)
-    {
+            RemoveEpsilonTransitionsCommand cmd) {
         super(graph, cmd);
+        this.ccmd = cmd;
         this.commands = new ArrayList<>();
         for (Command c : cmd.getCommands()) {
             this.commands.add(UICommand.fromCommand(graph, c));
@@ -46,5 +47,11 @@ public class RemoveEpsilonTransitionsUICommand extends UICommand {
 
     public List<UICommand> getCommands() {
         return Collections.unmodifiableList(this.commands);
+    }
+
+    @Override
+    public String getDescription() {
+        return "Removed outgoing epsilon transitions from state "
+                + this.ccmd.getTargetState().toString();
     }
 }
