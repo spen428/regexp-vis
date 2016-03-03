@@ -144,7 +144,7 @@ public class CommandHistory extends Observable {
         cmd.redo();
         mHistoryIdx++;
         this.setChanged();
-        this.notifyObservers(mHistoryIdx);
+        this.notifyObservers(cmd);
     }
 
     public void clear() {

@@ -1,9 +1,12 @@
 package controller;
 
+import java.util.ArrayList;
+
 import javafx.geometry.Point2D;
 import model.AddStateCommand;
 import model.AddTransitionCommand;
 import model.Automaton;
+import model.AutomatonTransition;
 import model.BreakdownChoiceCommand;
 import model.BreakdownCommand;
 import model.BreakdownIterationCommand;
@@ -99,4 +102,7 @@ public abstract class UICommand extends Command {
         throw new IllegalArgumentException(cmd.getClass().toString()
                 + " is not a subclass of BreakdownCommand.");
     }
+
+    public abstract String getDescription();
+
 }
