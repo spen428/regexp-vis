@@ -1,7 +1,11 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Observable;
+
+import controller.UICommand;
 
 /**
  * Stores a history of commands for rewind and playback
@@ -160,6 +164,10 @@ public class CommandHistory extends Observable {
 
     public void setClobbered(boolean clobber) {
         this.clobber = clobber;
+    }
+
+    public List<Command> getCommands() {
+        return Collections.unmodifiableList(this.mCommandList);
     }
 
 }

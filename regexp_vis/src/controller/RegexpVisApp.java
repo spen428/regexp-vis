@@ -3,6 +3,7 @@ package controller;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -34,6 +35,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import model.Automaton;
+import model.Command;
 import model.CommandHistory;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
@@ -465,14 +467,17 @@ public class RegexpVisApp implements Observer {
 
         /* Update history list */
         this.historyList.getItems().clear();
-        for (int i = 0; i <= this.currentActivity.history
-                .getHistorySize(); i++) {
+        List<Command> cmds = this.currentActivity.history.getCommands();
+        for (int i = 0; i <= cmds.size(); i++) {
             String text;
             if (i == 0) {
                 text = HISTORY_INITIAL_STATE_TEXT;
             } else {
-                // TODO: get command text for here
-                text = "Step " + i;
+                if (cmds.get(i - 1) instanceof UICommand) {
+                    text = ((UICommand) cmds.get(i - 1)).getDescription();
+                } else {
+                    text = "Step " + i;
+                }
             }
             this.historyList.getItems().add(createListViewLabel(text));
             this.historyList.getSelectionModel().select(i);
