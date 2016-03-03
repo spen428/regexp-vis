@@ -436,6 +436,14 @@ public class RegexpVisApp implements Observer {
             throw new IllegalArgumentException();
         }
 
+        /*
+         * Set "checked" status of all menu items to reflect the change of
+         * activity
+         */
+        for (int i = 0; i < this.activityMenuItems.length; i++) {
+            this.activityMenuItems[i].setSelected(i == actType.ordinal());
+        }
+
         Activity newActivity = this.activities[actType.ordinal()];
         if (this.currentActivity == newActivity) {
             // Don't do anything, current activity hasn't actually changed
@@ -468,14 +476,6 @@ public class RegexpVisApp implements Observer {
             }
             this.historyList.getItems().add(createListViewLabel(text));
             this.historyList.getSelectionModel().select(i);
-        }
-
-        /*
-         * Set "checked" status of all menu items to reflect the change of
-         * activity
-         */
-        for (int i = 0; i < this.activityMenuItems.length; i++) {
-            this.activityMenuItems[i].setSelected(i == actType.ordinal());
         }
 
         this.currentActivity.onStarted();
