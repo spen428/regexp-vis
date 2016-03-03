@@ -11,11 +11,12 @@ import view.GraphCanvasFX;
 
 public class RemoveEquivalentStatesUICommand extends UICommand {
     private ArrayList<UICommand> commands;
+    private final RemoveEquivalentStatesCommand ccmd;
 
     public RemoveEquivalentStatesUICommand(GraphCanvasFX graph,
-            RemoveEquivalentStatesCommand cmd)
-    {
+            RemoveEquivalentStatesCommand cmd) {
         super(graph, cmd);
+        this.ccmd = cmd;
         this.commands = new ArrayList<>();
         for (Command c : cmd.getCommands()) {
             this.commands.add(UICommand.fromCommand(graph, c));
@@ -46,5 +47,11 @@ public class RemoveEquivalentStatesUICommand extends UICommand {
 
     public List<UICommand> getCommands() {
         return Collections.unmodifiableList(this.commands);
+    }
+
+    @Override
+    public String getDescription() {
+        return "Removed equivalent states for state "
+                + this.ccmd.getTargetState().toString();
     }
 }

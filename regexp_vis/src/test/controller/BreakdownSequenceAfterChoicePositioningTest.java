@@ -12,7 +12,7 @@ public class BreakdownSequenceAfterChoicePositioningTest extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         TestRegexpVisApp ui = new TestRegexpVisApp(stage, "ab*c*|(d*e)*f");
-        BreakdownTestUtils.breakdownEdges(ui, 0, 2);
+        BreakdownTestUtils.breakdownEdges(ui, 0, 1, 2);
     }
 
 }
