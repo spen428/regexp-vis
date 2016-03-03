@@ -35,4 +35,10 @@ public class RemoveTransitionUICommand extends UICommand {
         this.cmd.undo();
     }
 
+    @Override
+    public String getDescription() {
+        return "Removed transition "
+                + this.ccmd.getTransition().getData().toString();
+    }
+
 }

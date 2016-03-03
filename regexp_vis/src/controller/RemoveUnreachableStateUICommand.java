@@ -11,14 +11,16 @@ import view.GraphCanvasFX;
 
 public class RemoveUnreachableStateUICommand extends UICommand {
     private ArrayList<UICommand> commands;
+    private final RemoveStateCleanlyCommand ccmd;
 
     public RemoveUnreachableStateUICommand(GraphCanvasFX graph,
-            RemoveStateCleanlyCommand cmd)
-    {
+            RemoveStateCleanlyCommand cmd) {
         super(graph, cmd);
+        this.ccmd = cmd;
         this.commands = new ArrayList<>();
         for (Command c : cmd.getCommands()) {
             this.commands.add(UICommand.fromCommand(graph, c));
+            c.toString();
         }
     }
 
@@ -46,5 +48,10 @@ public class RemoveUnreachableStateUICommand extends UICommand {
 
     public List<UICommand> getCommands() {
         return Collections.unmodifiableList(this.commands);
+    }
+
+    @Override
+    public String getDescription() {
+        return "Removed unreachable state " + this.ccmd.getState().toString();
     }
 }

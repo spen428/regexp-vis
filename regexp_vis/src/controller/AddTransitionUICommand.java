@@ -39,4 +39,10 @@ public class AddTransitionUICommand extends UICommand {
         return this.ccmd.getTransition();
     }
 
+    @Override
+    public String getDescription() {
+        return "Added transition "
+                + this.ccmd.getTransition().getData().toString();
+    }
+
 }

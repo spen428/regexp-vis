@@ -6,11 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
-import model.AddTransitionCommand;
 import model.AutomatonTransition;
-import model.BreakdownChoiceCommand;
 import model.BreakdownCommand;
-import model.Command;
 import view.GraphCanvasFX;
 
 /**

@@ -35,4 +35,9 @@ public class SetStartStateUICommand extends UICommand {
     public void undo() {
         //graph.setStartState(oldStartState);
     }
+
+    @Override
+    public String getDescription() {
+        return "Set start state to " + this.state.toString();
+    }
 }
