@@ -606,6 +606,8 @@ public class RegexpVisApp implements Observer {
                 this.historyList.getItems()
                         .add(createListViewLabel(HISTORY_INITIAL_STATE_TEXT));
                 this.historyList.getSelectionModel().select(0);
+            } else {
+                this.historyList.getSelectionModel().select(idx);
             }
         } else if (arg instanceof UICommand) {
             String text = ((UICommand) arg).getDescription();
