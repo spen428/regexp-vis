@@ -22,11 +22,7 @@ import view.GraphCanvasFX;
  */
 public class BreakdownUITools {
 
-    /**
-     * The height of the triangles, rectangles, and curves on which new nodes
-     * are placed when a breakdown creates new states.
-     */
-    public static final double BREAKDOWN_HEIGHT_PX = 4
+    public static final double MIN_BREAKDOWN_HEIGHT_PX = 4
             * GraphCanvasFX.DEFAULT_NODE_RADIUS;
 
     private static Point2D[] computeRectanglePoints(double ax, double ay,
@@ -196,6 +192,7 @@ public class BreakdownUITools {
      * @return a {@link Point2D} array of the locations to place the new nodes,
      *         in order starting from the "from" end.
      */
+    @Deprecated
     public static Point2D[] placeNodesOld(GraphCanvasFX graph,
             BreakdownCommand cmd) {
         final AutomatonTransition transition = cmd.getOriginalTransition();
@@ -214,7 +211,7 @@ public class BreakdownUITools {
         Point2D[] points = new Point2D[numAddedStates];
         if (numAddedStates > 0) {
             boolean above = (numAddedStates == 1); // Arbitrary default value
-            double height = BREAKDOWN_HEIGHT_PX;
+            double height = MIN_BREAKDOWN_HEIGHT_PX;
 
             if (fromChoice) {
                 Point2D edgeMid = graph
@@ -232,7 +229,7 @@ public class BreakdownUITools {
             }
 
             if (cmd instanceof BreakdownIterationCommand && numAddedStates == 2
-                    && len <= BREAKDOWN_HEIGHT_PX * 2) {
+                    && len <= MIN_BREAKDOWN_HEIGHT_PX * 2) {
                 /* A bit too cramped, make a rectangle instead */
                 points = computeRectanglePoints(fromX, fromY, toX, toY, height,
                         above);
@@ -244,7 +241,8 @@ public class BreakdownUITools {
         return points;
     }
 
-    public static Point2D[] placeNodes(GraphCanvasFX canvas, BreakdownCommand cmd) {
+    public static Point2D[] placeNodes(GraphCanvasFX canvas,
+            BreakdownCommand cmd) {
         final AutomatonTransition transition = cmd.getOriginalTransition();
         final AutomatonState fromState = transition.getFrom();
         final AutomatonState toState = transition.getTo();
@@ -265,6 +263,12 @@ public class BreakdownUITools {
                 .lookupEdge(cmd.getOriginalTransition().getId())
                 .getEdgeMiddlePoint();
         Point2D offsetVec = middlePoint.subtract(midPointX, midPointY);
+        double mag = offsetVec.magnitude();
+        System.out.println("mag = " + mag);
+        if (mag != 0 && mag < MIN_BREAKDOWN_HEIGHT_PX) {
+            offsetVec = offsetVec.multiply(MIN_BREAKDOWN_HEIGHT_PX / mag);
+            System.out.println("newmag = " + offsetVec.magnitude());
+        }
 
         Point2D[] points = new Point2D[numAddedStates];
 
