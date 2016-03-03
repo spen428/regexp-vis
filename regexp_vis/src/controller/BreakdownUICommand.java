@@ -55,6 +55,7 @@ public abstract class BreakdownUICommand extends UICommand {
         return this.originalTransition;
     }
 
+    @Override
     public String getDescription() {
         /* Construct a string listing the new transitions */
         AutomatonTransition[] newTransitions = getNewTransitions(this);
