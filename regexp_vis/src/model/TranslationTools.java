@@ -289,4 +289,26 @@ public final class TranslationTools {
 
         return false;
     }
+
+    /**
+     * @param automaton The automaton in question
+     * @param from The state we are checking transitions from
+     * @param to The state we are checking transitions to
+     * @param c The character to check for transitions
+     * @return Whether there exists a transition between the given states (only
+     * single direction from "from")
+     */
+    public static boolean hasCharacterTrans(Automaton automaton,
+            AutomatonState from, AutomatonState to, char c)
+    {
+        for (AutomatonTransition tmp : automaton.getStateTransitions(from)) {
+            BasicRegexp tmpRe = (BasicRegexp)tmp.getData();
+            if (tmp.getTo() == to && tmpRe.isSingleChar() &&
+                    tmpRe.getChar() == c) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
