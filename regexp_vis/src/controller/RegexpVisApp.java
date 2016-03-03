@@ -252,8 +252,20 @@ public class RegexpVisApp implements Observer {
                 RegexpVisApp.this.currentActivity.historyPrev();
             }
         });
-        Button buttonLoad = new Button("Load");
-        Button buttonSave = new Button("Save");
+        Button buttonLoad = new Button("Import");
+        buttonLoad.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                onImportGraph(event);
+            }
+        });
+        Button buttonSave = new Button("Export");
+        buttonSave.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                onExportGraph(event);
+            }
+        });
         Button buttonForward = new Button("-->");
         buttonForward.setOnAction(new EventHandler<ActionEvent>() {
             @Override
