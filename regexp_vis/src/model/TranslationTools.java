@@ -236,16 +236,19 @@ public final class TranslationTools {
     public static List<Character> calcNonDeterministicTrans(Automaton a,
             AutomatonState state)
     {
-        ArrayList<Character> list = new ArrayList<>();
+        HashSet<Character> nonDetSet = new HashSet<>();
         HashSet<Character> found = new HashSet<>();
         for (AutomatonTransition t : a.getStateTransitions(state)) {
             if (found.contains(t.getData().getChar())) {
-                list.add(t.getData().getChar());
+                nonDetSet.add(t.getData().getChar());
             } else {
                 found.add(t.getData().getChar());
             }
         }
 
+        // Turn the set into a list which we then sort (consistent ordering in
+        // menu for example)
+        ArrayList<Character> list = new ArrayList<>(nonDetSet);
         Collections.sort(list);
         return list;
     }
