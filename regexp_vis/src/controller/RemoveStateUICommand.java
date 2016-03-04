@@ -36,6 +36,11 @@ public class RemoveStateUICommand extends UICommand {
     public void undo() {
         GraphNode nodeFrom = this.graph.addNode(this.ccmd.getState().getId(),
                 this.location.getX(), this.location.getY());
+        if (this.ccmd.getState().isFinal()) {
+            // Make sure we set this node to use the "final style" if this is
+            // a final state
+            this.graph.setNodeUseFinalStyle(nodeFrom, true);
+        }
 
         for (AutomatonTransition t : this.ccmd.getTransitions()) {
             GraphNode nodeTo = this.graph.lookupNode(t.getTo().getId());

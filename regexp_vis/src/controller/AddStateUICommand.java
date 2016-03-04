@@ -30,8 +30,13 @@ public class AddStateUICommand extends UICommand {
 
     @Override
     public void redo() {
-        this.graph.addNode(this.ccmd.getState().getId(), this.location.getX(),
-                this.location.getY());
+        GraphNode n = this.graph.addNode(this.ccmd.getState().getId(),
+                this.location.getX(), this.location.getY());
+        if (this.ccmd.getState().isFinal()) {
+            // This state is already marked as final, make sure we retain that
+            // visually
+            this.graph.setNodeUseFinalStyle(n, true);
+        }
         this.ccmd.redo();
     }
 
