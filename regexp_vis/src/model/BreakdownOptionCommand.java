@@ -29,12 +29,19 @@ public class BreakdownOptionCommand extends BreakdownCommand {
         mCommands.add(new RemoveTransitionCommand(automaton, t));
 
         BasicRegexp operand = re.getOperands().get(0);
-        AutomatonTransition epsilonForwardTrans = automaton.createNewTransition(
-            from, to, BasicRegexp.EPSILON_EXPRESSION);
+        AutomatonTransition epsilonForwardTrans = null;
+        if (!TranslationTools.hasCharacterTrans(getAutomaton(), from, to,
+                BasicRegexp.EPSILON_CHAR)) {
+            epsilonForwardTrans = automaton.createNewTransition(
+                    from, to, BasicRegexp.EPSILON_EXPRESSION);
+        }
         AutomatonTransition subexprTrans = automaton.createNewTransition(from,
             to, operand);
 
-        mCommands.add(new AddTransitionCommand(automaton, epsilonForwardTrans));
+        if (epsilonForwardTrans != null) {
+            mCommands.add(new AddTransitionCommand(automaton,
+                    epsilonForwardTrans));
+        }
         mCommands.add(new AddTransitionCommand(automaton, subexprTrans));
     }
 }
