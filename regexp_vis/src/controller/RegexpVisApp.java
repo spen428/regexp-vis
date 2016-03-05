@@ -614,6 +614,7 @@ public class RegexpVisApp implements Observer {
             items.add(createListViewLabel(text));
             this.historyList.getSelectionModel().select(items.size() - 1);
         }
+        this.historyList.scrollTo(items.size() - 1);
     }
 
     private Label createListViewLabel(String text) {
