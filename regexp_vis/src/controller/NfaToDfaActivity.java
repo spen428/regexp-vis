@@ -73,7 +73,6 @@ public class NfaToDfaActivity extends Activity {
      * initiating the activity.
      */
     private void initiateActivity() {
-        historyClear();
         removeEpsilonActivity.recreateContext();
 
         // Check if nothing needs to be done, fast-track to removal of
@@ -118,9 +117,7 @@ public class NfaToDfaActivity extends Activity {
     public void onGraphFileImport(GraphExportFile file) {
         // Start off removing epsilon transitions
         subActivity = removeEpsilonActivity;
-        this.canvas.removeAllNodes();
-        this.automaton.clear();
-        file.loadFile(this.automaton, canvas);
+        super.onGraphFileImport(file);
         ensureNotHybridAutomaton();
         initiateActivity();
     }

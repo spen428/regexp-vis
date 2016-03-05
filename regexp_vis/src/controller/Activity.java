@@ -110,7 +110,10 @@ public abstract class Activity {
      * @param file The graph export file we read from disk, not loaded yet
      */
     public void onGraphFileImport(GraphExportFile file) {
-
+        this.canvas.removeAllNodes();
+        this.automaton.clear();
+        this.history.clear();
+        file.loadFile(this.automaton, this.canvas);
     }
 
     /**
