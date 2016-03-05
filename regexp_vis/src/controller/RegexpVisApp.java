@@ -230,6 +230,7 @@ public class RegexpVisApp implements Observer {
                     }
                 });
         canvasContainer.getItems().add(this.historyList);
+        canvasContainer.setDividerPosition(0, 0.8f);
 
         root.getChildren().add(canvasContainer);
         this.mCanvas.requestFocus(); // Pulls focus away from the text field
