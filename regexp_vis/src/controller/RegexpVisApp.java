@@ -524,7 +524,7 @@ public class RegexpVisApp implements Observer {
         fileChooser.getExtensionFilters()
                 .addAll(new FileChooser.ExtensionFilter("Automaton Graph Files",
                         "*.txt"),
-                new FileChooser.ExtensionFilter("All Files", "*.*"));
+                new FileChooser.ExtensionFilter("All Files", "*"));
 
         File selectedFile = fileChooser.showOpenDialog(this.stage);
         if (selectedFile == null) {
