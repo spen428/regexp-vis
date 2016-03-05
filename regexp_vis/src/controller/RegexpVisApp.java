@@ -71,6 +71,7 @@ public class RegexpVisApp implements Observer {
             + "Samuel Pengelly\t<sp611@kent.ac.uk>\n"
             + "William Dix\t\t<wrd2@kent.ac.uk>\n";
     public static final String WINDOW_TITLE = Main.TITLE + " v" + Main.VERSION;
+    private static final String AUTOMATON_GRAPH_FILE_EXT = ".txt";
 
     /* Variables */
     protected Activity currentActivity;
@@ -523,7 +524,7 @@ public class RegexpVisApp implements Observer {
         // easier to edit with text editors.
         fileChooser.getExtensionFilters()
                 .addAll(new FileChooser.ExtensionFilter("Automaton Graph Files",
-                        "*.txt"),
+                        "*" + AUTOMATON_GRAPH_FILE_EXT),
                 new FileChooser.ExtensionFilter("All Files", "*"));
 
         File selectedFile = fileChooser.showOpenDialog(this.stage);
@@ -559,13 +560,20 @@ public class RegexpVisApp implements Observer {
         // easier to edit with text editors.
         fileChooser.getExtensionFilters()
                 .addAll(new FileChooser.ExtensionFilter("Automaton Graph Files",
-                        "*.txt"),
-                new FileChooser.ExtensionFilter("All Files", "*.*"));
+                        "*" + AUTOMATON_GRAPH_FILE_EXT),
+                new FileChooser.ExtensionFilter("All Files", "*"));
 
         File selectedFile = fileChooser.showSaveDialog(this.stage);
         if (selectedFile == null) {
             // No file selected, exit early
             return;
+        }
+
+        // Add file extension if it was not specified
+        if (!selectedFile.getAbsolutePath()
+                .endsWith(AUTOMATON_GRAPH_FILE_EXT)) {
+            selectedFile = new File(
+                    selectedFile.getAbsolutePath() + AUTOMATON_GRAPH_FILE_EXT);
         }
 
         try {
