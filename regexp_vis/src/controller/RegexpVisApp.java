@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import com.sun.glass.ui.Application;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -24,6 +26,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyCode;
@@ -47,7 +50,7 @@ public class RegexpVisApp implements Observer {
     private final Activity[] activities;
     private final Automaton automaton;
     protected final GraphCanvasFX mCanvas;
-    final ListView<Label> historyList;
+    final HistoryListView historyList;
     final Stage stage;
 
     /* Constants */
@@ -60,8 +63,6 @@ public class RegexpVisApp implements Observer {
     private static final int BUTTON_PANEL_PADDING_PX = 10;
     private static final int CONTROL_PANEL_PADDING_HORIZONTAL_PX = 35;
     private static final int CONTROL_PANEL_PADDING_VERTICAL_PX = 20;
-    private static final int HISTORY_LIST_WIDTH_PX = 140;
-    private static final double LISTVIEW_LABEL_WIDTH_OFFSET = -20;
     protected static final String ABOUT_HEADER = "Regular Expression Visualiser"
             + " (v" + Main.VERSION + ")";
     protected static final String ABOUT_CONTENT = "Authors:\n\n"
@@ -77,9 +78,7 @@ public class RegexpVisApp implements Observer {
 
     public RegexpVisApp(Stage stage) {
         final VBox root = new VBox();
-        final HBox canvasContainer = new HBox();
-        this.historyList = new ListView<>();
-        this.historyList.setPadding(new Insets(0));
+        final SplitPane canvasContainer = new SplitPane();
         final VBox controlPanel = new VBox();
         this.stage = stage;
 
@@ -217,11 +216,10 @@ public class RegexpVisApp implements Observer {
         VBox.setVgrow(this.mCanvas, javafx.scene.layout.Priority.ALWAYS);
         HBox.setHgrow(canvasContainer, javafx.scene.layout.Priority.ALWAYS);
         HBox.setHgrow(this.mCanvas, javafx.scene.layout.Priority.ALWAYS);
-        canvasContainer.getChildren().add(this.mCanvas);
+        canvasContainer.getItems().add(this.mCanvas);
 
         // History list also part of the canvas container
-        this.historyList.setMinWidth(HISTORY_LIST_WIDTH_PX);
-        this.historyList.setMaxWidth(HISTORY_LIST_WIDTH_PX);
+        this.historyList = new HistoryListView();
         this.historyList.getSelectionModel().selectedIndexProperty()
                 .addListener(new ChangeListener<Number>() {
                     @Override
@@ -231,7 +229,7 @@ public class RegexpVisApp implements Observer {
                         RegexpVisApp.this.setHistoryIdx(newValue);
                     }
                 });
-        canvasContainer.getChildren().add(this.historyList);
+        canvasContainer.getItems().add(this.historyList);
 
         root.getChildren().add(canvasContainer);
         this.mCanvas.requestFocus(); // Pulls focus away from the text field
@@ -479,7 +477,7 @@ public class RegexpVisApp implements Observer {
                     text = "Step " + i;
                 }
             }
-            this.historyList.getItems().add(createListViewLabel(text));
+            this.historyList.addItem(text);
             this.historyList.getSelectionModel().select(i);
         }
 
@@ -603,30 +601,17 @@ public class RegexpVisApp implements Observer {
                 items.remove(items.size() - 1);
             } else if (idx == CommandHistory.HISTORY_CLEARED) {
                 this.historyList.getItems().clear();
-                this.historyList.getItems()
-                        .add(createListViewLabel(HISTORY_INITIAL_STATE_TEXT));
+                this.historyList.addItem(HISTORY_INITIAL_STATE_TEXT);
                 this.historyList.getSelectionModel().select(0);
             } else {
                 this.historyList.getSelectionModel().select(idx);
             }
         } else if (arg instanceof UICommand) {
             String text = ((UICommand) arg).getDescription();
-            items.add(createListViewLabel(text));
+            this.historyList.addItem(text);
             this.historyList.getSelectionModel().select(items.size() - 1);
         }
         this.historyList.scrollTo(items.size() - 1);
-    }
-
-    private Label createListViewLabel(String text) {
-        Label label = new Label(text);
-        label.setPadding(new Insets(0));
-        label.setWrapText(true);
-        label.setMinWidth(
-                this.historyList.getMinWidth() + LISTVIEW_LABEL_WIDTH_OFFSET);
-        label.setMaxWidth(
-                this.historyList.getMaxWidth() + LISTVIEW_LABEL_WIDTH_OFFSET);
-        // TODO: Bind to historyList resize
-        return label;
     }
 
 }
