@@ -7,8 +7,6 @@ import org.junit.Test;
 
 import controller.AddStateUICommand;
 import controller.AddTransitionUICommand;
-import controller.SetIsFinalUICommand;
-import controller.SetStartStateUICommand;
 import controller.UICommand;
 import model.AddStateCommand;
 import model.AddTransitionCommand;
@@ -17,7 +15,6 @@ import model.AutomatonState;
 import model.AutomatonTransition;
 import model.BasicRegexp;
 import model.CommandHistory;
-import model.SetIsFinalCommand;
 import test.model.CommandHistoryTest;
 import view.GraphCanvasFX;
 
@@ -75,8 +72,6 @@ public class UICommandHistoryTest {
                 automaton.createNewTransition(c.getState(), f.getState(), BasicRegexp.EPSILON_EXPRESSION));
 
         // Build the graph we want through a series of commands
-        history.executeNewCommand(
-                new SetStartStateUICommand(graph, s.getState()));
         history.executeNewCommand(new AddStateUICommand(graph, b, 0, 1));
         history.executeNewCommand(new AddTransitionUICommand(graph, s_b_0));
 
@@ -87,8 +82,6 @@ public class UICommandHistoryTest {
         history.executeNewCommand(new AddStateUICommand(graph, f, 6, 7));
         history.executeNewCommand(new AddTransitionUICommand(graph, c_d_0));
         history.executeNewCommand(new AddTransitionUICommand(graph, c_f_0));
-        history.executeNewCommand(new SetIsFinalUICommand(graph,
-                new SetIsFinalCommand(automaton, f.getState(), true)));
 
         history.executeNewCommand(new AddStateUICommand(graph, e, 8, 9));
         history.executeNewCommand(new AddTransitionUICommand(graph, d_e_0));

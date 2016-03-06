@@ -23,7 +23,7 @@ import view.GraphCanvasFX;
  * @author sp611
  *
  */
-public abstract class BreakdownUICommand extends UICommand {
+public class BreakdownUICommand extends UICommand {
 
     protected final LinkedList<UICommand> commands;
     protected final AutomatonTransition originalTransition;
@@ -43,7 +43,7 @@ public abstract class BreakdownUICommand extends UICommand {
                         (AddStateCommand) c, loc.getX(), loc.getY());
                 this.commands.add(newCommand);
             } else {
-                this.commands.add(new UICommand(graph, c));
+                this.commands.add(UICommand.fromCommand(graph, c));
             }
         }
     }
