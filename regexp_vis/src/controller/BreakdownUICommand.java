@@ -6,8 +6,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
+import javafx.geometry.Point2D;
+import model.AddStateCommand;
 import model.AutomatonTransition;
+import model.BreakdownChoiceCommand;
 import model.BreakdownCommand;
+import model.BreakdownIterationCommand;
+import model.BreakdownOptionCommand;
+import model.BreakdownSequenceCommand;
+import model.Command;
 import view.GraphCanvasFX;
 
 /**
@@ -25,6 +32,20 @@ public abstract class BreakdownUICommand extends UICommand {
         super(graph, cmd);
         this.commands = new LinkedList<>();
         this.originalTransition = cmd.getOriginalTransition();
+
+        Point2D[] points = BreakdownUITools.placeNodes(graph, cmd);
+        int added = 0;
+
+        for (Command c : cmd.getCommands()) {
+            if (c instanceof AddStateCommand) {
+                Point2D loc = points[added++];
+                AddStateUICommand newCommand = new AddStateUICommand(graph,
+                        (AddStateCommand) c, loc.getX(), loc.getY());
+                this.commands.add(newCommand);
+            } else {
+                this.commands.add(new UICommand(graph, c));
+            }
+        }
     }
 
     @Override
@@ -73,15 +94,15 @@ public abstract class BreakdownUICommand extends UICommand {
 
         /* Format description string */
         String origStr = this.getOriginalTransition().getData().toString();
-        if (this instanceof BreakdownChoiceUICommand) {
+        if (this.cmd instanceof BreakdownChoiceCommand) {
             return String.format("Broke down choice %s into transitions %s",
                     origStr, tranStr.toString());
-        } else if (this instanceof BreakdownSequenceUICommand) {
+        } else if (this.cmd instanceof BreakdownSequenceCommand) {
             return String.format("Broke down sequence %s into transitions %s",
                     origStr, tranStr.toString());
-        } else if (this instanceof BreakdownIterationUICommand) {
+        } else if (this.cmd instanceof BreakdownIterationCommand) {
             return String.format("Broke down iteration %s", origStr);
-        } else if (this instanceof BreakdownOptionUICommand) {
+        } else if (this.cmd instanceof BreakdownOptionCommand) {
             return String.format("Broke down option %s", origStr);
         }
 
