@@ -24,10 +24,7 @@ public class CompositeCommand extends Command {
 
     @Override
     public void undo() {
-        ListIterator<Command> it = this.commands
-                .listIterator(this.commands.size());
-        while (it.hasPrevious()) {
-            Command c = it.previous();
+        for (Command c : this.commands) {
             c.undo();
         }
     }
