@@ -29,8 +29,7 @@ import javafx.scene.transform.Affine;
 
 public final class GraphCanvasFX extends Canvas {
 
-    private static final Logger LOGGER = Logger.getLogger(GraphCanvasFX.class
-            .toString());
+    private static final Logger LOGGER = Logger.getLogger("view");
 
     public static class NodeEdgePair {
         final GraphNode mNode;
@@ -1396,7 +1395,7 @@ public final class GraphCanvasFX extends Canvas {
             LOGGER.log(Level.FINE, "onMousePressed, hit NODE " + n);
         } else if (e != null) {
             mDragEdge = e;
-            LOGGER.log(Level.FINER, "onMousePressed, hit EDGE " + e + " id = "
+            LOGGER.log(Level.FINE, "onMousePressed, hit EDGE " + e + " id = "
                     + e.getId() + " label text = \"" + e.mText + "\"");
         }
 
@@ -1407,7 +1406,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     private void onMouseReleased(MouseEvent event) {
-        LOGGER.log(Level.FINER,
+        LOGGER.log(Level.FINE,
                 "onMouseUp, X = " + event.getX() + ", Y = " + event.getY());
         mDragNode = null;
         mDragEdge = null;
@@ -1421,7 +1420,7 @@ public final class GraphCanvasFX extends Canvas {
     private void onMouseClicked(MouseEvent event) {
         double x = event.getX();
         double y = event.getY();
-        LOGGER.log(Level.FINER, "onMouseClicked, X = " + x + ", Y = "
+        LOGGER.log(Level.FINE, "onMouseClicked, X = " + x + ", Y = "
                 + y + ", clickCount = " + event.getClickCount());
 
         if (mCreateEdgeModeActive) {

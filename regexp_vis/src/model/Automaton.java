@@ -15,8 +15,7 @@ import java.util.logging.Logger;
  */
 public class Automaton {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(Automaton.class.toString());
+    private static final Logger LOGGER = Logger.getLogger("model");
 
     public static class StateTransitionsPair {
         private final AutomatonState mState;

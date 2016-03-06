@@ -24,8 +24,7 @@ import view.GraphCanvasFX;
  */
 public class BreakdownUITools {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(BreakdownUITools.class.toString());
+    private static final Logger LOGGER = Logger.getLogger("controller");
 
     public static final double MIN_BREAKDOWN_HEIGHT_PX = 4
             * GraphCanvasFX.DEFAULT_NODE_RADIUS;
@@ -269,10 +268,10 @@ public class BreakdownUITools {
                 .getEdgeMiddlePoint();
         Point2D offsetVec = middlePoint.subtract(midPointX, midPointY);
         double mag = offsetVec.magnitude();
-        LOGGER.log(Level.FINE, "mag = " + mag);
+        LOGGER.log(Level.FINER, "oldmag = " + mag);
         if (mag != 0 && mag < MIN_BREAKDOWN_HEIGHT_PX) {
             offsetVec = offsetVec.multiply(MIN_BREAKDOWN_HEIGHT_PX / mag);
-            LOGGER.log(Level.FINE, "newmag = " + offsetVec.magnitude());
+            LOGGER.log(Level.FINER, "newmag = " + offsetVec.magnitude());
         }
 
         Point2D[] points = new Point2D[numAddedStates];

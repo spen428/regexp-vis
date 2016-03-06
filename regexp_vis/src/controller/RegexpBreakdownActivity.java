@@ -20,8 +20,7 @@ import view.GraphEdge;
  */
 public class RegexpBreakdownActivity extends Activity {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(RegexpBreakdownActivity.class.toString());
+    private static final Logger LOGGER = Logger.getLogger("controller");
 
     public RegexpBreakdownActivity(GraphCanvasFX canvas, Automaton automaton) {
         super(canvas, automaton);

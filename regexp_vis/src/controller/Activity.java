@@ -28,8 +28,7 @@ import view.GraphNode;
  */
 public abstract class Activity {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(Activity.class.toString());
+    private static final Logger LOGGER = Logger.getLogger("controller");
 
     enum ActivityType {
         ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"),
