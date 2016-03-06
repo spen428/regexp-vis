@@ -14,8 +14,7 @@ import java.util.Set;
  * epsilon transitions for the state have been removed (by
  * RemoveEpsilonTransitionsCommand). For the NFA to DFA conversion process.
  */
-public class RemoveEquivalentStatesCommand extends Command {
-    protected final ArrayList<Command> mCommands;
+public class RemoveEquivalentStatesCommand extends CompositeCommand {
     private final RemoveEpsilonTransitionsContext mCtx;
     private final AutomatonState mTargetState;
 
@@ -23,7 +22,6 @@ public class RemoveEquivalentStatesCommand extends Command {
             RemoveEpsilonTransitionsContext ctx, AutomatonState state)
     {
         super(automaton);
-        mCommands = new ArrayList<Command>();
         mCtx = ctx;
         mTargetState = state;
 
@@ -92,7 +90,7 @@ public class RemoveEquivalentStatesCommand extends Command {
         for (AutomatonTransition t : trans) {
             if (t.getTo() != mTargetState
                     && equivalentStates.contains(t.getTo())) {
-                mCommands.add(new RemoveTransitionCommand(automaton, t));
+                super.commands.add(new RemoveTransitionCommand(automaton, t));
             }
         }
 
@@ -107,7 +105,7 @@ public class RemoveEquivalentStatesCommand extends Command {
                 // already created a RemoveTransitionCommand for
                 if (!(t.getTo() != mTargetState
                         && equivalentStates.contains(t.getTo()))) {
-                    mCommands.add(new RemoveTransitionCommand(automaton, t));
+                    super.commands.add(new RemoveTransitionCommand(automaton, t));
                 }
             }
         }
@@ -115,7 +113,7 @@ public class RemoveEquivalentStatesCommand extends Command {
         // Actually remove the states
         for (AutomatonState s2 : equivalentStates) {
             if (s2 != mTargetState) {
-                mCommands.add(new RemoveStateCommand(automaton, s2));
+                super.commands.add(new RemoveStateCommand(automaton, s2));
             }
         }
 
@@ -156,7 +154,7 @@ public class RemoveEquivalentStatesCommand extends Command {
         for (AutomatonTransition t : trans) {
             AutomatonTransition newTrans = automaton.createNewTransition(
                     t.getFrom(), mTargetState, t.getData());
-            mCommands.add(new AddTransitionCommand(automaton, newTrans));
+            super.commands.add(new AddTransitionCommand(automaton, newTrans));
         }
     }
 
@@ -176,30 +174,4 @@ public class RemoveEquivalentStatesCommand extends Command {
         return mTargetState;
     }
 
-    /**
-     * @return the list of commands which this command executes, as an
-     * unmodifiable list
-     */
-    public List<Command> getCommands()
-    {
-        return Collections.unmodifiableList(mCommands);
-    }
-
-    @Override
-    public void undo()
-    {
-        ListIterator<Command> it = mCommands.listIterator(mCommands.size());
-        while (it.hasPrevious()) {
-            Command c = it.previous();
-            c.undo();
-        }
-    }
-
-    @Override
-    public void redo()
-    {
-        for (Command c : mCommands) {
-            c.redo();
-        }
-    }
 }

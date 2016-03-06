@@ -19,7 +19,7 @@ public class BreakdownSequenceCommand extends BreakdownCommand {
     {
         super(automaton, t);
 
-        BasicRegexp re = (BasicRegexp)t.getData();
+        BasicRegexp re = t.getData();
         AutomatonState from = t.getFrom();
         AutomatonState to = t.getTo();
 
@@ -29,7 +29,7 @@ public class BreakdownSequenceCommand extends BreakdownCommand {
                 "transition (e.g. \"abcd\"");
         }
 
-        mCommands.add(new RemoveTransitionCommand(automaton, t));
+        super.commands.add(new RemoveTransitionCommand(automaton, t));
         mNewTransitionsCount = re.getOperands().size();
 
         AutomatonState prevState = from;
@@ -39,14 +39,14 @@ public class BreakdownSequenceCommand extends BreakdownCommand {
             AutomatonState nextState;
             if (it.hasNext()) {
                 nextState = automaton.createNewState();
-                mCommands.add(new AddStateCommand(automaton, nextState));
+                super.commands.add(new AddStateCommand(automaton, nextState));
             } else {
                 nextState = to;
             }
 
             AutomatonTransition newTrans = automaton.createNewTransition(
                 prevState, nextState, operand);
-            mCommands.add(new AddTransitionCommand(automaton, newTrans));
+            super.commands.add(new AddTransitionCommand(automaton, newTrans));
             prevState = nextState;
         }
     }

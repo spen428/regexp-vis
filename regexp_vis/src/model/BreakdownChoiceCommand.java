@@ -15,7 +15,7 @@ public class BreakdownChoiceCommand extends BreakdownCommand {
     {
         super(automaton, t);
 
-        BasicRegexp re = (BasicRegexp)t.getData();
+        BasicRegexp re = t.getData();
         AutomatonState from = t.getFrom();
         AutomatonState to = t.getTo();
 
@@ -25,10 +25,10 @@ public class BreakdownChoiceCommand extends BreakdownCommand {
                 "transition (e.g. \"a|b|c\")");
         }
 
-        mCommands.add(new RemoveTransitionCommand(automaton, t));
+        super.commands.add(new RemoveTransitionCommand(automaton, t));
         for (BasicRegexp operand : re.getOperands()) {
             AutomatonTransition newTrans = automaton.createNewTransition(from, to, operand);
-            mCommands.add(new AddTransitionCommand(automaton, newTrans));
+            super.commands.add(new AddTransitionCommand(automaton, newTrans));
         }
     }
 }

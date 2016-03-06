@@ -12,14 +12,12 @@ import java.util.Set;
  * Command which removes the out-going epsilon transitions for a state.
  * For the NFA to DFA conversion process.
  */
-public class RemoveEpsilonTransitionsCommand extends Command {
-    protected final ArrayList<Command> mCommands;
+public class RemoveEpsilonTransitionsCommand extends CompositeCommand {
     private final AutomatonState mTargetState;
 
     public RemoveEpsilonTransitionsCommand(Automaton automaton, AutomatonState s)
     {
         super(automaton);
-        mCommands = new ArrayList<Command>();
         mTargetState = s;
 
         Set<AutomatonState> reachable = TranslationTools
@@ -29,8 +27,8 @@ public class RemoveEpsilonTransitionsCommand extends Command {
         // to be made final as well
         for (AutomatonState s2 : reachable) {
             if (s2.isFinal()) {
-                mCommands.add(new SetIsFinalCommand(automaton, mTargetState,
-                        true));
+                super.commands.add(new SetIsFinalCommand(automaton,
+                        mTargetState, true));
             }
         }
 
@@ -39,7 +37,7 @@ public class RemoveEpsilonTransitionsCommand extends Command {
                 .getStateTransitions(mTargetState);
         for (AutomatonTransition t : outgoingTrans) {
             if (t.getData().getChar() == BasicRegexp.EPSILON_CHAR) {
-                mCommands.add(new RemoveTransitionCommand(automaton, t));
+                super.commands.add(new RemoveTransitionCommand(automaton, t));
             }
         }
 
@@ -116,7 +114,7 @@ public class RemoveEpsilonTransitionsCommand extends Command {
         for (AutomatonTransition t : trans) {
             AutomatonTransition newTrans = automaton.createNewTransition(
                     mTargetState, t.getTo(), t.getData());
-            mCommands.add(new AddTransitionCommand(automaton, newTrans));
+            super.commands.add(new AddTransitionCommand(automaton, newTrans));
         }
     }
 
@@ -128,30 +126,4 @@ public class RemoveEpsilonTransitionsCommand extends Command {
         return mTargetState;
     }
 
-    /**
-     * @return the list of commands which this command executes, as an
-     * unmodifiable list
-     */
-    public List<Command> getCommands()
-    {
-        return Collections.unmodifiableList(mCommands);
-    }
-
-    @Override
-    public void undo()
-    {
-        ListIterator<Command> it = mCommands.listIterator(mCommands.size());
-        while (it.hasPrevious()) {
-            Command c = it.previous();
-            c.undo();
-        }
-    }
-
-    @Override
-    public void redo()
-    {
-        for (Command c : mCommands) {
-            c.redo();
-        }
-    }
 }

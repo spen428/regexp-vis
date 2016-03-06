@@ -15,7 +15,7 @@ public class BreakdownOptionCommand extends BreakdownCommand {
     {
         super(automaton, t);
 
-        BasicRegexp re = (BasicRegexp)t.getData();
+        BasicRegexp re = t.getData();
         AutomatonState from = t.getFrom();
         AutomatonState to = t.getTo();
 
@@ -26,7 +26,7 @@ public class BreakdownOptionCommand extends BreakdownCommand {
         }
 
         // Same as choice between epsilon or the expression
-        mCommands.add(new RemoveTransitionCommand(automaton, t));
+        super.commands.add(new RemoveTransitionCommand(automaton, t));
 
         BasicRegexp operand = re.getOperands().get(0);
         AutomatonTransition epsilonForwardTrans = null;
@@ -39,9 +39,9 @@ public class BreakdownOptionCommand extends BreakdownCommand {
             to, operand);
 
         if (epsilonForwardTrans != null) {
-            mCommands.add(new AddTransitionCommand(automaton,
+            super.commands.add(new AddTransitionCommand(automaton,
                     epsilonForwardTrans));
         }
-        mCommands.add(new AddTransitionCommand(automaton, subexprTrans));
+        super.commands.add(new AddTransitionCommand(automaton, subexprTrans));
     }
 }
