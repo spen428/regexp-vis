@@ -1,6 +1,8 @@
 package controller;
 
 import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javafx.event.Event;
 import javafx.scene.control.Alert;
@@ -25,6 +27,9 @@ import view.GraphNode;
  *
  */
 public abstract class Activity {
+
+    private static final Logger LOGGER = Logger
+            .getLogger(Activity.class.toString());
 
     enum ActivityType {
         ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"),
@@ -53,7 +58,8 @@ public abstract class Activity {
         this.history = new CommandHistory();
     }
 
-    Activity(GraphCanvasFX canvas, Automaton automaton, CommandHistory history) {
+    Activity(GraphCanvasFX canvas, Automaton automaton,
+            CommandHistory history) {
         this.canvas = canvas;
         this.automaton = automaton;
         this.history = history;
@@ -62,12 +68,13 @@ public abstract class Activity {
     /**
      * Called by RegexpVisApp after entering a regular expression.
      *
-     * @param text The regexp the user entered
+     * @param text
+     *            The regexp the user entered
      */
     public void onEnteredRegexp(String text) {
         historyClear();
 
-        System.out.printf("Entered regexp: %s%n", text);
+        LOGGER.log(Level.INFO, "Entered regexp: " + text);
         BasicRegexp re = null;
         try {
             re = BasicRegexp.parseRegexp(text);
@@ -107,7 +114,8 @@ public abstract class Activity {
      * can decide to do nothing, pre-process the file or just load file as
      * normal.
      *
-     * @param file The graph export file we read from disk, not loaded yet
+     * @param file
+     *            The graph export file we read from disk, not loaded yet
      */
     public void onGraphFileImport(GraphExportFile file) {
         this.canvas.removeAllNodes();
@@ -121,7 +129,7 @@ public abstract class Activity {
      * activity to this one.
      *
      * @return true if we can start this activity, false otherwise in which case
-     * the switching of activities will be aborted.
+     *         the switching of activities will be aborted.
      */
     public boolean onPreStarted() {
         return true;
@@ -144,16 +152,21 @@ public abstract class Activity {
     /**
      * Called by RegexpVisApp when the state of the CommandHistory changes.
      *
-     * @param obj The object the observer got passed
+     * @param obj
+     *            The object the observer got passed
      */
     public void onHistoryChanged(Object obj) {
 
     }
 
     public abstract void onNodeClicked(GraphCanvasEvent event);
+
     public abstract void onEdgeClicked(GraphCanvasEvent event);
+
     public abstract void onBackgroundClicked(GraphCanvasEvent event);
+
     public abstract void onContextMenuRequested(ContextMenuEvent event);
+
     public abstract void onHideContextMenu(MouseEvent event);
 
     protected void executeNewCommand(Command cmd) {

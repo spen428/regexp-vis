@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -41,6 +43,9 @@ import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 
 public class RegexpVisApp implements Observer {
+
+    private static final Logger LOGGER = Logger.getLogger(RegexpVisApp.class
+            .toString());
 
     /* Finals */
     final CheckMenuItem[] activityMenuItems;
@@ -429,7 +434,7 @@ public class RegexpVisApp implements Observer {
 
     protected static void exitApplication() {
         // TODO Confirm exit (unsaved changes, etc.)
-        System.out.println("Exiting application...");
+        LOGGER.log(Level.FINE, "Exiting application...");
         System.exit(0);
     }
 

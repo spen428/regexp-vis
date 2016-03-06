@@ -2,6 +2,8 @@ package controller;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javafx.geometry.Point2D;
 import model.AddStateCommand;
@@ -21,6 +23,9 @@ import view.GraphCanvasFX;
  *
  */
 public class BreakdownUITools {
+
+    private static final Logger LOGGER = Logger
+            .getLogger(BreakdownUITools.class.toString());
 
     public static final double MIN_BREAKDOWN_HEIGHT_PX = 4
             * GraphCanvasFX.DEFAULT_NODE_RADIUS;
@@ -264,10 +269,10 @@ public class BreakdownUITools {
                 .getEdgeMiddlePoint();
         Point2D offsetVec = middlePoint.subtract(midPointX, midPointY);
         double mag = offsetVec.magnitude();
-        System.out.println("mag = " + mag);
+        LOGGER.log(Level.FINE, "mag = " + mag);
         if (mag != 0 && mag < MIN_BREAKDOWN_HEIGHT_PX) {
             offsetVec = offsetVec.multiply(MIN_BREAKDOWN_HEIGHT_PX / mag);
-            System.out.println("newmag = " + offsetVec.magnitude());
+            LOGGER.log(Level.FINE, "newmag = " + offsetVec.magnitude());
         }
 
         Point2D[] points = new Point2D[numAddedStates];
