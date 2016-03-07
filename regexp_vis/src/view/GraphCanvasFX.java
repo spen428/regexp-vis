@@ -651,6 +651,8 @@ public final class GraphCanvasFX extends Canvas {
         double S_E_gradientVecX = x2 - x1;
         double S_E_gradientVecY = y2 - y1;
 
+        edge.mMiddlePoint = new Point2D(midPointX, midPointY);
+
         // Check distance is large enough to draw arrow
         if (l < from.mRadius + to.mRadius + ARROW_LENGTH) {
             System.out
@@ -693,8 +695,6 @@ public final class GraphCanvasFX extends Canvas {
         edge.mTextX = textX;
         edge.mTextY = textY;
         edge.mTextAngle = textAngle;
-
-        edge.mMiddlePoint = new Point2D(midPointX, midPointY);
     }
 
     /**
@@ -740,6 +740,10 @@ public final class GraphCanvasFX extends Canvas {
             G_C_gradientVecX = S_E_gradientVecY;
             G_C_gradientVecY = -S_E_gradientVecX;
         }
+
+        double peakX = midPointX - absHeight * G_C_gradientVecX;
+        double peakY = midPointY - absHeight * G_C_gradientVecY;
+        edge.mMiddlePoint = new Point2D(peakX, peakY);
 
         // TODO: document: work around: assumption that radius >= height
         double circleX = midPointX + (radius - absHeight) * G_C_gradientVecX;
@@ -809,8 +813,6 @@ public final class GraphCanvasFX extends Canvas {
         }
 
         // Draw label
-        double peakX = midPointX - absHeight * G_C_gradientVecX;
-        double peakY = midPointY - absHeight * G_C_gradientVecY;
         double textX = midPointX
                 - (absHeight + TEXT_POS_HEIGHT) * G_C_gradientVecX;
         double textY = midPointY
@@ -843,8 +845,6 @@ public final class GraphCanvasFX extends Canvas {
         edge.mArcCenterY = circleY;
         edge.mArcStartAngle = startAngle;
         edge.mArcExtent = arcExtent;
-
-        edge.mMiddlePoint = new Point2D(peakX, peakY);
     }
 
     /**
