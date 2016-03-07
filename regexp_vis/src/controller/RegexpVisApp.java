@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-import com.sun.glass.ui.Application;
-
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -214,13 +212,12 @@ public class RegexpVisApp implements Observer {
         // Graph canvas
         this.mCanvas = new GraphCanvasFX();
         VBox.setVgrow(canvasContainer, javafx.scene.layout.Priority.ALWAYS);
-        VBox.setVgrow(this.mCanvas, javafx.scene.layout.Priority.ALWAYS);
-        HBox.setHgrow(canvasContainer, javafx.scene.layout.Priority.ALWAYS);
         HBox.setHgrow(this.mCanvas, javafx.scene.layout.Priority.ALWAYS);
         canvasContainer.getItems().add(this.mCanvas);
 
         // History list also part of the canvas container
         this.historyList = new HistoryListView();
+        SplitPane.setResizableWithParent(this.historyList, Boolean.FALSE);
         this.historyList.getSelectionModel().selectedIndexProperty()
                 .addListener(new ChangeListener<Number>() {
                     @Override
