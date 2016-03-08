@@ -2,11 +2,11 @@ package view;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -84,7 +84,7 @@ public final class GraphCanvasFX extends Canvas {
     /**
      * All nodes and edges
      */
-    private HashMap<Integer, NodeEdgePair> mGraph;
+    private TreeMap<Integer, NodeEdgePair> mGraph;
     /**
      * Current node we are dragging, null if we aren't dragging anything
      */
@@ -192,7 +192,7 @@ public final class GraphCanvasFX extends Canvas {
         super();
         /// mNodes = new ArrayList<>();
         // mEdges = new ArrayList<>();
-        mGraph = new HashMap<Integer, NodeEdgePair>();
+        mGraph = new TreeMap<Integer, NodeEdgePair>();
         mGC = getGraphicsContext2D();
         mLabelFont = Font.font("Consolas", 16.0);
         mNodeFont = Font.font("Consolas", 16.0);
@@ -1551,7 +1551,10 @@ public final class GraphCanvasFX extends Canvas {
      * @return The node which was hit, or null if no node was hit
      */
     public GraphNode findNodeHit(double x, double y) {
-        for (NodeEdgePair pair : mGraph.values()) {
+        // Note the .descendingMap() -- the last nodes in the map will render
+        // over the previous nodes. To maintain consistency with the rendering,
+        // we need to look at the last nodes first.
+        for (NodeEdgePair pair : mGraph.descendingMap().values()) {
             if (nodeHitTest(pair.mNode, x, y)) {
                 return pair.mNode;
             }
