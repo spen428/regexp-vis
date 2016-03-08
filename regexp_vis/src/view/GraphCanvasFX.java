@@ -750,7 +750,8 @@ public final class GraphCanvasFX extends Canvas {
         double peakY = midPointY - absHeight * G_C_gradientVecY;
         edge.mMiddlePoint = new Point2D(peakX, peakY);
 
-        // TODO: document: work around: assumption that radius >= height
+        // Assumption that radius >= height, see updateConnectionLayoutData()
+        // for more info.
         double circleX = midPointX + (radius - absHeight) * G_C_gradientVecX;
         double circleY = midPointY + (radius - absHeight) * G_C_gradientVecY;
 
@@ -950,8 +951,20 @@ public final class GraphCanvasFX extends Canvas {
             midEdgeIdx = count / 2;
         }
 
-        double height = (count - 1) * ARC_GAP_SIZE * 0.5;
         double length = GraphUtils.vecLength(n2.mX - n1.mX, n2.mY - n1.mY);
+        double maxHeight = (count - 1) * ARC_GAP_SIZE * 0.5;
+        double arcGapSize = ARC_GAP_SIZE;
+
+        if (maxHeight > length * 0.5) {
+            // The mathematics of rendering the arcs has the assumption that the
+            // height of the arc < radius. This makes sense otherwise we would
+            // be talking about the arc of an ellipse, not a circle.
+
+            double rescale = (length * 0.5) / maxHeight;
+            maxHeight *= rescale;
+            arcGapSize *= rescale;
+        }
+
         double textAngle = GraphUtils.calcTextAngle(n2.mX - n1.mX,
                 n2.mY - n1.mY, length);
         int i = 0;
@@ -961,7 +974,7 @@ public final class GraphCanvasFX extends Canvas {
                 continue;
             }
             if (i != midEdgeIdx) {
-                updateEdgeArcLayoutData(e, height - i * ARC_GAP_SIZE,
+                updateEdgeArcLayoutData(e, maxHeight - i * arcGapSize,
                         textAngle);
             } else {
                 updateEdgeLineLayoutData(e, textAngle);
@@ -975,7 +988,7 @@ public final class GraphCanvasFX extends Canvas {
 
             if (i != midEdgeIdx) {
                 // Negative since the arc is going in the opposite direction
-                updateEdgeArcLayoutData(e, -(height - i * ARC_GAP_SIZE),
+                updateEdgeArcLayoutData(e, -(maxHeight - i * arcGapSize),
                         textAngle);
             } else {
                 updateEdgeLineLayoutData(e, textAngle);
