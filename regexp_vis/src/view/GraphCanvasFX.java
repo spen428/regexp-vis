@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -26,6 +28,9 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Affine;
 
 public final class GraphCanvasFX extends Canvas {
+
+    private static final Logger LOGGER = Logger.getLogger("view");
+
     public static class NodeEdgePair {
         final GraphNode mNode;
         /**
@@ -655,8 +660,8 @@ public final class GraphCanvasFX extends Canvas {
 
         // Check distance is large enough to draw arrow
         if (l < from.mRadius + to.mRadius + ARROW_LENGTH) {
-            System.out
-                    .println("DEBUG: couldn't draw line, too little distance");
+            LOGGER.log(Level.FINER, "DEBUG: couldn't draw line, too little "
+                    + "distance");
             return;
         }
 
@@ -762,8 +767,8 @@ public final class GraphCanvasFX extends Canvas {
                 y1 - circleY, tmpGradientX, tmpGradientY);
         double newX1, newY1;
         if (results == null) {
-            System.out.println(
-                    "DEBUG: couldn't draw arc, probably too little distance (1)");
+            LOGGER.log(Level.FINER, "DEBUG: couldn't draw arc, probably too "
+                    + "little distance (1)");
             return;
         } else {
             newX1 = results[0] + circleX;
@@ -783,8 +788,8 @@ public final class GraphCanvasFX extends Canvas {
                 - circleX, newY1 - circleY, tmpGradientX, tmpGradientY);
         double newX2, newY2;
         if (results == null) {
-            System.out.println(
-                    "DEBUG: couldn't draw arc, probably too little distance (2)");
+            LOGGER.log(Level.FINER, "DEBUG: couldn't draw arc, probably too "
+                    + "little distance (2)");
             return;
         } else {
             newX2 = results[0] + circleX;
@@ -804,8 +809,8 @@ public final class GraphCanvasFX extends Canvas {
                 - circleX, newY1 - circleY, tmpGradientX, tmpGradientY);
         double arrowX, arrowY;
         if (results == null) {
-            System.out.println(
-                    "DEBUG: couldn't draw arc, probably too little distance (3)");
+            LOGGER.log(Level.FINER, "DEBUG: couldn't draw arc, probably too "
+                    + "little distance (3)");
             return;
         } else {
             arrowX = results[0] + circleX;
@@ -1349,7 +1354,7 @@ public final class GraphCanvasFX extends Canvas {
             updateMaxPosNodes();
         } else if (mDragEdge != null && mDragEdge.mFrom == mDragEdge.mTo) {
             // Trying to drag a looped edge, update loop direction vector
-            System.out.println("Dragging edge");
+            LOGGER.log(Level.FINE, "Dragging edge");
             GraphNode n = mDragEdge.mFrom;
             n.mLoopDirVecX = event.getX() - n.mX;
             n.mLoopDirVecY = event.getY() - n.mY;
@@ -1387,10 +1392,10 @@ public final class GraphCanvasFX extends Canvas {
             mDragNode = n;
             mDragOrigX = n.mX;
             mDragOrigY = n.mY;
-            System.out.println("onMousePressed, hit NODE " + n);
+            LOGGER.log(Level.FINE, "onMousePressed, hit NODE " + n);
         } else if (e != null) {
             mDragEdge = e;
-            System.out.println("onMousePressed, hit EDGE " + e + " id = "
+            LOGGER.log(Level.FINE, "onMousePressed, hit EDGE " + e + " id = "
                     + e.getId() + " label text = \"" + e.mText + "\"");
         }
 
@@ -1401,7 +1406,7 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     private void onMouseReleased(MouseEvent event) {
-        System.out.println(
+        LOGGER.log(Level.FINE,
                 "onMouseUp, X = " + event.getX() + ", Y = " + event.getY());
         mDragNode = null;
         mDragEdge = null;
@@ -1415,7 +1420,7 @@ public final class GraphCanvasFX extends Canvas {
     private void onMouseClicked(MouseEvent event) {
         double x = event.getX();
         double y = event.getY();
-        System.out.println("onMouseClicked, X = " + x + ", Y = "
+        LOGGER.log(Level.FINE, "onMouseClicked, X = " + x + ", Y = "
                 + y + ", clickCount = " + event.getClickCount());
 
         if (mCreateEdgeModeActive) {

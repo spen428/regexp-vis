@@ -1,6 +1,11 @@
 package model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class representing a "basic" regular expression, with one top level operator.
@@ -11,6 +16,10 @@ import java.util.*;
  * @author Matthew Nicholls
  */
 public class BasicRegexp implements Comparable<BasicRegexp> {
+
+    private static final Logger LOGGER = Logger.getLogger(BasicRegexp.class
+            .toString());
+
     public enum RegexpOperator {
         NONE(3, true),
         STAR(2, true),
@@ -955,14 +964,14 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
 
         String opStr = re.getOperator().name();
         if (re.isSingleChar()) {
-            System.out.println(indentStr + "[BasicRegexp:" + opStr + "] char = "
-                + re.mChar);
+            LOGGER.log(Level.FINE, indentStr + "[BasicRegexp:" + opStr
+                    + "] char = " + re.mChar);
         } else {
-            System.out.println(indentStr + "[BasicRegexp:" + opStr + "] {");
+            LOGGER.log(Level.FINE, indentStr + "[BasicRegexp:" + opStr + "] {");
             for (int i = 0; i < re.mOperands.size(); i++) {
                 debugPrintBasicRegexp(indent + 1, re.mOperands.get(i));
             }
-            System.out.println(indentStr + "}");
+            LOGGER.log(Level.FINE, indentStr + "}");
         }
     }
 }
