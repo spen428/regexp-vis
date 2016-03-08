@@ -3,6 +3,7 @@ package view;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -393,9 +394,8 @@ public final class GraphCanvasFX extends Canvas {
         NodeEdgePair pair = new NodeEdgePair(n);
         mGraph.put(id, pair);
 
-        // TODO: be smarter about this (do minimum amount of layout
-        // recalculation necessary)
-        updateAllLayoutData();
+        // Don't need to do any layout recalculation as no edges are being
+        // added. Still need to redraw however.
         doRedraw();
         return n;
     }
@@ -511,9 +511,10 @@ public final class GraphCanvasFX extends Canvas {
         GraphEdge e = new GraphEdge(id, from, to, text, DEFAULT_EDGE_LINE_COLOUR);
         pair.addEdge(e);
 
-        // TODO: be smarter about this (do minimum amount of layout
-        // recalculation necessary)
-        updateAllLayoutData();
+        // Only need to do layout recalculation for edges between these two
+        // nodes.
+        NodeEdgePair toPair = (NodeEdgePair)mGraph.get(to.mId);
+        updateConnectionLayoutData(pair, toPair);
         doRedraw();
         return e;
     }
@@ -528,9 +529,12 @@ public final class GraphCanvasFX extends Canvas {
         // And remove it
         NodeEdgePair pair = mGraph.get(oldEdge.mFrom.getId());
         pair.removeEdge(oldEdge);
-        // TODO: be smarter about this (do minimum amount of layout
-        // recalculation necessary)
-        updateAllLayoutData();
+
+        // Only need to do layout recalculation for edges between the two nodes
+        // of the edge we removed.
+        NodeEdgePair pair1 = (NodeEdgePair)mGraph.get(oldEdge.mFrom.mId);
+        NodeEdgePair pair2 = (NodeEdgePair)mGraph.get(oldEdge.mTo.mId);
+        updateConnectionLayoutData(pair1, pair2);
         doRedraw();
     }
 
@@ -919,6 +923,34 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
+     * Update the layout data for all edges going to, or coming from a node.
+     *
+     * @param pair The node-edge pair for the node
+     */
+    private void updateConnectionLayoutData(NodeEdgePair pair) {
+        int id = pair.mNode.getId();
+
+        // If any edge involves this node is some way, add that node
+        HashSet<Integer> recalced = new HashSet<>();
+        for (NodeEdgePair pair2 : mGraph.values()) {
+            for (GraphEdge e : pair2.mEdges) {
+                if (e.mFrom.getId() == id) {
+                    recalced.add(e.mTo.getId());
+                } else if (e.mTo.getId() == id) {
+                    recalced.add(e.mFrom.getId());
+                }
+            }
+        }
+
+        for (int i : recalced) {
+            NodeEdgePair pair2 = mGraph.get(i);
+            updateConnectionLayoutData(pair, pair2);
+        }
+
+        updateEdgesLoopedLayoutData(pair.mNode, pair.mLoopedEdges);
+    }
+
+    /**
      * Update the layout data for all edges between two nodes, in both
      * directions. See updateEdgeLineLayoutData() for more information.
      *
@@ -927,6 +959,20 @@ public final class GraphCanvasFX extends Canvas {
      */
     private void updateConnectionLayoutData(NodeEdgePair pair1,
             NodeEdgePair pair2) {
+        if (pair1.mNode.mId == pair2.mNode.mId) {
+            // Updating connections with self, edges are looped
+            updateEdgesLoopedLayoutData(pair1.mNode, pair1.mLoopedEdges);
+            return;
+        }
+
+        // Ensure we have a consistent ordering for which edges we draw first,
+        // otherwise they could swap ordering
+        if (pair2.mNode.mId > pair1.mNode.mId) {
+            // Out of order, swap
+            NodeEdgePair tmp = pair1;
+            pair1 = pair2;
+            pair2 = tmp;
+        }
         GraphNode n1 = pair1.mNode;
         GraphNode n2 = pair2.mNode;
 
@@ -1026,16 +1072,10 @@ public final class GraphCanvasFX extends Canvas {
      * properly. See updateEdgeLineLayoutData() for more information.
      */
     private void updateAllLayoutData() {
-        for (NodeEdgePair pair : mGraph.values()) {
-            GraphNode n = pair.mNode;
-
-            updateEdgesLoopedLayoutData(n, pair.mLoopedEdges);
-        }
-
         Object[] tmpPairs = mGraph.values().toArray();
 
         for (int i = 0; i < tmpPairs.length; i++) {
-            for (int j = i + 1; j < tmpPairs.length; j++) {
+            for (int j = i; j < tmpPairs.length; j++) {
                 updateConnectionLayoutData((NodeEdgePair) tmpPairs[i],
                         (NodeEdgePair) tmpPairs[j]);
             }
@@ -1303,9 +1343,15 @@ public final class GraphCanvasFX extends Canvas {
         GraphNode n = findNodeHit(x, y);
         NodeEdgePair pair = mGraph.get(mCreateEdgeFromNode.getId());
 
+        // Keep track of which edges we removed / added, so we can be smart
+        // about layout recalculation
+        GraphEdge edgeRemoved = null;
+        GraphEdge edgeAdded = null;
+
         if (mTempEdge != null && mTempEdge.mTo != n) {
             // Remove old edge
             pair.removeEdge(mTempEdge);
+            edgeRemoved = mTempEdge;
             mTempEdge = null;
         }
 
@@ -1314,11 +1360,25 @@ public final class GraphCanvasFX extends Canvas {
             mTempEdge = new GraphEdge(TEMPORARY_EDGE_ID, mCreateEdgeFromNode, n,
                     null, TEMPORARY_EDGE_LINE_COLOUR);
             pair.addEdge(mTempEdge);
+            edgeAdded = mTempEdge;
         }
 
-        // TODO: be smarter about this (do minimum amount of layout
-        // recalculation necessary)
-        updateAllLayoutData();
+        if (edgeRemoved != null) {
+            // We removed a temporary edge, recalc between the nodes
+            NodeEdgePair pair1 = mGraph.get(edgeRemoved.mFrom.getId());
+            NodeEdgePair pair2 = mGraph.get(edgeRemoved.mTo.getId());
+            updateConnectionLayoutData(pair1, pair2);
+        }
+
+        if (edgeAdded != null) {
+            // We added a temporary edge, recalc between the nodes
+            NodeEdgePair pair1 = mGraph.get(edgeAdded.mFrom.getId());
+            NodeEdgePair pair2 = mGraph.get(edgeAdded.mTo.getId());
+            updateConnectionLayoutData(pair1, pair2);
+        }
+
+        // Always recalc for non-attached temporary edge
+        updateTempEdgeLayoutData();
         doRedraw();
     }
 
@@ -1365,6 +1425,10 @@ public final class GraphCanvasFX extends Canvas {
             mDragNode.mY = newY;
             repositionNode(mDragNode);
             updateMaxPosNodes();
+
+            // Update all connections coming from or going to this node
+            NodeEdgePair pair = mGraph.get(mDragNode.getId());
+            updateConnectionLayoutData(pair);
         } else if (mDragEdge != null && mDragEdge.mFrom == mDragEdge.mTo) {
             // Trying to drag a looped edge, update loop direction vector
             LOGGER.log(Level.FINE, "Dragging edge");
@@ -1375,11 +1439,13 @@ public final class GraphCanvasFX extends Canvas {
                     / GraphUtils.vecLength(n.mLoopDirVecX, n.mLoopDirVecY);
             n.mLoopDirVecX *= invVecLength;
             n.mLoopDirVecY *= invVecLength;
+
+            // Dragged a looped edge, need to update layout data for looped
+            // edges
+            NodeEdgePair pair = mGraph.get(mDragEdge.mFrom.getId());
+            updateConnectionLayoutData(pair, pair);
         }
 
-        // TODO: be smarter about this (do minimum amount of layout
-        // recalculation necessary)
-        updateAllLayoutData();
         doRedraw();
     }
 
@@ -1412,10 +1478,9 @@ public final class GraphCanvasFX extends Canvas {
                     + e.getId() + " label text = \"" + e.mText + "\"");
         }
 
-        // TODO: be smarter about this (do minimum amount of layout
-        // recalculation necessary)
-        updateAllLayoutData();
-        doRedraw();
+        // No need to do any layout recalc or drawing at the time of writing.
+        // Note: if adding to this method, remember to evaluate if layout recalc
+        // is needed / what recalc.
     }
 
     private void onMouseReleased(MouseEvent event) {
@@ -1424,10 +1489,9 @@ public final class GraphCanvasFX extends Canvas {
         mDragNode = null;
         mDragEdge = null;
 
-        // TODO: be smarter about this (do minimum amount of layout
-        // recalculation necessary)
-        updateAllLayoutData();
-        doRedraw();
+        // No need to do any layout recalc or drawing at the time of writing.
+        // Note: if adding to this method, remember to evaluate if layout recalc
+        // is needed / what recalc.
     }
 
     private void onMouseClicked(MouseEvent event) {
@@ -1444,13 +1508,16 @@ public final class GraphCanvasFX extends Canvas {
                     mCreatedEdgeHandler.handle(
                             new GraphCanvasEvent(event, null, mTempEdge));
                 }
+
+                // We removed the temporary edge, recalc between the nodes
+                NodeEdgePair pair1 = mGraph.get(mTempEdge.mFrom.getId());
+                NodeEdgePair pair2 = mGraph.get(mTempEdge.mTo.getId());
+                updateConnectionLayoutData(pair1, pair2);
+
                 mTempEdge = null;
             }
             mCreateEdgeModeActive = false;
             mCreateEdgeFromNode = null;
-            // TODO: be smarter about this (do minimum amount of layout
-            // recalculation necessary)
-            updateAllLayoutData();
             doRedraw();
             return;
         }
