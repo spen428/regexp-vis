@@ -61,13 +61,14 @@ public class RegexpVisApp implements Observer {
     private static final int BUTTON_PANEL_PADDING_PX = 10;
     private static final int CONTROL_PANEL_PADDING_HORIZONTAL_PX = 35;
     private static final int CONTROL_PANEL_PADDING_VERTICAL_PX = 20;
-    protected static final String ABOUT_HEADER = "Regular Expression Visualiser"
+    protected static final String ABOUT_HEADER = "Regular Language Visualiser"
             + " (v" + Main.VERSION + ")";
     protected static final String ABOUT_CONTENT = "Authors:\n\n"
-            + "Matthew Nicholls\t<mjn33@kent.ac.uk>\n"
+            + "William Dix\t\t\t<wrd2@kent.ac.uk>\n"
             + "Parham Ghassemi\t<pg272@kent.ac.uk>\n"
-            + "Samuel Pengelly\t<sp611@kent.ac.uk>\n"
-            + "William Dix\t\t<wrd2@kent.ac.uk>\n";
+            + "Matthew Nicholls\t\t<mjn33@kent.ac.uk>\n"
+            + "Samuel Pengelly\t\t<sp611@kent.ac.uk>\n";
+
     public static final String WINDOW_TITLE = Main.TITLE + " v" + Main.VERSION;
     private static final String AUTOMATON_GRAPH_FILE_EXT = ".txt";
 
