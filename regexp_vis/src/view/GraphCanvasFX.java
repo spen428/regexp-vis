@@ -414,12 +414,12 @@ public final class GraphCanvasFX extends Canvas {
 
         GraphNode n = new GraphNode(id, x, y, radius, false, false,
                 DEFAULT_NODE_BACKGROUND_COLOUR);
-        repositionNode(n);
-        updateTransparentNodes();
-        updateMaxPosNodes();
 
         NodeEdgePair pair = new NodeEdgePair(n);
         mGraph.put(id, pair);
+        repositionNode(n);
+        updateTransparentNodes();
+        updateMaxPosNodes();
 
         // Don't need to do any layout recalculation as no edges are being
         // added. Still need to redraw however.
@@ -503,6 +503,8 @@ public final class GraphCanvasFX extends Canvas {
         }
 
         mGraph.remove(id);
+        updateTransparentNodes();
+
         doRedraw();
     }
 
