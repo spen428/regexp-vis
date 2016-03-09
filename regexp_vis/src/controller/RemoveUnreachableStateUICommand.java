@@ -3,6 +3,10 @@ package controller;
 import model.RemoveStateCleanlyCommand;
 import view.GraphCanvasFX;
 
+/**
+ * TODO: Inconsistent naming {@link RemoveUnreachableStateUICommand} and
+ * {@link RemoveStateCleanlyCommand}
+ */
 public class RemoveUnreachableStateUICommand extends CompositeUICommand {
 
     private final RemoveStateCleanlyCommand ccmd;
