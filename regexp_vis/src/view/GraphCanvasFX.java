@@ -896,6 +896,16 @@ public final class GraphCanvasFX extends Canvas {
         double endVecX = results[2];
         double endVecY = results[3];
 
+        if (!GraphUtils.vecIsClockwise(startVecX, startVecY, endVecX, endVecY)) {
+            // Ensure that the "end" is clockwise to the "start", swap them
+            double tmpStartVecX = startVecX;
+            double tmpStartVecY = startVecY;
+            startVecX = endVecX;
+            startVecY = endVecY;
+            endVecX = tmpStartVecX;
+            endVecY = tmpStartVecY;
+        }
+
         double startAngle = GraphUtils.calcAngleOnCircle(startVecX, startVecY,
                 1);
         double endAngle = GraphUtils.calcAngleOnCircle(endVecX, endVecY, 1);
@@ -1210,14 +1220,18 @@ public final class GraphCanvasFX extends Canvas {
             return;
         }
 
+        Point2D arrowBase = n.mEndLineP1.add(n.mEndLineDir
+                .multiply(ARROW_LENGTH));
+
         GraphEdge prevEdge = null;
         for (GraphEdge edge : edges) {
             mGC.setStroke(edge.mLineColour);
             Point2D fromStart, toStart, fromEnd, toEnd;
 
             if (prevEdge == null) {
+                // Need to also give space on the "end" line for the arrow
                 fromStart = n.mStartLineP1;
-                fromEnd = n.mEndLineP1;
+                fromEnd = arrowBase;
             } else {
                 fromStart = n.mStartLineP1.add(n.mStartLineDir
                         .multiply(prevEdge.mArcRadius - n.mRadius));
@@ -1240,6 +1254,9 @@ public final class GraphCanvasFX extends Canvas {
 
             prevEdge = edge;
         }
+
+        GraphUtils.fillArrowHead(mGC, arrowBase.getX(), arrowBase.getY(),
+                n.mEndLineP1.getX(), n.mEndLineP1.getY(), ARROW_WIDTH);
 
         mGC.setFontSmoothingType(FontSmoothingType.LCD);
         mGC.setFont(mLabelFont);
