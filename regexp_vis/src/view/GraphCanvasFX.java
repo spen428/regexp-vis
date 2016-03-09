@@ -380,9 +380,11 @@ public final class GraphCanvasFX extends Canvas {
                 }
                 // Check overlap is significant enough
                 GraphNode n2 = pairList.get(j).mNode;
-                double maxRadius = Math.max(n1.mRadius, n2.mRadius);
-                double dist = GraphUtils.vecLength(n2.mX - n1.mX, n2.mY - n1.mY);
-                if (dist < maxRadius) {
+                double maxRadiusSqr = Math.max(n1.mRadius, n2.mRadius);
+                maxRadiusSqr *= maxRadiusSqr;
+                double distSqr = GraphUtils.vecLengthSqr(n2.mX - n1.mX,
+                        n2.mY - n1.mY);
+                if (distSqr < maxRadiusSqr) {
                     overlap = true;
                 }
             }
