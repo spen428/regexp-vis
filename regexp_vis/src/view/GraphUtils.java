@@ -51,7 +51,7 @@ public final class GraphUtils {
         if (y1 * x2 > x1 * y2) {
             return false;
         } else {
-          return true;
+            return true;
         }
     }
 
