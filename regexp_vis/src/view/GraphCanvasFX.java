@@ -365,6 +365,32 @@ public final class GraphCanvasFX extends Canvas {
     }
 
     /**
+     * Updates the transparency status of nodes, nodes are made transparent when
+     * they overlap with another node.
+     */
+    private void updateTransparentNodes() {
+        List<NodeEdgePair> pairList = new ArrayList<>(mGraph.values());
+
+        for (int i = 0; i < pairList.size(); i++) {
+            GraphNode n1 = pairList.get(i).mNode;
+            boolean overlap = false;
+            for (int j = 0; j < pairList.size(); j++) {
+                if (i == j) {
+                    continue;
+                }
+                // Check overlap is significant enough
+                GraphNode n2 = pairList.get(j).mNode;
+                double maxRadius = Math.max(n1.mRadius, n2.mRadius);
+                double dist = GraphUtils.vecLength(n2.mX - n1.mX, n2.mY - n1.mY);
+                if (dist < maxRadius) {
+                    overlap = true;
+                }
+            }
+            n1.mIsTransparent = overlap;
+        }
+    }
+
+    /**
      * Add a node of a given id, to the canvas.
      *
      * @param id The ID of the node
@@ -389,6 +415,7 @@ public final class GraphCanvasFX extends Canvas {
         GraphNode n = new GraphNode(id, x, y, radius, false, false,
                 DEFAULT_NODE_BACKGROUND_COLOUR);
         repositionNode(n);
+        updateTransparentNodes();
         updateMaxPosNodes();
 
         NodeEdgePair pair = new NodeEdgePair(n);
@@ -426,6 +453,7 @@ public final class GraphCanvasFX extends Canvas {
         if (value) {
             // May need to reposition node now that we have an arrow
             repositionNode(n);
+            updateTransparentNodes();
             updateMaxPosNodes();
         }
         doRedraw();
@@ -560,6 +588,10 @@ public final class GraphCanvasFX extends Canvas {
         mCreateEdgeFromNode = null;
     }
 
+    /**
+     * The opacity to render overlapping nodes with.
+     */
+    public final static double OVERLAPPING_NODE_OPACITY = 0.3;
     /**
      * The default colour we are using to render the background of nodes
      */
@@ -1305,9 +1337,21 @@ public final class GraphCanvasFX extends Canvas {
      *
      * @param n The node to draw
      */
-    void drawNode(GraphNode n) {
-        mGC.setFill(n.mBackgroundColour);
-        mGC.setStroke(mNodeBorderColour);
+    private void drawNode(GraphNode n) {
+        if (n.mIsTransparent) {
+            Color adjustedBgColour = new Color(n.mBackgroundColour.getRed(),
+                    n.mBackgroundColour.getGreen(),
+                    n.mBackgroundColour.getBlue(),
+                    n.mBackgroundColour.getOpacity() * OVERLAPPING_NODE_OPACITY);
+            mGC.setFill(adjustedBgColour);
+            Color adjustedBorderColour = new Color(mNodeBorderColour.getRed(),
+                    mNodeBorderColour.getGreen(), mNodeBorderColour.getBlue(),
+                    mNodeBorderColour.getOpacity() * OVERLAPPING_NODE_OPACITY);
+            mGC.setStroke(adjustedBorderColour);
+        } else {
+            mGC.setFill(n.mBackgroundColour);
+            mGC.setStroke(mNodeBorderColour);
+        }
 
         GraphUtils.fillCircleCentred(mGC, n.mX, n.mY, n.mRadius);
         GraphUtils.strokeCircleCentred(mGC, n.mX, n.mY, n.mRadius);
@@ -1467,6 +1511,7 @@ public final class GraphCanvasFX extends Canvas {
             mDragNode.mX = newX;
             mDragNode.mY = newY;
             repositionNode(mDragNode);
+            updateTransparentNodes();
             updateMaxPosNodes();
 
             // Update all connections coming from or going to this node
@@ -1757,6 +1802,7 @@ public final class GraphCanvasFX extends Canvas {
         if (recalcLayoutData) {
             // This is why updateMaxPosNodes() isn't in repositionNode(), otherwise
             // we would have n^2 time complexity to the number of nodes
+            updateTransparentNodes();
             updateMaxPosNodes();
             updateAllLayoutData();
         }
