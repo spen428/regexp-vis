@@ -33,6 +33,7 @@ public class GraphNode {
     double mArcExtent;
 
     Color mBackgroundColour;
+    boolean mIsTransparent;
 
     public GraphNode(int id, double x, double y, double r, boolean startStyle,
             boolean finalStyle, Color backgroundColour)
@@ -51,6 +52,7 @@ public class GraphNode {
         //mLoopDirNormalVecY = mLoopDirVecX;
 
         mBackgroundColour = backgroundColour;
+        mIsTransparent = false;
     }
 
     public double getX()
@@ -62,7 +64,7 @@ public class GraphNode {
     {
         return mY;
     }
-    
+
     public int getId()
     {
         return mId;

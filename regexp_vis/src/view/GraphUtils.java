@@ -35,6 +35,27 @@ public final class GraphUtils {
     }
 
     /**
+     * Determines if vector (x2, y2) is clockwise to (x1, y1).
+     *
+     * @param x1 The x component of the vector
+     * @param y1 The y component of the vector
+     * @param x2 The x component of the other vector
+     * @param y2 The y component of the other vector
+     * @return True if (x2, y2) is clockwise, false otherwise
+     */
+    public static boolean vecIsClockwise(double x1, double y1, double x2,
+            double y2)
+    {
+        // Very simple method, found here:
+        // http://gamedev.stackexchange.com/q/45412
+        if (y1 * x2 > x1 * y2) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
      * Calculates the angle (in degrees) of the specified vector on the circle,
      * formed by going anti-clockwise.
      *
@@ -194,7 +215,7 @@ public final class GraphUtils {
      * @param y1 The y component of a vector specifying either end of the arc
      * @param x2 The x component of the vector which bisects the arc
      * @param y2 The y component of the vector which bisects the arc
-     * @return True if the point is between the angle formed by the arc, false 
+     * @return True if the point is between the angle formed by the arc, false
      * otherwise
      */
     public static boolean isPointInArcSection(double x, double y, double x1, double y1, double x3, double y3)
@@ -309,7 +330,7 @@ public final class GraphUtils {
         double baselinePointY2 = arrowBaseY + baselineGradientY * width * 0.5;
 
         gc.fillPolygon(
-            new double[] { arrowTipX, baselinePointX1,  baselinePointX2 }, 
+            new double[] { arrowTipX, baselinePointX1,  baselinePointX2 },
             new double[] { arrowTipY, baselinePointY1,  baselinePointY2 }, 3);
     }
 

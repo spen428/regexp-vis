@@ -48,7 +48,7 @@ public class GraphEdgeTest {
                 (Color) null);
         GraphEdge graphEdge0 = new GraphEdge(703, graphNode0, graphNode0,
                 (String) null, (Color) null);
-        graphEdge0.isRendered();
+        graphEdge0.getRenderMode();
         assertEquals(703, graphEdge0.getId());
     }
 
