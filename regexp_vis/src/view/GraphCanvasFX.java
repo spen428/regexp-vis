@@ -643,9 +643,9 @@ public final class GraphCanvasFX extends Canvas {
      * rotated by
      */
     private void updateEdgeLineLayoutData(GraphEdge edge, double textAngle) {
-        // Set "mIsRendered" here so we can exit the method early to avoid
+        // Set "mRenderMode" here so we can exit the method early to avoid
         // rendering the line if problems arise
-        edge.mIsRendered = false;
+        edge.mRenderMode = GraphEdge.RenderMode.NONE;
 
         GraphNode from = edge.mFrom;
         GraphNode to = edge.mTo;
@@ -662,12 +662,22 @@ public final class GraphCanvasFX extends Canvas {
 
         edge.mMiddlePoint = new Point2D(midPointX, midPointY);
 
-        // Check distance is large enough to draw arrow
-        if (l < from.mRadius + to.mRadius + ARROW_LENGTH) {
+        double arrowLength = ARROW_LENGTH;
+        double arrowWidth = ARROW_WIDTH;
+        if (l <= from.mRadius + to.mRadius) {
             LOGGER.log(Level.FINER, "DEBUG: couldn't draw line, too little "
                     + "distance");
             return;
+        } else if (l < from.mRadius + to.mRadius + ARROW_LENGTH) {
+            LOGGER.log(Level.FINER,
+                    "DEBUG: too little distance, shrinking arrow head");
+            arrowLength = l - (from.mRadius + to.mRadius);
+            arrowWidth *= arrowLength / ARROW_LENGTH;
+            edge.mRenderMode = GraphEdge.RenderMode.ARROW;
+        } else {
+            edge.mRenderMode = GraphEdge.RenderMode.FULL;
         }
+
 
         double invVecLength = 1
                 / GraphUtils.vecLength(S_E_gradientVecX, S_E_gradientVecY);
@@ -682,8 +692,8 @@ public final class GraphCanvasFX extends Canvas {
         newY1 = y1 + S_E_gradientVecY * from.mRadius;
         newX2 = x2 - S_E_gradientVecX * to.mRadius;
         newY2 = y2 - S_E_gradientVecY * to.mRadius;
-        arrowX = newX2 - S_E_gradientVecX * ARROW_LENGTH;
-        arrowY = newY2 - S_E_gradientVecY * ARROW_LENGTH;
+        arrowX = newX2 - S_E_gradientVecX * arrowLength;
+        arrowY = newY2 - S_E_gradientVecY * arrowLength;
 
         // Draw label
         double textX = midPointX - TEXT_POS_HEIGHT * G_C_gradientVecX;
@@ -697,8 +707,8 @@ public final class GraphCanvasFX extends Canvas {
         edge.mStartPointY = newY1;
         edge.mArrowTipX = newX2;
         edge.mArrowTipY = newY2;
+        edge.mArrowWidth = arrowWidth;
 
-        edge.mIsRendered = true;
         edge.mIsLine = true;
 
         edge.mTextX = textX;
@@ -718,9 +728,9 @@ public final class GraphCanvasFX extends Canvas {
      */
     private void updateEdgeArcLayoutData(GraphEdge edge, double height,
             double textAngle) {
-        // Set "mIsRendered" here so we can exit the method early to avoid
+        // Set "mRenderMode" here so we can exit the method early to avoid
         // rendering the arc if problems arise
-        edge.mIsRendered = false;
+        edge.mRenderMode = GraphEdge.RenderMode.NONE;
 
         GraphNode from = edge.mFrom;
         GraphNode to = edge.mTo;
@@ -813,13 +823,21 @@ public final class GraphCanvasFX extends Canvas {
         results = GraphUtils.filterArcIntersectionPoint(results, newX1
                 - circleX, newY1 - circleY, tmpGradientX, tmpGradientY);
         double arrowX, arrowY;
+        double arrowWidth = ARROW_WIDTH;
         if (results == null) {
-            LOGGER.log(Level.FINER, "DEBUG: couldn't draw arc, probably too "
-                    + "little distance (3)");
-            return;
+            LOGGER.log(Level.FINER,
+                    "DEBUG: too little distance, shrinking arrow head");
+            // Draw the arrow head where we would have drawn the arc instead
+            arrowX = newX1;
+            arrowY = newY1;
+            double arrowLength = GraphUtils.vecLength(newX2 - arrowX, newY2
+                    - arrowY);
+            arrowWidth *= (arrowLength / ARROW_LENGTH);
+            edge.mRenderMode = GraphEdge.RenderMode.ARROW;
         } else {
             arrowX = results[0] + circleX;
             arrowY = results[1] + circleY;
+            edge.mRenderMode = GraphEdge.RenderMode.FULL;
         }
 
         // Draw label
@@ -830,11 +848,18 @@ public final class GraphCanvasFX extends Canvas {
         updateEdgeLabelHitTestData(edge, textX, textY, S_E_gradientVecX,
                 S_E_gradientVecY, G_C_gradientVecX, G_C_gradientVecY);
 
-        double startAngle = GraphUtils.calcAngleOnCircle(newX1 - circleX,
-                newY1 - circleY, radius);
-        double endAngle = GraphUtils.calcAngleOnCircle(arrowX - circleX,
-                arrowY - circleY, radius);
-        double arcExtent = GraphUtils.arcCalcArcExtent(startAngle, endAngle);
+        // Only need to calculate arc angles if we are going to render an arc
+        if (edge.mRenderMode == GraphEdge.RenderMode.FULL) {
+            double startAngle = GraphUtils.calcAngleOnCircle(newX1 - circleX,
+                    newY1 - circleY, radius);
+            double endAngle = GraphUtils.calcAngleOnCircle(arrowX - circleX,
+                    arrowY - circleY, radius);
+            double arcExtent = GraphUtils
+                    .arcCalcArcExtent(startAngle, endAngle);
+
+            edge.mArcStartAngle = startAngle;
+            edge.mArcExtent = arcExtent;
+        }
 
         edge.mArrowBaseX = arrowX;
         edge.mArrowBaseY = arrowY;
@@ -842,8 +867,8 @@ public final class GraphCanvasFX extends Canvas {
         edge.mStartPointY = newY1;
         edge.mArrowTipX = newX2;
         edge.mArrowTipY = newY2;
+        edge.mArrowWidth = arrowWidth;
 
-        edge.mIsRendered = true;
         edge.mIsLine = false;
 
         edge.mTextX = textX;
@@ -853,8 +878,6 @@ public final class GraphCanvasFX extends Canvas {
         edge.mArcRadius = radius;
         edge.mArcCenterX = circleX;
         edge.mArcCenterY = circleY;
-        edge.mArcStartAngle = startAngle;
-        edge.mArcExtent = arcExtent;
     }
 
     /**
@@ -892,8 +915,7 @@ public final class GraphCanvasFX extends Canvas {
         double loopDirNormalVecY = n.mLoopDirVecX;
 
         double textAngle = GraphUtils.calcTextAngle(loopDirNormalVecX,
-                loopDirNormalVecY, 1);// GraphUtils.calcAngleOnCircle(n.mLoopDirNormalVecX,
-                                      // n.mLoopDirNormalVecY, 1);
+                loopDirNormalVecY, 1);
         double tmpRadius = n.mRadius + ARC_LOOP_BASE_DISTANCE;
         for (GraphEdge edge : edges) {
             double textX = n.mX
@@ -902,7 +924,7 @@ public final class GraphCanvasFX extends Canvas {
                     + (tmpRadius + TEXT_POS_HEIGHT) * n.mLoopDirVecY;
 
             edge.mIsLine = false;
-            edge.mIsRendered = true;
+            edge.mRenderMode = GraphEdge.RenderMode.FULL;
 
             edge.mTextX = textX;
             edge.mTextY = textY;
@@ -1111,11 +1133,13 @@ public final class GraphCanvasFX extends Canvas {
 
         mGC.setStroke(edge.mLineColour);
         mGC.setFill(edge.mLineColour);
-        mGC.strokeLine(edge.mStartPointX, edge.mStartPointY, edge.mArrowBaseX,
-                edge.mArrowBaseY);
+        if (edge.mRenderMode == GraphEdge.RenderMode.FULL) {
+            mGC.strokeLine(edge.mStartPointX, edge.mStartPointY,
+                    edge.mArrowBaseX, edge.mArrowBaseY);
+        }
 
         GraphUtils.fillArrowHead(mGC, edge.mArrowBaseX, edge.mArrowBaseY,
-                edge.mArrowTipX, edge.mArrowTipY, ARROW_WIDTH);
+                edge.mArrowTipX, edge.mArrowTipY, edge.mArrowWidth);
     }
 
     /**
@@ -1145,13 +1169,15 @@ public final class GraphCanvasFX extends Canvas {
 
         mGC.setStroke(edge.mLineColour);
         mGC.setFill(edge.mLineColour);
-        mGC.strokeArc(edge.mArcCenterX - edge.mArcRadius,
-                edge.mArcCenterY - edge.mArcRadius, edge.mArcRadius * 2,
-                edge.mArcRadius * 2, edge.mArcStartAngle, edge.mArcExtent,
-                ArcType.OPEN);
+        if (edge.mRenderMode == GraphEdge.RenderMode.FULL) {
+            mGC.strokeArc(edge.mArcCenterX - edge.mArcRadius, edge.mArcCenterY
+                    - edge.mArcRadius, edge.mArcRadius * 2,
+                    edge.mArcRadius * 2, edge.mArcStartAngle, edge.mArcExtent,
+                    ArcType.OPEN);
+        }
 
         GraphUtils.fillArrowHead(mGC, edge.mArrowBaseX, edge.mArrowBaseY,
-                edge.mArrowTipX, edge.mArrowTipY, ARROW_WIDTH);
+                edge.mArrowTipX, edge.mArrowTipY, edge.mArrowWidth);
     }
 
     /**
@@ -1161,7 +1187,7 @@ public final class GraphCanvasFX extends Canvas {
      * @param edge The edge to draw
      */
     private void drawEdge(GraphEdge edge) {
-        if (!edge.mIsRendered) {
+        if (edge.mRenderMode == GraphEdge.RenderMode.NONE) {
             return;
         }
 
@@ -1600,7 +1626,7 @@ public final class GraphCanvasFX extends Canvas {
     private static final double COS_45_DEG = Math.sqrt(2) * 0.5;
 
     private boolean edgeLabelHitTest(GraphEdge e, double x, double y) {
-        if (!e.mIsRendered || e.mText == null) {
+        if (e.mRenderMode == GraphEdge.RenderMode.NONE || e.mText == null) {
             // Can't hit an edge we aren't rendering
             // Can't hit a label with no text
             return false;
