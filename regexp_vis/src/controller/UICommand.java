@@ -6,6 +6,10 @@ import model.AddTransitionCommand;
 import model.Automaton;
 import model.BreakdownCommand;
 import model.Command;
+import model.RemoveEpsilonTransitionsCommand;
+import model.RemoveEquivalentStatesCommand;
+import model.RemoveNonDeterminismCommand;
+import model.RemoveStateCleanlyCommand;
 import model.RemoveStateCommand;
 import model.RemoveTransitionCommand;
 import model.SetIsFinalCommand;
@@ -47,8 +51,7 @@ public abstract class UICommand extends Command {
         if (cmd instanceof AddStateCommand) {
             return new AddStateUICommand(graph, (AddStateCommand) cmd, 0, 0);
         } else if (cmd instanceof AddTransitionCommand) {
-            return new AddTransitionUICommand(graph,
-                    (AddTransitionCommand) cmd);
+            return new AddTransitionUICommand(graph, (AddTransitionCommand) cmd);
         } else if (cmd instanceof BreakdownCommand) {
             return new BreakdownUICommand(graph, (BreakdownCommand) cmd);
         } else if (cmd instanceof RemoveStateCommand) {
@@ -58,15 +61,24 @@ public abstract class UICommand extends Command {
                     (RemoveTransitionCommand) cmd);
         } else if (cmd instanceof SetIsFinalCommand) {
             return new SetIsFinalUICommand(graph, (SetIsFinalCommand) cmd);
+        } else if (cmd instanceof RemoveEpsilonTransitionsCommand) {
+            return new RemoveEpsilonTransitionsUICommand(graph,
+                    (RemoveEpsilonTransitionsCommand) cmd);
+        } else if (cmd instanceof RemoveEquivalentStatesCommand) {
+            return new RemoveEquivalentStatesUICommand(graph,
+                    (RemoveEquivalentStatesCommand) cmd);
+        } else if (cmd instanceof RemoveNonDeterminismCommand) {
+            return new RemoveNonDeterminismUICommand(graph,
+                    (RemoveNonDeterminismCommand) cmd);
+        } else if (cmd instanceof RemoveStateCleanlyCommand) {
+            return new RemoveUnreachableStateUICommand(graph,
+                    (RemoveStateCleanlyCommand) cmd);
         } else if (cmd == null) {
             return null;
-        } else {
-            String msg = String.format(
-                    "Conversion from %s to UICommand has "
-                            + "not yet been implemented.",
-                    cmd.getClass().toString());
-            throw new UnsupportedOperationException(msg);
         }
+        String msg = String.format("Conversion from %s to UICommand has "
+                + "not yet been implemented.", cmd.getClass().toString());
+        throw new UnsupportedOperationException(msg);
     }
 
     public abstract String getDescription();

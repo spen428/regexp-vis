@@ -3,7 +3,7 @@ package view;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.transform.Rotate;
 
-final class GraphUtils {
+public final class GraphUtils {
     /**
      * Cosine of 45 degrees
      */

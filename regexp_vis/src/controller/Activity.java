@@ -1,8 +1,9 @@
 package controller;
 
 import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javafx.event.Event;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.ContextMenuEvent;
@@ -26,10 +27,12 @@ import view.GraphNode;
  */
 public abstract class Activity {
 
+    private static final Logger LOGGER = Logger.getLogger("controller");
+
     enum ActivityType {
-        ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"),
-        ACTIVITY_NFA_TO_REGEXP("Convert NFA to Regular Expression"),
-        ACTIVITY_NFA_TO_DFA("Convert NFA to DFA");
+        ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"), ACTIVITY_NFA_TO_REGEXP(
+                "Convert NFA to Regular Expression"), ACTIVITY_NFA_TO_DFA(
+                "Convert NFA to DFA");
 
         private final String text;
 
@@ -53,7 +56,8 @@ public abstract class Activity {
         this.history = new CommandHistory();
     }
 
-    Activity(GraphCanvasFX canvas, Automaton automaton, CommandHistory history) {
+    Activity(GraphCanvasFX canvas, Automaton automaton,
+            CommandHistory history) {
         this.canvas = canvas;
         this.automaton = automaton;
         this.history = history;
@@ -62,12 +66,13 @@ public abstract class Activity {
     /**
      * Called by RegexpVisApp after entering a regular expression.
      *
-     * @param text The regexp the user entered
+     * @param text
+     *            The regexp the user entered
      */
     public void onEnteredRegexp(String text) {
         historyClear();
 
-        System.out.printf("Entered regexp: %s%n", text);
+        LOGGER.log(Level.INFO, "Entered regexp: " + text);
         BasicRegexp re = null;
         try {
             re = BasicRegexp.parseRegexp(text);
@@ -85,8 +90,8 @@ public abstract class Activity {
         // TODO: Add the following to history
         AutomatonState startState = this.automaton.getStartState();
         AutomatonState finalState = this.automaton.createNewState();
-        AutomatonTransition trans = this.automaton
-                .createNewTransition(startState, finalState, re);
+        AutomatonTransition trans = this.automaton.createNewTransition(
+                startState, finalState, re);
         finalState.setFinal(true);
         this.automaton.addStateWithTransitions(finalState,
                 new LinkedList<AutomatonTransition>());
@@ -107,7 +112,8 @@ public abstract class Activity {
      * can decide to do nothing, pre-process the file or just load file as
      * normal.
      *
-     * @param file The graph export file we read from disk, not loaded yet
+     * @param file
+     *            The graph export file we read from disk, not loaded yet
      */
     public void onGraphFileImport(GraphExportFile file) {
         this.canvas.removeAllNodes();
@@ -121,7 +127,7 @@ public abstract class Activity {
      * activity to this one.
      *
      * @return true if we can start this activity, false otherwise in which case
-     * the switching of activities will be aborted.
+     *         the switching of activities will be aborted.
      */
     public boolean onPreStarted() {
         return true;
@@ -144,34 +150,42 @@ public abstract class Activity {
     /**
      * Called by RegexpVisApp when the state of the CommandHistory changes.
      *
-     * @param obj The object the observer got passed
+     * @param obj
+     *            The object the observer got passed
      */
     public void onHistoryChanged(Object obj) {
 
     }
 
     public abstract void onNodeClicked(GraphCanvasEvent event);
+
     public abstract void onEdgeClicked(GraphCanvasEvent event);
+
     public abstract void onBackgroundClicked(GraphCanvasEvent event);
+
     public abstract void onContextMenuRequested(ContextMenuEvent event);
+
     public abstract void onHideContextMenu(MouseEvent event);
 
     protected void executeNewCommand(Command cmd) {
+        UICommand uiCmd;
         if (cmd instanceof UICommand) {
-            // TODO: This doesn't test for any different subclass types, but it
-            // should be okay...
-            throw new IllegalArgumentException(
-                    "Argument should be of type Command, not UICommand.");
+            uiCmd = (UICommand) cmd;
+        } else {
+            uiCmd = UICommand.fromCommand(this.canvas, cmd);
         }
 
-        UICommand uiCmd = UICommand.fromCommand(this.canvas, cmd);
         if (uiCmd != null) {
             this.history.executeNewCommand(uiCmd);
         }
     }
 
-    protected void executeNewUICommand(UICommand uiCmd) {
-        this.history.executeNewCommand(uiCmd);
+    /**
+     * @deprecated Use {@link #executeNewCommand(Command)} instead, there is no
+     *             need to instantiate the {@link UICommand} yourself
+     */
+    protected void executeNewUICommand(UICommand cmd) {
+        executeNewCommand(cmd);
     }
 
     // Expose CommandHistory methods, except for executeNewCommand()
