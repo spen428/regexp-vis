@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
-public class CompositeCommand extends Command {
+public abstract class CompositeCommand extends Command {
 
     protected final ArrayList<Command> commands;
 
