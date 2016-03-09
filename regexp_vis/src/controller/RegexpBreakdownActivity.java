@@ -1,5 +1,8 @@
 package controller;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import model.Automaton;
@@ -16,6 +19,8 @@ import view.GraphEdge;
  *
  */
 public class RegexpBreakdownActivity extends Activity {
+
+    private static final Logger LOGGER = Logger.getLogger("controller");
 
     public RegexpBreakdownActivity(GraphCanvasFX canvas, Automaton automaton) {
         super(canvas, automaton);
@@ -51,8 +56,8 @@ public class RegexpBreakdownActivity extends Activity {
     private void onEdgeDoubleClick(GraphCanvasEvent event) {
         if (this.history.getHistoryIdx() != this.history.getHistorySize()
                 && !this.history.isClobbered()) {
-            System.out.println("Ignoring breakdown event as we are not at the "
-                    + "end of the history list.");
+            LOGGER.log(Level.FINE, "Ignoring breakdown event as we are not at "
+                    + "the end of the history list.");
             return;
         }
 
@@ -65,8 +70,7 @@ public class RegexpBreakdownActivity extends Activity {
                 .getAutomatonTransitionById(edge.getId());
 
         if (trans == null) {
-            System.err
-                    .println("Could not find an edge with id " + edge.getId());
+            LOGGER.log(Level.WARNING, "Could not find an edge with id " + edge.getId());
             return;
         }
 

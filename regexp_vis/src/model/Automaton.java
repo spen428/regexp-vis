@@ -1,12 +1,22 @@
 package model;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class which represents a non-deterministic finite automaton (NFA) or
  * deterministic finite automaton.
  */
 public class Automaton {
+
+    private static final Logger LOGGER = Logger.getLogger("model");
+
     public static class StateTransitionsPair {
         private final AutomatonState mState;
         private final LinkedList<AutomatonTransition> mTransitions;
@@ -117,30 +127,30 @@ public class Automaton {
      */
     public void debugPrint()
     {
-        System.out.println("Automaton {");
-        System.out.println("    counter = " + mCounter);
-        System.out.println("    start state (id) " + mStartState.getId());
+        LOGGER.log(Level.FINE, "Automaton {");
+        LOGGER.log(Level.FINE, "    counter = " + mCounter);
+        LOGGER.log(Level.FINE, "    start state (id) " + mStartState.getId());
         for (Map.Entry<Integer, StateTransitionsPair> e : mGraph.entrySet()) {
             AutomatonState state = e.getValue().mState;
             LinkedList<AutomatonTransition> transitions = e.getValue().mTransitions;
-            System.out.println("    AutomatonState {");
-            System.out.println("        id = " +  state.getId());
-            System.out.println("        is final = " +  state.isFinal());
-            System.out.println("        transitions = [");
+            LOGGER.log(Level.FINE, "    AutomatonState {");
+            LOGGER.log(Level.FINE, "        id = " +  state.getId());
+            LOGGER.log(Level.FINE, "        is final = " +  state.isFinal());
+            LOGGER.log(Level.FINE, "        transitions = [");
             for (AutomatonTransition t : transitions) {
                 int fromId = t.getFrom().getId();
                 int toId = t.getTo().getId();
                 String strData = t.getData().toString();
-                System.out.println("            AutomatonTransition {");
-                System.out.println("                from (id) = " + fromId);
-                System.out.println("                to (id) = " + toId);
-                System.out.println("                data = " + strData);
-                System.out.println("            },");
+                LOGGER.log(Level.FINE, "            AutomatonTransition {");
+                LOGGER.log(Level.FINE, "                from (id) = " + fromId);
+                LOGGER.log(Level.FINE, "                to (id) = " + toId);
+                LOGGER.log(Level.FINE, "                data = " + strData);
+                LOGGER.log(Level.FINE, "            },");
             }
-            System.out.println("        ]");
-            System.out.println("    }");
+            LOGGER.log(Level.FINE, "        ]");
+            LOGGER.log(Level.FINE, "    }");
         }
-        System.out.println("}");
+        LOGGER.log(Level.FINE, "}");
     }
 
     /**

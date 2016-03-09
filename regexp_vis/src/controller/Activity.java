@@ -1,6 +1,8 @@
 package controller;
 
 import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -24,6 +26,8 @@ import view.GraphNode;
  *
  */
 public abstract class Activity {
+
+    private static final Logger LOGGER = Logger.getLogger("controller");
 
     enum ActivityType {
         ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"), ACTIVITY_NFA_TO_REGEXP(
@@ -52,7 +56,8 @@ public abstract class Activity {
         this.history = new CommandHistory();
     }
 
-    Activity(GraphCanvasFX canvas, Automaton automaton, CommandHistory history) {
+    Activity(GraphCanvasFX canvas, Automaton automaton,
+            CommandHistory history) {
         this.canvas = canvas;
         this.automaton = automaton;
         this.history = history;
@@ -67,7 +72,7 @@ public abstract class Activity {
     public void onEnteredRegexp(String text) {
         historyClear();
 
-        System.out.printf("Entered regexp: %s%n", text);
+        LOGGER.log(Level.INFO, "Entered regexp: " + text);
         BasicRegexp re = null;
         try {
             re = BasicRegexp.parseRegexp(text);
