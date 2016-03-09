@@ -1,10 +1,6 @@
 package controller;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
 
 import javafx.geometry.Point2D;
 import model.AddStateCommand;
@@ -23,50 +19,27 @@ import view.GraphCanvasFX;
  * @author sp611
  *
  */
-public class BreakdownUICommand extends UICommand {
+public class BreakdownUICommand extends CompositeUICommand {
 
-    protected final LinkedList<UICommand> commands;
     protected final AutomatonTransition originalTransition;
 
     public BreakdownUICommand(GraphCanvasFX graph, BreakdownCommand cmd) {
         super(graph, cmd);
-        this.commands = new LinkedList<>();
         this.originalTransition = cmd.getOriginalTransition();
 
+        super.commands.clear();
         Point2D[] points = BreakdownUITools.placeNodes(graph, cmd);
         int added = 0;
-
         for (Command c : cmd.getCommands()) {
             if (c instanceof AddStateCommand) {
                 Point2D loc = points[added++];
                 AddStateUICommand newCommand = new AddStateUICommand(graph,
                         (AddStateCommand) c, loc.getX(), loc.getY());
-                this.commands.add(newCommand);
+                super.commands.add(newCommand);
             } else {
-                this.commands.add(UICommand.fromCommand(graph, c));
+                super.commands.add(UICommand.fromCommand(graph, c));
             }
         }
-    }
-
-    @Override
-    public void undo() {
-        ListIterator<UICommand> it = this.commands
-                .listIterator(this.commands.size());
-        while (it.hasPrevious()) {
-            UICommand c = it.previous();
-            c.undo();
-        }
-    }
-
-    @Override
-    public void redo() {
-        for (UICommand c : this.commands) {
-            c.redo();
-        }
-    }
-
-    public List<UICommand> getCommands() {
-        return Collections.unmodifiableList(this.commands);
     }
 
     public AutomatonTransition getOriginalTransition() {

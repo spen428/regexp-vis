@@ -6,6 +6,7 @@ import model.AddTransitionCommand;
 import model.Automaton;
 import model.BreakdownCommand;
 import model.Command;
+import model.CompositeCommand;
 import model.RemoveStateCommand;
 import model.RemoveTransitionCommand;
 import model.SetIsFinalCommand;
@@ -47,10 +48,11 @@ public abstract class UICommand extends Command {
         if (cmd instanceof AddStateCommand) {
             return new AddStateUICommand(graph, (AddStateCommand) cmd, 0, 0);
         } else if (cmd instanceof AddTransitionCommand) {
-            return new AddTransitionUICommand(graph,
-                    (AddTransitionCommand) cmd);
-        } else if (cmd instanceof BreakdownCommand) {
-            return new BreakdownUICommand(graph, (BreakdownCommand) cmd);
+            return new AddTransitionUICommand(graph, (AddTransitionCommand) cmd);
+        } else if (cmd instanceof CompositeCommand) {
+            if (cmd instanceof BreakdownCommand) {
+                return new BreakdownUICommand(graph, (BreakdownCommand) cmd);
+            }
         } else if (cmd instanceof RemoveStateCommand) {
             return new RemoveStateUICommand(graph, (RemoveStateCommand) cmd);
         } else if (cmd instanceof RemoveTransitionCommand) {
@@ -60,13 +62,10 @@ public abstract class UICommand extends Command {
             return new SetIsFinalUICommand(graph, (SetIsFinalCommand) cmd);
         } else if (cmd == null) {
             return null;
-        } else {
-            String msg = String.format(
-                    "Conversion from %s to UICommand has "
-                            + "not yet been implemented.",
-                    cmd.getClass().toString());
-            throw new UnsupportedOperationException(msg);
         }
+        String msg = String.format("Conversion from %s to UICommand has "
+                + "not yet been implemented.", cmd.getClass().toString());
+        throw new UnsupportedOperationException(msg);
     }
 
     public abstract String getDescription();
