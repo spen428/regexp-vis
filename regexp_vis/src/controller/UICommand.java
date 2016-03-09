@@ -6,7 +6,6 @@ import model.AddTransitionCommand;
 import model.Automaton;
 import model.BreakdownCommand;
 import model.Command;
-import model.CompositeCommand;
 import model.RemoveEpsilonTransitionsCommand;
 import model.RemoveEquivalentStatesCommand;
 import model.RemoveNonDeterminismCommand;
