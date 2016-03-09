@@ -45,8 +45,7 @@ import view.GraphCanvasFX;
 
 public class RegexpVisApp implements Observer {
 
-    private static final Logger LOGGER = Logger.getLogger(RegexpVisApp.class
-            .toString());
+    private static final Logger LOGGER = Logger.getLogger("controller");
 
     /* Finals */
     final CheckMenuItem[] activityMenuItems;

@@ -17,8 +17,7 @@ import java.util.logging.Logger;
  */
 public class BasicRegexp implements Comparable<BasicRegexp> {
 
-    private static final Logger LOGGER = Logger.getLogger(BasicRegexp.class
-            .toString());
+    private static final Logger LOGGER = Logger.getLogger("model");
 
     public enum RegexpOperator {
         NONE(3, true),
