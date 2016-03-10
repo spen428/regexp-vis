@@ -164,6 +164,10 @@ public abstract class Activity {
 
     public abstract void onBackgroundClicked(GraphCanvasEvent event);
 
+    public void onCreatedEdge(GraphCanvasEvent event) {
+
+    }
+
     public abstract void onContextMenuRequested(ContextMenuEvent event);
 
     public abstract void onHideContextMenu(MouseEvent event);

@@ -377,6 +377,14 @@ public class RegexpVisApp implements Observer {
                     }
                 });
 
+        this.mCanvas.setOnCreatedEdge(new EventHandler<GraphCanvasEvent>() {
+            @Override
+            public void handle(GraphCanvasEvent event) {
+                onCreatedEdge(event);
+            }
+
+        });
+
         this.mCanvas.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED,
                 new EventHandler<ContextMenuEvent>() {
                     @Override
@@ -503,6 +511,12 @@ public class RegexpVisApp implements Observer {
     private void onBackgroundClicked(GraphCanvasEvent event) {
         if (this.currentActivity != null) {
             this.currentActivity.onBackgroundClicked(event);
+        }
+    }
+
+    private void onCreatedEdge(GraphCanvasEvent event) {
+        if (this.currentActivity != null) {
+            this.currentActivity.onCreatedEdge(event);
         }
     }
 
