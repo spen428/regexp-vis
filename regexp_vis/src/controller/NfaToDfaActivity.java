@@ -371,6 +371,7 @@ public class NfaToDfaActivity extends Activity {
                 itemShowReachable.setDisable(true);
                 itemRemoveOutgoing.setDisable(true);
                 itemRemoveEquivalent.setDisable(true);
+                itemRemoveUnreachable.setDisable(true);
             } else {
                 // Can only remove out-going epsilon transitions if there are
                 // actually ones to remove, so disable the menu item if this is

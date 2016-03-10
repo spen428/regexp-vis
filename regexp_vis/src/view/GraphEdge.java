@@ -4,6 +4,21 @@ import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 
 public class GraphEdge {
+    public static enum RenderMode {
+        /**
+         * Render nothing.
+         */
+        NONE,
+        /**
+         * Render the arrow head only.
+         */
+        ARROW,
+        /**
+         * Render both the line / arc and arrow head.
+         */
+        FULL
+    }
+
     final int mId;
     final GraphNode mFrom;
     final GraphNode mTo;
@@ -18,12 +33,11 @@ public class GraphEdge {
     double mLabelTestBisectY;
 
     /**
-     * Whether or not this node is being rendered (set by layout 
-     * calculation), due to too little space. Could in theory be replaced 
-     * with an enumeration if more complex handling of too little space is 
-     * implemented at a later date.
+     * Describes what is being rendered for the edge (set by layout
+     * calculation). For example, only draw the arrow head if low on space, or
+     * if there is no space at all don't render anything.
      */
-    boolean mIsRendered;
+    RenderMode mRenderMode;
     boolean mIsLine;
 
     double mArrowBaseX;
@@ -32,6 +46,7 @@ public class GraphEdge {
     double mStartPointY;
     double mArrowTipX;
     double mArrowTipY;
+    double mArrowWidth;
 
     double mTextX;
     double mTextY;
@@ -70,9 +85,9 @@ public class GraphEdge {
         return mId;
     }
 
-    public boolean isRendered()
+    public RenderMode getRenderMode()
     {
-        return mIsRendered;
+        return mRenderMode;
     }
 
     /**
@@ -83,5 +98,5 @@ public class GraphEdge {
     {
         return mMiddlePoint;
     }
-    
+
 }
