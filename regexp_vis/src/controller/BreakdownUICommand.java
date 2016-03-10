@@ -1,7 +1,5 @@
 package controller;
 
-import java.util.ArrayList;
-
 import javafx.geometry.Point2D;
 import model.AddStateCommand;
 import model.AutomatonTransition;
@@ -49,7 +47,8 @@ public class BreakdownUICommand extends CompositeUICommand {
     @Override
     public String getDescription() {
         /* Construct a string listing the new transitions */
-        AutomatonTransition[] newTransitions = getNewTransitions(this);
+        AutomatonTransition[] newTransitions = BreakdownUITools
+                .getNewTransitions(this);
         StringBuilder tranStr = new StringBuilder();
         for (int i = 0; i < newTransitions.length; i++) {
             tranStr.append(newTransitions[i].getData().toString());
@@ -80,17 +79,6 @@ public class BreakdownUICommand extends CompositeUICommand {
         }
 
         return "null";
-    }
-
-    private static AutomatonTransition[] getNewTransitions(
-            BreakdownUICommand cmd) {
-        ArrayList<AutomatonTransition> transitions = new ArrayList<>();
-        for (UICommand c : cmd.getCommands()) {
-            if (c instanceof AddTransitionUICommand) {
-                transitions.add(((AddTransitionUICommand) c).getTransition());
-            }
-        }
-        return transitions.toArray(new AutomatonTransition[0]);
     }
 
 }
