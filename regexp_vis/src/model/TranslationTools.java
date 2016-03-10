@@ -314,4 +314,51 @@ public final class TranslationTools {
 
         return false;
     }
+
+    /**
+     * @param automaton The automaton of the given state
+     * @param state The state in question
+     * @return Null if the given state doesn't have exactly one loop onto
+     * itself, otherwise it returns the AutomatonTransition for the single loop.
+     */
+    public static AutomatonTransition getSingleLoop(Automaton automaton,
+            AutomatonState state)
+    {
+        AutomatonTransition loopTrans = null;
+        for (AutomatonTransition t : automaton.getStateTransitions(state)) {
+            if (t.getTo() == state) {
+                if (loopTrans == null) {
+                    loopTrans = t;
+                } else {
+                    // Multiple looped transitions
+                    return null;
+                }
+            }
+        }
+
+        return loopTrans;
+    }
+
+    /**
+     * @param automaton The automaton of the given state
+     * @param state The state in question
+     * @param to A specific target state to check for parallel transitions. If
+     * null, any state is considered.
+     * @return True if there exists out-going parallel transitions from the
+     * given state to the target state.
+     */
+    public static boolean stateHasParallelTrans(Automaton automaton,
+            AutomatonState state, AutomatonState to)
+    {
+        HashSet<AutomatonState> found = new HashSet<>();
+        for (AutomatonTransition t : automaton.getStateTransitions(state)) {
+            if (found.contains(t.getTo())) {
+                return true;
+            } else if (to == null || to == t.getTo()) {
+                found.add(t.getTo());
+            }
+        }
+
+        return false;
+    }
 }
