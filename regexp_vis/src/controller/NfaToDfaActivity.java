@@ -4,15 +4,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import view.GraphCanvasEvent;
-import view.GraphCanvasFX;
-import view.GraphNode;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
@@ -20,7 +17,6 @@ import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
 import model.Command;
-import model.CommandHistory;
 import model.RemoveEpsilonTransitionsCommand;
 import model.RemoveEpsilonTransitionsContext;
 import model.RemoveEquivalentStatesCommand;
@@ -28,6 +24,9 @@ import model.RemoveNonDeterminismCommand;
 import model.RemoveNonDeterminismContext;
 import model.RemoveStateCleanlyCommand;
 import model.TranslationTools;
+import view.GraphCanvasEvent;
+import view.GraphCanvasFX;
+import view.GraphNode;
 
 /**
  *
@@ -383,6 +382,7 @@ public class NfaToDfaActivity extends Activity {
                 itemShowReachable.setDisable(true);
                 itemRemoveOutgoing.setDisable(true);
                 itemRemoveEquivalent.setDisable(true);
+                itemRemoveUnreachable.setDisable(true);
             } else {
                 // Can only remove out-going epsilon transitions if there are
                 // actually ones to remove, so disable the menu item if this is
