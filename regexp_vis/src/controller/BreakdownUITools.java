@@ -131,8 +131,8 @@ public class BreakdownUITools {
      *         {@value #VARIATION}
      */
     private static Point2D variedPoint(double x, double y) {
-        double dx = Math.random() * VARIATION;
-        double dy = Math.random() * VARIATION;
+        double dx = (Math.random() * 2 * VARIATION) - VARIATION;
+        double dy = (Math.random() * 2 * VARIATION) - VARIATION;
         return new Point2D(x + dx, y + dy);
     }
 
