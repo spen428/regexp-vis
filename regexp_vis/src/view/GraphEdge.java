@@ -85,6 +85,16 @@ public class GraphEdge {
         return mId;
     }
 
+    public GraphNode getFrom()
+    {
+        return mFrom;
+    }
+
+    public GraphNode getTo()
+    {
+        return mTo;
+    }
+
     public RenderMode getRenderMode()
     {
         return mRenderMode;
