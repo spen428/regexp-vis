@@ -61,6 +61,11 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         new BasicRegexp(EPSILON_CHAR);
 
     final private ArrayList<BasicRegexp> mOperands;
+    /**
+     * The operands for this BasicRegexp but sorted. The use for this is when
+     * doing comparison on CHOICE, where ordering doesn't matter.
+     */
+    final private ArrayList<BasicRegexp> mSortedOperands;
     final private char mChar;
     final private RegexpOperator mOperator;
     // IDEA(mjn33): cache results from .optimise() and .isNullable()?
@@ -113,7 +118,12 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
             optimisedOperands = new ArrayList<>(operands);
         }
 
+        ArrayList<BasicRegexp> sortedOptimisedOperands = new ArrayList<>(
+                optimisedOperands);
+        Collections.sort(sortedOptimisedOperands);
+
         mOperands = optimisedOperands;
+        mSortedOperands = sortedOptimisedOperands;
         mChar = EPSILON_CHAR;
         mOperator = op;
     }
@@ -142,6 +152,7 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
 
         mOperands = new ArrayList<>();
         mOperands.add(operand);
+        mSortedOperands = new ArrayList<>(mOperands);
         mChar = EPSILON_CHAR;
         mOperator = op;
     }
@@ -154,8 +165,34 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
     public BasicRegexp(char c)
     {
         mOperands = null;
+        mSortedOperands = null;
         mChar = c;
         mOperator = RegexpOperator.NONE;
+    }
+
+    private static int compareOperandLists(List<BasicRegexp> list1,
+            List<BasicRegexp> list2)
+    {
+
+        Iterator<BasicRegexp> list1It = list1.iterator();
+        Iterator<BasicRegexp> list2It = list2.iterator();
+        while (list1It.hasNext() && list2It.hasNext()) {
+            BasicRegexp thisOperand = list1It.next();
+            BasicRegexp otherOperand = list2It.next();
+
+            // Return based on the first difference in operands
+            int ret = thisOperand.compareTo(otherOperand);
+            if (ret != 0) {
+                return ret;
+            }
+        }
+
+        // Shorter expressions come before longer ones
+        if (list1It.hasNext() == list2It.hasNext()) {
+            return 0;
+        } else {
+            return list1It.hasNext() ? 1 : -1;
+        }
     }
 
     public int compareTo(BasicRegexp other)
@@ -175,25 +212,18 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
             return Character.compare(mChar, other.mChar);
         } else {
             // Compare complex expressions
-            Iterator<BasicRegexp> thisIt = mOperands.iterator();
-            Iterator<BasicRegexp> otherIt = other.mOperands.iterator();
-            while (thisIt.hasNext() && otherIt.hasNext()) {
-                BasicRegexp thisOperand = thisIt.next();
-                BasicRegexp otherOperand = otherIt.next();
+            List<BasicRegexp> thisList = mOperands;
+            List<BasicRegexp> otherList = other.mOperands;
 
-                // Return based on the first difference in operands
-                ret = thisOperand.compareTo(otherOperand);
-                if (ret != 0) {
-                    return ret;
-                }
+            // Check if we are comparing CHOICE, ordering is unimportant so use
+            // the sorted lists.
+            if (mOperator == RegexpOperator.CHOICE) {
+                thisList = mSortedOperands;
+                otherList = other.mSortedOperands;
             }
 
-            // Shorter expressions come before longer ones
-            if (thisIt.hasNext() == otherIt.hasNext()) {
-                return 0;
-            } else {
-                return thisIt.hasNext() ? 1 : -1;
-            }
+            ret = compareOperandLists(thisList, otherList);
+            return ret;
         }
     }
 
@@ -561,8 +591,13 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
      * @return True if any optimisations were made, false otherwise
      */
     private boolean optimiseStarOnSC(BasicRegexp re,
-        ArrayList<BasicRegexp> optimisedOperands)
+        ArrayList<BasicRegexp> optimisedOperands, int what, int level)
     {
+        if (level == 0) {
+            optimisedOperands.add(re);
+            return false;
+        }
+
         if (re.getOperator() == RegexpOperator.SEQUENCE && !re.isNullable()) {
             // Non-nullable SEQUENCE, can't progress further.
             optimisedOperands.add(re);
@@ -587,17 +622,18 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
                 } else {
                     // Check if by getting unwrapping this, we uncover another
                     // CHOICE or nullable SEQUENCE
-                    optimiseStarOnSC(subExpr, optimisedOperands);
+                    optimiseStarOnSC(subExpr, optimisedOperands, what,
+                            level - 1);
                 }
 
                 hasOptimisedSubExpr = true;
                 break;
             case SEQUENCE:
                 hasOptimisedSubExpr = optimiseStarOnSC(operand,
-                    optimisedOperands);
+                    optimisedOperands, what, level - 1);
                 break;
             case CHOICE:
-                optimiseStarOnSC(operand, optimisedOperands);
+                optimiseStarOnSC(operand, optimisedOperands, what, level - 1);
                 hasOptimisedSubExpr = true;
                 break;
             default:
@@ -606,10 +642,17 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         return hasOptimisedSubExpr;
     }
 
-    private BasicRegexp optimiseStar()
+    private BasicRegexp optimiseStar(int what, int level)
     {
+        if (level == 0) {
+            return this;
+        }
+        if ((what & OPTIMISE_STAR) == 0) {
+            return this;
+        }
+
         BasicRegexp subExpr = mOperands.get(0);
-        BasicRegexp subExprOptimised = subExpr.optimise();
+        BasicRegexp subExprOptimised = subExpr.optimise(what, level - 1);
         switch (subExprOptimised.getOperator()) {
         case NONE:
             if (subExpr == subExprOptimised) {
@@ -628,7 +671,7 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         case CHOICE: {
             ArrayList<BasicRegexp> optimisedOperands = new ArrayList<>();
             boolean hasOptimisedSubExpr = optimiseStarOnSC(subExprOptimised,
-                optimisedOperands);
+                optimisedOperands, what, level - 1);
             if (!hasOptimisedSubExpr && subExpr == subExprOptimised) {
                 // No optimisations made
                 return this;
@@ -651,7 +694,7 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
                 // which we can translate to (a|b|c)*
                 BasicRegexp newExprOptimised = new BasicRegexp(
                     optimisedOperands, RegexpOperator.CHOICE);
-                newExprOptimised = newExprOptimised.optimise();
+                newExprOptimised = newExprOptimised.optimise(what, level - 1);
                 return new BasicRegexp(newExprOptimised, RegexpOperator.STAR);
             }
         }
@@ -660,10 +703,17 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         }
     }
 
-    private BasicRegexp optimisePlus()
+    private BasicRegexp optimisePlus(int what, int level)
     {
+        if (level == 0) {
+            return this;
+        }
+        if ((what & OPTIMISE_PLUS) == 0) {
+            return this;
+        }
+
         BasicRegexp subExpr = mOperands.get(0);
-        BasicRegexp subExprOptimised = subExpr.optimise();
+        BasicRegexp subExprOptimised = subExpr.optimise(what, level - 1);
         switch (subExprOptimised.getOperator()) {
         case NONE:
             if (subExpr == subExprOptimised) {
@@ -708,10 +758,17 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         }
     }
 
-    private BasicRegexp optimiseOption()
+    private BasicRegexp optimiseOption(int what, int level)
     {
+        if (level == 0) {
+            return this;
+        }
+        if ((what & OPTIMISE_OPTION) == 0) {
+            return this;
+        }
+
         BasicRegexp subExpr = mOperands.get(0);
-        BasicRegexp subExprOptimised = subExpr.optimise();
+        BasicRegexp subExprOptimised = subExpr.optimise(what, level - 1);
 
         if (subExprOptimised.isNullable()) {
             return subExprOptimised;
@@ -784,17 +841,38 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         return -1;
     }
 
-    private BasicRegexp optimiseSequence()
+    private BasicRegexp optimiseSequence(int what, int level)
     {
+        if (level == 0) {
+            return this;
+        }
+        if ((what & OPTIMISE_SEQUENCE) == 0) {
+            return this;
+        }
+
         // Optimise all sub expressions, track if any were *actually* optimised
         ArrayList<BasicRegexp> optimisedOperands = new ArrayList<>();
         boolean hasOptimisedSubExpr = false;
         for (BasicRegexp operand : mOperands) {
-            BasicRegexp optimisedOperand = operand.optimise();
+            BasicRegexp optimisedOperand = operand.optimise(what, level - 1);
             if (operand != optimisedOperand) {
                 hasOptimisedSubExpr = true;
             }
             optimisedOperands.add(optimisedOperand);
+        }
+
+        // Check for epsilon characters in this SEQUENCE, remove them
+        Iterator<BasicRegexp> it = optimisedOperands.iterator();
+        while (it.hasNext()) {
+            BasicRegexp re = it.next();
+            if (re.isSingleChar() && re.getChar() == EPSILON_CHAR) {
+                it.remove();
+            }
+        }
+
+        if (optimisedOperands.size() == 0) {
+            // All operands were epsilons, equal to EPSILON_EXPRESSION
+            return EPSILON_EXPRESSION;
         }
 
         // Loop forwards through pairs
@@ -846,13 +924,20 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         }
     }
 
-    private BasicRegexp optimiseChoice()
+    private BasicRegexp optimiseChoice(int what, int level)
     {
+        if (level == 0) {
+            return this;
+        }
+        if ((what & OPTIMISE_CHOICE) == 0) {
+            return this;
+        }
+
         // Optimise all sub expressions, track if any were *actually* optimised
         ArrayList<BasicRegexp> optimisedOperands = new ArrayList<>();
         boolean hasOptimisedSubExpr = false;
         for (BasicRegexp operand : mOperands) {
-            BasicRegexp optimisedOperand = operand.optimise();
+            BasicRegexp optimisedOperand = operand.optimise(what, level - 1);
             if (operand != optimisedOperand) {
                 hasOptimisedSubExpr = true;
             }
@@ -888,12 +973,24 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         }
     }
 
+    public static int OPTIMISE_STAR = 0x01;
+    public static int OPTIMISE_PLUS = 0x02;
+    public static int OPTIMISE_OPTION = 0x04;
+    public static int OPTIMISE_SEQUENCE = 0x08;
+    public static int OPTIMISE_CHOICE = 0x10;
+    public static int OPTIMISE_ALL = 0xFFFFFFFF;
+
     /**
      * Creates an optimised version of this regular expression, if the
      * expression cannot be optimised further this expression is returned.
+     *
+     * @param what A bitfield describing what optimisations to make
+     * (OPTIMISE_* constants)
+     * @param level The level of recursion to following in optimising
+     * sub-expressions
      * @return The optimised expression
      */
-    public BasicRegexp optimise()
+    public BasicRegexp optimise(int what, int level)
     {
         // Step 1: call .optimise() on sub expressions, if a new expression is
         // returned (i.e. we optimised it somehow) we definitely need to create
@@ -933,15 +1030,15 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         case NONE:
             return this;
         case STAR:
-            return optimiseStar();
+            return optimiseStar(what, level);
         case PLUS:
-            return optimisePlus();
+            return optimisePlus(what, level);
         case OPTION:
-            return optimiseOption();
+            return optimiseOption(what, level);
         case SEQUENCE:
-            return optimiseSequence();
+            return optimiseSequence(what, level);
         case CHOICE:
-            return optimiseChoice();
+            return optimiseChoice(what, level);
         default:
             throw new RuntimeException("BUG: Should be unreachable.");
         }
