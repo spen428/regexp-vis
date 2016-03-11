@@ -647,7 +647,7 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         if (level == 0) {
             return this;
         }
-        if ((what & OPTIMIZE_STAR) == 0) {
+        if ((what & OPTIMISE_STAR) == 0) {
             return this;
         }
 
@@ -708,7 +708,7 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         if (level == 0) {
             return this;
         }
-        if ((what & OPTIMIZE_PLUS) == 0) {
+        if ((what & OPTIMISE_PLUS) == 0) {
             return this;
         }
 
@@ -763,7 +763,7 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         if (level == 0) {
             return this;
         }
-        if ((what & OPTIMIZE_OPTION) == 0) {
+        if ((what & OPTIMISE_OPTION) == 0) {
             return this;
         }
 
@@ -846,7 +846,7 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         if (level == 0) {
             return this;
         }
-        if ((what & OPTIMIZE_SEQUENCE) == 0) {
+        if ((what & OPTIMISE_SEQUENCE) == 0) {
             return this;
         }
 
@@ -929,7 +929,7 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         if (level == 0) {
             return this;
         }
-        if ((what & OPTIMIZE_CHOICE) == 0) {
+        if ((what & OPTIMISE_CHOICE) == 0) {
             return this;
         }
 
@@ -973,19 +973,19 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         }
     }
 
-    public static int OPTIMIZE_STAR = 0x01;
-    public static int OPTIMIZE_PLUS = 0x02;
-    public static int OPTIMIZE_OPTION = 0x04;
-    public static int OPTIMIZE_SEQUENCE = 0x08;
-    public static int OPTIMIZE_CHOICE = 0x10;
-    public static int OPTIMIZE_ALL = 0xFFFFFFFF;
+    public static int OPTIMISE_STAR = 0x01;
+    public static int OPTIMISE_PLUS = 0x02;
+    public static int OPTIMISE_OPTION = 0x04;
+    public static int OPTIMISE_SEQUENCE = 0x08;
+    public static int OPTIMISE_CHOICE = 0x10;
+    public static int OPTIMISE_ALL = 0xFFFFFFFF;
 
     /**
      * Creates an optimised version of this regular expression, if the
      * expression cannot be optimised further this expression is returned.
      *
      * @param what A bitfield describing what optimisations to make
-     * (OPTIMIZE_* constants)
+     * (OPTIMISE_* constants)
      * @param level The level of recursion to following in optimising
      * sub-expressions
      * @return The optimised expression
