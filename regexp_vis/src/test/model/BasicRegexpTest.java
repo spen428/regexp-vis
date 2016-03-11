@@ -269,16 +269,26 @@ public class BasicRegexpTest {
         BasicRegexp re9 = BasicRegexp.parseRegexp("a+?");
         BasicRegexp re10 = BasicRegexp.parseRegexp("a?+");
 
-        assertEquals(re1.optimise().toString(), "a*");
-        assertEquals(re2.optimise().toString(), "a*");
-        assertEquals(re3.optimise().toString(), "a*");
-        assertEquals(re4.optimise().toString(), "a*");
-        assertEquals(re5.optimise().toString(), "a*");
-        assertEquals(re6.optimise().toString(), "a*");
-        assertEquals(re7.optimise().toString(), "a*");
-        assertEquals(re8.optimise().toString(), "a*");
-        assertEquals(re9.optimise().toString(), "a*");
-        assertEquals(re10.optimise().toString(), "a*");
+        assertEquals(re1.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
+        assertEquals(re2.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
+        assertEquals(re3.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
+        assertEquals(re4.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
+        assertEquals(re5.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
+        assertEquals(re6.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
+        assertEquals(re7.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
+        assertEquals(re8.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
+        assertEquals(re9.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
+        assertEquals(re10.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
     }
 
     @Test
@@ -286,7 +296,8 @@ public class BasicRegexpTest {
         // Test combinations of iteration simplifying down to a single PLUS
         BasicRegexp re1 = BasicRegexp.parseRegexp("a+++++++++++++++++++++");
 
-        assertEquals(re1.optimise().toString(), "a+");
+        assertEquals(re1.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a+");
     }
 
     @Test
@@ -299,11 +310,16 @@ public class BasicRegexpTest {
         BasicRegexp re4 = BasicRegexp.parseRegexp("a?a?a?a?a*");
         BasicRegexp re5 = BasicRegexp.parseRegexp("a?a*a*a?a*a?a?a?a*a*a?a*a?");
 
-        assertEquals(re1.optimise().toString(), "a*");
-        assertEquals(re2.optimise().toString(), "a*");
-        assertEquals(re3.optimise().toString(), "a*");
-        assertEquals(re4.optimise().toString(), "a*");
-        assertEquals(re5.optimise().toString(), "a*");
+        assertEquals(re1.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
+        assertEquals(re2.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
+        assertEquals(re3.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
+        assertEquals(re4.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
+        assertEquals(re5.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*");
     }
 
     @Test
@@ -318,13 +334,20 @@ public class BasicRegexpTest {
         BasicRegexp re6 = BasicRegexp.parseRegexp("(a|b)+(a|b)?");
         BasicRegexp re7 = BasicRegexp.parseRegexp("(a|b)?(a|b)+");
 
-        assertEquals(re1.optimise().toString(), "(a|b)*");
-        assertEquals(re2.optimise().toString(), "(a|b)*");
-        assertEquals(re3.optimise().toString(), "(a|b)*");
-        assertEquals(re4.optimise().toString(), "(a|b)+");
-        assertEquals(re5.optimise().toString(), "(a|b)+");
-        assertEquals(re6.optimise().toString(), "(a|b)+");
-        assertEquals(re7.optimise().toString(), "(a|b)+");
+        assertEquals(re1.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a|b)*");
+        assertEquals(re2.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a|b)*");
+        assertEquals(re3.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a|b)*");
+        assertEquals(re4.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a|b)+");
+        assertEquals(re5.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a|b)+");
+        assertEquals(re6.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a|b)+");
+        assertEquals(re7.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a|b)+");
     }
 
     @Test
@@ -338,11 +361,16 @@ public class BasicRegexpTest {
         BasicRegexp re4 = BasicRegexp.parseRegexp("a?a?b?a?a*");
         BasicRegexp re5 = BasicRegexp.parseRegexp("a?a*a*a?a*b?a?a?a*b*a?a*a?");
 
-        assertEquals(re1.optimise().toString(), "a*b*");
-        assertEquals(re2.optimise().toString(), "a*b?");
-        assertEquals(re3.optimise().toString(), "a?b*");
-        assertEquals(re4.optimise().toString(), "a?a?b?a*");
-        assertEquals(re5.optimise().toString(), "a*b?a*b*a*");
+        assertEquals(re1.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*b*");
+        assertEquals(re2.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*b?");
+        assertEquals(re3.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a?b*");
+        assertEquals(re4.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a?a?b?a*");
+        assertEquals(re5.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*b?a*b*a*");
     }
 
     @Test
@@ -355,11 +383,16 @@ public class BasicRegexpTest {
         BasicRegexp re4 = BasicRegexp.parseRegexp("(c|b|b)*|(a|a)*|a*");
         BasicRegexp re5 = BasicRegexp.parseRegexp("a*b*|a*b*");
 
-        assertEquals(re1.optimise().toString(), "a|b");
-        assertEquals(re2.optimise().toString(), "b|a");
-        assertEquals(re3.optimise().toString(), "b*|a*");
-        assertEquals(re4.optimise().toString(), "(c|b)*|a*");
-        assertEquals(re5.optimise().toString(), "a*b*");
+        assertEquals(re1.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a|b");
+        assertEquals(re2.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "b|a");
+        assertEquals(re3.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "b*|a*");
+        assertEquals(re4.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(c|b)*|a*");
+        assertEquals(re5.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "a*b*");
     }
 
     @Test
@@ -378,20 +411,44 @@ public class BasicRegexpTest {
         BasicRegexp re10 = BasicRegexp.parseRegexp("((a*|b*)+b?|c)*");
         BasicRegexp re11 = BasicRegexp.parseRegexp("(abc**)*");
 
-        assertEquals(re1.optimise().toString(), "(a|b)*");
-        assertEquals(re2.optimise().toString(), "(a|d|b|c)*");
-        assertEquals(re3.optimise().toString(), "(abc)*");
-        assertEquals(re4.optimise().toString(), "(a|b|c)*");
-        assertEquals(re5.optimise().toString(), "(a|b|c)*");
-        assertEquals(re6.optimise().toString(), "(ab|b|c)*");
-        assertEquals(re7.optimise().toString(), "(a|b|c)*");
-        assertEquals(re8.optimise().toString(), "((a|b)+b?|c)*"); // Can't
-                                                                  // optimise
-                                                                  // further
-        assertEquals(re9.optimise().toString(), "(a*bc*)*"); // Can't optimise
-                                                             // further
-        assertEquals(re10.optimise().toString(), "(a|b|c)*");
-        assertEquals(re11.optimise().toString(), "(abc*)*");
+        assertEquals(re1.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a|b)*");
+        assertEquals(re2.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a|d|b|c)*");
+        assertEquals(re3.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(abc)*");
+        assertEquals(re4.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a|b|c)*");
+        assertEquals(re5.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a|b|c)*");
+        assertEquals(re6.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(ab|b|c)*");
+        assertEquals(re7.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a|b|c)*");
+        // Can't optimise further
+        assertEquals(re8.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "((a|b)+b?|c)*");
+        // Can't optimise further
+        assertEquals(re9.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a*bc*)*");
+        assertEquals(re10.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a|b|c)*");
+        assertEquals(re11.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(abc*)*");
+    }
+
+    @Test
+    public void testOptimise_8() throws InvalidRegexpException {
+        // Test optimisations realise different orderings of CHOICE are
+        // equivalent
+        BasicRegexp re1 = BasicRegexp.parseRegexp("(a|b)*(b|a)*");
+        BasicRegexp re2 = BasicRegexp.parseRegexp("(c|d)*|(d|c)*");
+
+        assertEquals(re1.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(a|b)*");
+        assertEquals(re2.optimise(BasicRegexp.OPTIMIZE_ALL, -1).toString(),
+                "(c|d)*");
+
     }
 
     @Test
@@ -514,7 +571,7 @@ public class BasicRegexpTest {
                 basicRegexp_RegexpOperator0);
         // Undeclared exception!
         try {
-            basicRegexp0.optimise();
+            basicRegexp0.optimise(BasicRegexp.OPTIMIZE_ALL, -1);
             fail("Expecting exception: NullPointerException");
         } catch (NullPointerException e) {
             //
@@ -526,7 +583,7 @@ public class BasicRegexpTest {
     @Test
     public void test10() throws Throwable {
         BasicRegexp basicRegexp0 = new BasicRegexp('#');
-        basicRegexp0.optimise();
+        basicRegexp0.optimise(BasicRegexp.OPTIMIZE_ALL, -1);
     }
 
     @Test
@@ -660,7 +717,7 @@ public class BasicRegexpTest {
                 basicRegexp_RegexpOperator0);
         // Undeclared exception!
         try {
-            basicRegexp0.optimise();
+            basicRegexp0.optimise(BasicRegexp.OPTIMIZE_ALL, -1);
             fail("Expecting exception: NullPointerException");
         } catch (NullPointerException e) {
             //
@@ -672,13 +729,13 @@ public class BasicRegexpTest {
     @Test
     public void test27() throws Throwable {
         BasicRegexp basicRegexp0 = BasicRegexp.parseRegexp("Fv+2~{z3`=5");
-        basicRegexp0.optimise();
+        basicRegexp0.optimise(BasicRegexp.OPTIMIZE_ALL, -1);
     }
 
     @Test
     public void test28() throws Throwable {
         BasicRegexp basicRegexp0 = BasicRegexp.parseRegexp("3xi-+P*0D");
-        basicRegexp0.optimise();
+        basicRegexp0.optimise(BasicRegexp.OPTIMIZE_ALL, -1);
     }
 
     @Test
@@ -944,7 +1001,8 @@ public class BasicRegexpTest {
     @Test
     public void test55() throws Throwable {
         BasicRegexp basicRegexp0 = BasicRegexp.parseRegexp("\" K2v2't|La");
-        BasicRegexp basicRegexp1 = basicRegexp0.optimise();
+        BasicRegexp basicRegexp1 = basicRegexp0.optimise(
+                BasicRegexp.OPTIMIZE_ALL, -1);
         assertSame(basicRegexp1, basicRegexp0);
     }
 
