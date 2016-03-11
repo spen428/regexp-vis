@@ -61,6 +61,11 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
         new BasicRegexp(EPSILON_CHAR);
 
     final private ArrayList<BasicRegexp> mOperands;
+    /**
+     * The operands for this BasicRegexp but sorted. The use for this is when
+     * doing comparison on CHOICE, where ordering doesn't matter.
+     */
+    final private ArrayList<BasicRegexp> mSortedOperands;
     final private char mChar;
     final private RegexpOperator mOperator;
     // IDEA(mjn33): cache results from .optimise() and .isNullable()?
@@ -113,7 +118,12 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
             optimisedOperands = new ArrayList<>(operands);
         }
 
+        ArrayList<BasicRegexp> sortedOptimisedOperands = new ArrayList<>(
+                optimisedOperands);
+        Collections.sort(sortedOptimisedOperands);
+
         mOperands = optimisedOperands;
+        mSortedOperands = sortedOptimisedOperands;
         mChar = EPSILON_CHAR;
         mOperator = op;
     }
@@ -142,6 +152,7 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
 
         mOperands = new ArrayList<>();
         mOperands.add(operand);
+        mSortedOperands = new ArrayList<>(mOperands);
         mChar = EPSILON_CHAR;
         mOperator = op;
     }
@@ -154,8 +165,34 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
     public BasicRegexp(char c)
     {
         mOperands = null;
+        mSortedOperands = null;
         mChar = c;
         mOperator = RegexpOperator.NONE;
+    }
+
+    private static int compareOperandLists(List<BasicRegexp> list1,
+            List<BasicRegexp> list2)
+    {
+
+        Iterator<BasicRegexp> list1It = list1.iterator();
+        Iterator<BasicRegexp> list2It = list2.iterator();
+        while (list1It.hasNext() && list2It.hasNext()) {
+            BasicRegexp thisOperand = list1It.next();
+            BasicRegexp otherOperand = list2It.next();
+
+            // Return based on the first difference in operands
+            int ret = thisOperand.compareTo(otherOperand);
+            if (ret != 0) {
+                return ret;
+            }
+        }
+
+        // Shorter expressions come before longer ones
+        if (list1It.hasNext() == list2It.hasNext()) {
+            return 0;
+        } else {
+            return list1It.hasNext() ? 1 : -1;
+        }
     }
 
     public int compareTo(BasicRegexp other)
@@ -175,25 +212,18 @@ public class BasicRegexp implements Comparable<BasicRegexp> {
             return Character.compare(mChar, other.mChar);
         } else {
             // Compare complex expressions
-            Iterator<BasicRegexp> thisIt = mOperands.iterator();
-            Iterator<BasicRegexp> otherIt = other.mOperands.iterator();
-            while (thisIt.hasNext() && otherIt.hasNext()) {
-                BasicRegexp thisOperand = thisIt.next();
-                BasicRegexp otherOperand = otherIt.next();
+            List<BasicRegexp> thisList = mOperands;
+            List<BasicRegexp> otherList = other.mOperands;
 
-                // Return based on the first difference in operands
-                ret = thisOperand.compareTo(otherOperand);
-                if (ret != 0) {
-                    return ret;
-                }
+            // Check if we are comparing CHOICE, ordering is unimportant so use
+            // the sorted lists.
+            if (mOperator == RegexpOperator.CHOICE) {
+                thisList = mSortedOperands;
+                otherList = other.mSortedOperands;
             }
 
-            // Shorter expressions come before longer ones
-            if (thisIt.hasNext() == otherIt.hasNext()) {
-                return 0;
-            } else {
-                return thisIt.hasNext() ? 1 : -1;
-            }
+            ret = compareOperandLists(thisList, otherList);
+            return ret;
         }
     }
 
