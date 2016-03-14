@@ -1,6 +1,5 @@
 package controller;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,8 +28,8 @@ public abstract class BreakdownUICommand extends UICommand {
 
     @Override
     public void undo() {
-        ListIterator<UICommand> it = this.commands
-                .listIterator(this.commands.size());
+        ListIterator<UICommand> it = this.commands.listIterator(this.commands
+                .size());
         while (it.hasPrevious()) {
             UICommand c = it.previous();
             c.undo();
@@ -55,7 +54,8 @@ public abstract class BreakdownUICommand extends UICommand {
     @Override
     public String getDescription() {
         /* Construct a string listing the new transitions */
-        AutomatonTransition[] newTransitions = getNewTransitions(this);
+        AutomatonTransition[] newTransitions = BreakdownUITools
+                .getNewTransitions(this);
         StringBuilder tranStr = new StringBuilder();
         for (int i = 0; i < newTransitions.length; i++) {
             tranStr.append(newTransitions[i].getData().toString());
@@ -86,17 +86,6 @@ public abstract class BreakdownUICommand extends UICommand {
         }
 
         return "null";
-    }
-
-    private static AutomatonTransition[] getNewTransitions(
-            BreakdownUICommand cmd) {
-        ArrayList<AutomatonTransition> transitions = new ArrayList<>();
-        for (UICommand c : cmd.getCommands()) {
-            if (c instanceof AddTransitionUICommand) {
-                transitions.add(((AddTransitionUICommand) c).getTransition());
-            }
-        }
-        return transitions.toArray(new AutomatonTransition[0]);
     }
 
 }
