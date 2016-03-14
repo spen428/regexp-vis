@@ -37,6 +37,8 @@ public class ConjoinParallelTransitionsCommand extends Command {
 
         BasicRegexp newRe = new BasicRegexp(operands,
                 BasicRegexp.RegexpOperator.CHOICE);
+        // Do very low depth optimisation
+        newRe = newRe.optimise(BasicRegexp.OPTIMISE_ALL, 1);
         AutomatonTransition newTrans = automaton.createNewTransition(mFrom, mTo,
                 newRe);
         mCommands.add(new AddTransitionCommand(automaton, newTrans));

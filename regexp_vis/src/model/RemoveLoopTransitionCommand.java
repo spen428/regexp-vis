@@ -41,6 +41,8 @@ public class RemoveLoopTransitionCommand extends Command {
             operands.add(t.getData());
             BasicRegexp newRe = new BasicRegexp(operands,
                     BasicRegexp.RegexpOperator.SEQUENCE);
+            // Do very low depth optimisation
+            newRe = newRe.optimise(BasicRegexp.OPTIMISE_ALL, 1);
             AutomatonTransition newTrans = automaton.createNewTransition(state,
                     t.getTo(), newRe);
             // Remove the old and add the new

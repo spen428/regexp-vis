@@ -36,6 +36,8 @@ public class SequenceStateTransitionsCommand extends Command {
                 operands.add(t2.getData());
                 BasicRegexp newRe = new BasicRegexp(operands,
                         BasicRegexp.RegexpOperator.SEQUENCE);
+                // Do very low depth optimisation
+                newRe = newRe.optimise(BasicRegexp.OPTIMISE_ALL, 1);
                 AutomatonTransition newTrans = automaton
                         .createNewTransition(t1.getFrom(), t2.getTo(), newRe);
                 mCommands.add(new AddTransitionCommand(automaton, newTrans));
