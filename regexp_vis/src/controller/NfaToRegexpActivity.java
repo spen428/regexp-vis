@@ -234,11 +234,12 @@ public class NfaToRegexpActivity extends Activity {
             return;
         }
 
-        List<Command> cmds = new ConjoinParallelTransitionsCommand(automaton,
-                from, to).getCommands();
-        for (Command cmd : cmds) {
-            super.executeNewCommand(cmd);
-        }
+        ConjoinParallelTransitionsCommand cmd =
+                new ConjoinParallelTransitionsCommand(automaton, from, to);
+        ConjoinParallelTransitionsUICommand uiCmd =
+                new ConjoinParallelTransitionsUICommand(canvas, cmd);
+
+        super.executeNewUICommand(uiCmd);
 
         if (checkActivityDone()) {
             onActivityDone();

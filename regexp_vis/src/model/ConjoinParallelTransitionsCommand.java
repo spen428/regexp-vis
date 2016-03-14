@@ -14,6 +14,8 @@ public class ConjoinParallelTransitionsCommand extends Command {
     private final ArrayList<Command> mCommands;
     private final AutomatonState mFrom;
     private final AutomatonState mTo;
+    private final ArrayList<AutomatonTransition> mParallelTrans;
+    private final AutomatonTransition mNewTransition;
 
     public ConjoinParallelTransitionsCommand(Automaton automaton,
             AutomatonState from, AutomatonState to)
@@ -25,11 +27,11 @@ public class ConjoinParallelTransitionsCommand extends Command {
 
         // Create a list of all parallel transitions originating from this
         // state. Also create a list of the BasicRegexp of these operands.
-        ArrayList<AutomatonTransition> parallelTrans = new ArrayList<>();
+        mParallelTrans = new ArrayList<>();
         ArrayList<BasicRegexp> operands = new ArrayList<>();
         for (AutomatonTransition t : automaton.getStateTransitions(mFrom)) {
             if (t.getTo() == mTo) {
-                parallelTrans.add(t);
+                mParallelTrans.add(t);
                 mCommands.add(new RemoveTransitionCommand(automaton, t));
                 operands.add(t.getData());
             }
@@ -39,9 +41,25 @@ public class ConjoinParallelTransitionsCommand extends Command {
                 BasicRegexp.RegexpOperator.CHOICE);
         // Do very low depth optimisation
         newRe = newRe.optimise(BasicRegexp.OPTIMISE_ALL, 1);
-        AutomatonTransition newTrans = automaton.createNewTransition(mFrom, mTo,
+        mNewTransition = automaton.createNewTransition(mFrom, mTo,
                 newRe);
-        mCommands.add(new AddTransitionCommand(automaton, newTrans));
+        mCommands.add(new AddTransitionCommand(automaton, mNewTransition));
+    }
+
+    /**
+     * @return The list of parallel transitions we are conjoining.
+     */
+    public List<AutomatonTransition> getParallelTransitions()
+    {
+        return Collections.unmodifiableList(mParallelTrans);
+    }
+
+    /**
+     * @return The transition which is the the result of conjoining
+     */
+    public AutomatonTransition getNewTransition()
+    {
+        return mNewTransition;
     }
 
     /**
