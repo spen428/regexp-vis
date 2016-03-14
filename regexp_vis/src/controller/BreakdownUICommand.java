@@ -54,31 +54,18 @@ public abstract class BreakdownUICommand extends UICommand {
     @Override
     public String getDescription() {
         /* Construct a string listing the new transitions */
-        AutomatonTransition[] newTransitions = BreakdownUITools
+        List<AutomatonTransition> newTransitions = BreakdownUITools
                 .getNewTransitions(this);
-        StringBuilder tranStr = new StringBuilder();
-        for (int i = 0; i < newTransitions.length; i++) {
-            tranStr.append(newTransitions[i].getData().toString());
-            if (newTransitions.length != 2 && i < newTransitions.length - 1) {
-                tranStr.append(",");
-            }
-
-            if (i == newTransitions.length - 2) {
-                /* Penultimate */
-                tranStr.append(" and ");
-            } else {
-                tranStr.append(" ");
-            }
-        }
+        String tranStr = StringUtils.transitionListToEnglish(newTransitions);
 
         /* Format description string */
         String origStr = this.getOriginalTransition().getData().toString();
         if (this instanceof BreakdownChoiceUICommand) {
             return String.format("Broke down choice %s into transitions %s",
-                    origStr, tranStr.toString());
+                    origStr, tranStr);
         } else if (this instanceof BreakdownSequenceUICommand) {
             return String.format("Broke down sequence %s into transitions %s",
-                    origStr, tranStr.toString());
+                    origStr, tranStr);
         } else if (this instanceof BreakdownIterationUICommand) {
             return String.format("Broke down iteration %s", origStr);
         } else if (this instanceof BreakdownOptionUICommand) {

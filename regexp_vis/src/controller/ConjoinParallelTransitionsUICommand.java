@@ -58,24 +58,10 @@ public class ConjoinParallelTransitionsUICommand extends UICommand {
 
     @Override
     public String getDescription() {
-        // FIXME: a bit of duplicate code here from BreakdownUICommand
         List<AutomatonTransition> oldTransitions = ccmd
                 .getParallelTransitions();
 
-        StringBuilder fromStr = new StringBuilder();
-        for (int i = 0; i < oldTransitions.size(); i++) {
-            fromStr.append(oldTransitions.get(i).getData().toString());
-            if (oldTransitions.size() != 2 && i < oldTransitions.size() - 1) {
-                fromStr.append(",");
-            }
-
-            if (i == oldTransitions.size() - 2) {
-                /* Penultimate */
-                fromStr.append(" and ");
-            } else {
-                fromStr.append(" ");
-            }
-        }
+        String fromStr = StringUtils.transitionListToEnglish(oldTransitions);
 
         String toStr = ccmd.getNewTransition().getData().toString();
         return String
