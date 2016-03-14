@@ -249,11 +249,13 @@ public class NfaToRegexpActivity extends Activity {
     }
 
     private void onRemoveState(ActionEvent event) {
-        List<Command> cmds = new SequenceStateTransitionsCommand(automaton,
-                this.rightClickedState).getCommands();
-        for (Command cmd : cmds) {
-            super.executeNewCommand(cmd);
-        }
+        SequenceStateTransitionsCommand cmd =
+                new SequenceStateTransitionsCommand(automaton,
+                        this.rightClickedState);
+        SequenceStateTransitionsUICommand uiCmd =
+                new SequenceStateTransitionsUICommand(canvas, cmd);
+
+        super.executeNewUICommand(uiCmd);
 
         if (checkActivityDone()) {
             onActivityDone();

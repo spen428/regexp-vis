@@ -13,6 +13,7 @@ import java.util.ListIterator;
 public class SequenceStateTransitionsCommand extends Command {
     private final ArrayList<Command> mCommands;
     private final AutomatonState mState;
+    private final ArrayList<AutomatonTransition> mNewTransitions;
 
     public SequenceStateTransitionsCommand(Automaton automaton,
             AutomatonState state)
@@ -20,6 +21,7 @@ public class SequenceStateTransitionsCommand extends Command {
         super(automaton);
         mCommands = new ArrayList<>();
         mState = state;
+        mNewTransitions = new ArrayList<>();
 
         List<AutomatonTransition> ingoingTrans = automaton
                 .getIngoingTransition(mState);
@@ -41,6 +43,7 @@ public class SequenceStateTransitionsCommand extends Command {
                 AutomatonTransition newTrans = automaton
                         .createNewTransition(t1.getFrom(), t2.getTo(), newRe);
                 mCommands.add(new AddTransitionCommand(automaton, newTrans));
+                mNewTransitions.add(newTrans);
             }
         }
 
@@ -54,6 +57,15 @@ public class SequenceStateTransitionsCommand extends Command {
         }
         // Remove the state itself
         mCommands.add(new RemoveStateCommand(automaton, mState));
+    }
+
+    /**
+     * @return The list of new transitions from sequencing the in-going and
+     * out-going transitions of the target state.
+     */
+    public List<AutomatonTransition> getSequencedTransitions()
+    {
+        return mNewTransitions;
     }
 
     /**
