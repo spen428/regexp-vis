@@ -50,14 +50,14 @@ public abstract class Activity {
     protected final Automaton automaton;
     protected final CommandHistory history;
 
-    Activity(GraphCanvasFX canvas, Automaton automaton) {
+    protected Activity(GraphCanvasFX canvas, Automaton automaton) {
         super();
         this.canvas = canvas;
         this.automaton = automaton;
         this.history = new CommandHistory();
     }
 
-    Activity(GraphCanvasFX canvas, Automaton automaton,
+    protected Activity(GraphCanvasFX canvas, Automaton automaton,
             CommandHistory history) {
         this.canvas = canvas;
         this.automaton = automaton;
