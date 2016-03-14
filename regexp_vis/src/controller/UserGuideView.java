@@ -1,6 +1,5 @@
 package controller;
 
-import java.io.InputStream;
 import java.net.URL;
 
 import javafx.scene.layout.Region;
