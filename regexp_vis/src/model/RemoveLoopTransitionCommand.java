@@ -52,6 +52,14 @@ public class RemoveLoopTransitionCommand extends Command {
     }
 
     /**
+     * @return Returns the loop transition which is removed.
+     */
+    public AutomatonTransition getLoopTransition()
+    {
+        return mTransition;
+    }
+
+    /**
      * @return the list of commands which this command executes, as an
      * unmodifiable list
      */

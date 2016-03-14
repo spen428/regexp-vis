@@ -199,11 +199,13 @@ public class NfaToRegexpActivity extends Activity {
     private void onRemoveLoop(ActionEvent event) {
         AutomatonTransition trans = TranslationTools.getSingleLoop(automaton,
                 this.rightClickedState);
-        List<Command> cmds = new RemoveLoopTransitionCommand(automaton, trans)
-                .getCommands();
-        for (Command cmd : cmds) {
-            super.executeNewCommand(cmd);
-        }
+
+        RemoveLoopTransitionCommand cmd =
+                new RemoveLoopTransitionCommand(automaton, trans);
+        RemoveLoopTransitionUICommand uiCmd =
+                new RemoveLoopTransitionUICommand(canvas, cmd);
+
+        super.executeNewUICommand(uiCmd);
 
         if (checkActivityDone()) {
             onActivityDone();
