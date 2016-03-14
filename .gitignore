@@ -1,8 +1,14 @@
 bin/
 dist/
-*.xml
-*.html
-*.css
+
+# JavaDoc and Test Reports
+doc/**/*.html
+doc/**/*.css
+testreports/**/*.xml
+testreports/**/*.html
+testreports/**/*.css
+
+# Vim
 *.swp
 
 # Eclipse
