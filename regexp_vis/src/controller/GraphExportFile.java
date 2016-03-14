@@ -137,11 +137,19 @@ public class GraphExportFile {
         InputStreamReader isr = new InputStreamReader(is, "UTF-8");
         try (BufferedReader br = new BufferedReader(isr)) {
             String strLine;
+            boolean firstLine = true;
 
             while ((strLine = br.readLine()) != null) {
+                if (firstLine) {
+                    if (strLine.length() > 0 && strLine.charAt(0) == 0xFEFF) {
+                        // Found a byte-order-mark (BOM), ignore this
+                        strLine = strLine.substring(1);
+                    }
+                    firstLine = false;
+                }
                 Scanner s = new Scanner(strLine);
-                 readLine(s);
-                 s.close();
+                readLine(s);
+                s.close();
             }
         }
     }
