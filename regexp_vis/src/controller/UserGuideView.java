@@ -26,7 +26,6 @@ public class UserGuideView extends Region {
         this.browser = new WebView();
         this.engine = this.browser.getEngine();
         URL url = this.getClass().getResource("/userguide/index.html");
-        System.out.println(url);
         this.engine.load(url.toExternalForm());
         getChildren().add(this.browser);
     }
