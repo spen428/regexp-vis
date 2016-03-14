@@ -326,6 +326,20 @@ public final class TranslationTools {
                 .isPresent();
     }
 
+    public static boolean automatonHasFinalState(Automaton automaton)
+    {
+        Iterator<Automaton.StateTransitionsPair> it = automaton.graphIterator();
+        while (it.hasNext()) {
+            Automaton.StateTransitionsPair pair = it.next();
+            AutomatonState state = pair.getState();
+            if (state.isFinal()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @param automaton The automaton of the given state
      * @param state The state in question
