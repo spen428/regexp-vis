@@ -8,6 +8,7 @@ import java.util.ListIterator;
 public class IsolateInitialStateCommand extends Command {
     protected final ArrayList<Command> mCommands;
     private final AutomatonState mStartStateCopy;
+    private final AddStateCommand mNewStateCommand;
 
     public static IsolateInitialStateCommand create(Automaton automaton)
     {
@@ -48,7 +49,8 @@ public class IsolateInitialStateCommand extends Command {
         mStartStateCopy = automaton.createNewState();
         AutomatonTransition epsilonTrans = automaton.createNewTransition(
                 startState, mStartStateCopy, BasicRegexp.EPSILON_EXPRESSION);
-        mCommands.add(new AddStateCommand(automaton, mStartStateCopy));
+        mNewStateCommand = new AddStateCommand(automaton, mStartStateCopy);
+        mCommands.add(mNewStateCommand);
         mCommands.add(new AddTransitionCommand(automaton, epsilonTrans));
 
         // Add all the transitions we removed from the start state, but to/from
@@ -71,7 +73,15 @@ public class IsolateInitialStateCommand extends Command {
     }
 
     /**
-     * @return The new state which is a copy of the
+     * @return The command which adds the copy of the initial state.
+     */
+    public AddStateCommand getNewStateCommand()
+    {
+        return mNewStateCommand;
+    }
+
+    /**
+     * @return The new state which is a copy of the initial state.
      */
     public AutomatonState getStartStateCopy()
     {

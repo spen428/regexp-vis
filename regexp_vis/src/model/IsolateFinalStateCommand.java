@@ -10,6 +10,7 @@ public class IsolateFinalStateCommand extends Command {
     protected final ArrayList<Command> mCommands;
     private final List<AutomatonState> mOldFinalStates;
     private final AutomatonState mNewFinalState;
+    private final AddStateCommand mNewStateCommand;
 
     public static IsolateFinalStateCommand create(Automaton automaton)
     {
@@ -53,11 +54,11 @@ public class IsolateFinalStateCommand extends Command {
         mCommands = new ArrayList<>();
         mOldFinalStates = finalStates;
 
-
         // Create the new final state
         mNewFinalState = automaton.createNewState();
         mNewFinalState.setFinal(true);
-        mCommands.add(new AddStateCommand(automaton, mNewFinalState));
+        mNewStateCommand = new AddStateCommand(automaton, mNewFinalState);
+        mCommands.add(mNewStateCommand);
 
         for (AutomatonState state : finalStates) {
             // Make all the old states not final anymore
@@ -67,6 +68,14 @@ public class IsolateFinalStateCommand extends Command {
                     mNewFinalState, BasicRegexp.EPSILON_EXPRESSION);
             mCommands.add(new AddTransitionCommand(automaton, newTrans));
         }
+    }
+
+    /**
+     * @return The command which adds the new (isolated) final state.
+     */
+    public AddStateCommand getNewStateCommand()
+    {
+        return mNewStateCommand;
     }
 
     /**
