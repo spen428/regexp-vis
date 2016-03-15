@@ -19,6 +19,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -51,6 +52,7 @@ public class RegexpVisApp implements Observer {
     private final Automaton automaton;
     protected final GraphCanvasFX mCanvas;
     final HistoryListView historyList;
+    final VBox advancedPanel;
     final Stage stage;
 
     /* Constants */
@@ -191,7 +193,15 @@ public class RegexpVisApp implements Observer {
                         ? CONTROL_PANEL_HIDE_TEXT : CONTROL_PANEL_SHOW_TEXT);
             }
         });
-        menuView.getItems().addAll(menuViewHistory, menuViewControlPanel);
+        final MenuItem menuViewAdvancedOptions = new CheckMenuItem("Show advanced options");
+        menuViewAdvancedOptions.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                advancedPanel.setVisible(advancedPanel.isVisible());
+                advancedPanel.setManaged(advancedPanel.isVisible());
+            }
+        });
+        menuView.getItems().addAll(menuViewHistory, menuViewControlPanel, menuViewAdvancedOptions);
 
         // --- Menu About
         Menu menuHelp = new Menu("Help");
@@ -299,7 +309,16 @@ public class RegexpVisApp implements Observer {
                 CONTROL_PANEL_PADDING_VERTICAL_PX,
                 CONTROL_PANEL_PADDING_HORIZONTAL_PX));
         controlPanel.getChildren().add(inputPanel);
-        root.getChildren().add(controlPanel);
+        
+        advancedPanel = new VBox();
+        HBox optimisePanel = new HBox();
+        CheckBox c1 = new CheckBox();
+        CheckBox c2 = new CheckBox();
+        CheckBox c3 = new CheckBox();
+        CheckBox c4 = new CheckBox();
+        optimisePanel.getChildren().addAll(c1,c2,c3,c4);
+        advancedPanel.getChildren().add(optimisePanel);
+        root.getChildren().addAll(advancedPanel, controlPanel);
 
         // Textfield focus listener
         // https://stackoverflow.com/questions/16549296/how-perform-task-on-javafx-textfield-at-onfocus-and-outfocus
