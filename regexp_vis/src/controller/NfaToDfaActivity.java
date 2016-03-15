@@ -47,26 +47,6 @@ public class NfaToDfaActivity extends Activity {
     }
 
     /**
-     * Ensure that we don't have a hybrid automaton with regular expressions on
-     * the transitions instead of characters.
-     */
-    private void ensureNotHybridAutomaton() {
-        // Just break everything down in one go, don't add to the history
-        List<AutomatonTransition> trans = TranslationTools
-                .getAllTransitionsToBreakdown(this.automaton);
-        while (trans != null) {
-            for (AutomatonTransition t : trans) {
-                Command cmd = TranslationTools.createBreakdownCommand(
-                        this.automaton, t);
-                UICommand uiCmd = UICommand.fromCommand(this.canvas, cmd);
-                uiCmd.redo();
-            }
-            trans = TranslationTools
-                    .getAllTransitionsToBreakdown(this.automaton);
-        }
-    }
-
-    /**
      * Helper method. After the various methods to create an automaton to start
      * with have been handled, we want to have some logic handling actually
      * initiating the activity.
@@ -108,7 +88,7 @@ public class NfaToDfaActivity extends Activity {
     public void onStarted() {
         // Start off removing epsilon transitions
         subActivity = removeEpsilonActivity;
-        ensureNotHybridAutomaton();
+        ensureNotHybridAutomaton(this.automaton, this.canvas);
         initiateActivity();
     }
 
@@ -117,7 +97,7 @@ public class NfaToDfaActivity extends Activity {
         // Start off removing epsilon transitions
         subActivity = removeEpsilonActivity;
         super.onGraphFileImport(file);
-        ensureNotHybridAutomaton();
+        ensureNotHybridAutomaton(this.automaton, this.canvas);
         initiateActivity();
     }
 
@@ -202,7 +182,7 @@ public class NfaToDfaActivity extends Activity {
         // Start off removing epsilon transitions
         subActivity = removeEpsilonActivity;
         super.onEnteredRegexp(text);
-        ensureNotHybridAutomaton();
+        ensureNotHybridAutomaton(this.automaton, this.canvas);
         initiateActivity();
     }
 

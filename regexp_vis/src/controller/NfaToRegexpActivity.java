@@ -265,6 +265,9 @@ public class NfaToRegexpActivity extends Activity {
     @Override
     public void onEnteredRegexp(String text) {
         super.onEnteredRegexp(text);
+        // Need to fully breakdown everything, otherwise there would be nothing
+        // to do initially
+        ensureNotHybridAutomaton(this.automaton, this.canvas);
         ensureInvariants();
         initiateActivity();
     }
