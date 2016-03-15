@@ -38,6 +38,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import model.Automaton;
+import model.BasicRegexp;
 import model.CommandHistory;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
@@ -75,6 +76,10 @@ public class RegexpVisApp implements Observer {
 
     public static final String WINDOW_TITLE = Main.TITLE + " v" + Main.VERSION;
     private static final String AUTOMATON_GRAPH_FILE_EXT = ".txt";
+
+    private final String[] optimisationOptionLabels = new String[] {
+            "No Optimisation", "Low Optimisation", "Medium Optimisation",
+            "High Optimisation" };
 
     /* Variables */
     protected Activity currentActivity;
@@ -255,7 +260,27 @@ public class RegexpVisApp implements Observer {
         HBox optimisePanel = new HBox();
         optimisePanel.setPadding(new Insets(0, BUTTON_PANEL_PADDING_PX, 0,
                 BUTTON_PANEL_PADDING_PX));
-        optimisePanel.getChildren().addAll(new ComboBox<String>());
+        ComboBox<String> comboBox = new ComboBox<String>();
+        comboBox.getItems().addAll(this.optimisationOptionLabels);
+        comboBox.getSelectionModel().select(0);
+        int lowOpt = BasicRegexp.OPTIMISE_OPTION | BasicRegexp.OPTIMISE_CHOICE;
+        int normalOpt = lowOpt | BasicRegexp.OPTIMISE_SEQUENCE;
+        int highOpt = BasicRegexp.OPTIMISE_ALL;
+        int[][] optimisationOptions = new int[][] { new int[] { 0, 0 },
+                new int[] { lowOpt, 3 }, new int[] { normalOpt, -1 },
+                new int[] { highOpt, -1 } };
+        comboBox.valueProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> ov,
+                    String oldText, String newText) {
+                int idx = comboBox.getSelectionModel().getSelectedIndex();
+                RegexpVisApp.this.currentActivity
+                        .setOptimisationFlags(optimisationOptions[idx][0]);
+                RegexpVisApp.this.currentActivity
+                        .setOptimisationLevel(optimisationOptions[idx][1]);
+            }
+        });
+        optimisePanel.getChildren().add(comboBox);
         this.advancedPanel.getChildren().add(optimisePanel);
 
         HBox buttonPanel = new HBox();
