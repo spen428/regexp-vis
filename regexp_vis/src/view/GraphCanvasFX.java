@@ -1298,6 +1298,7 @@ public final class GraphCanvasFX extends Canvas {
             prevEdge = edge;
         }
 
+        mGC.setFill(edges.get(0).mLineColour);
         GraphUtils.fillArrowHead(mGC, arrowBase.getX(), arrowBase.getY(),
                 n.mEndLineP1.getX(), n.mEndLineP1.getY(), ARROW_WIDTH);
 
