@@ -13,8 +13,7 @@ import java.util.Set;
  * Command which removes the a non-deterministic transition for a state. For the
  * NFA to DFA conversion process.
  */
-public class RemoveNonDeterminismCommand extends Command {
-    private final ArrayList<Command> mCommands;
+public class RemoveNonDeterminismCommand extends CompositeCommand {
     private final RemoveNonDeterminismContext mCtx;
     private final AutomatonState mState;
     private final char mChar;
@@ -29,7 +28,6 @@ public class RemoveNonDeterminismCommand extends Command {
         mState = state;
         mChar = c;
 
-        mCommands = new ArrayList<>();
         Automaton automaton = getAutomaton();
 
         ArrayList<AutomatonTransition> oldTrans = new ArrayList<>();
@@ -42,7 +40,7 @@ public class RemoveNonDeterminismCommand extends Command {
         }
 
         for (AutomatonTransition t : oldTrans) {
-            mCommands.add(new RemoveTransitionCommand(automaton, t));
+            super.commands.add(new RemoveTransitionCommand(automaton, t));
         }
 
         // ppSet = pre-processed set
@@ -61,13 +59,13 @@ public class RemoveNonDeterminismCommand extends Command {
         // the transition
         if (shouldAddState) {
             mNewStateCommand = new AddStateCommand(automaton, newState);
-            mCommands.add(mNewStateCommand);
+            super.commands.add(mNewStateCommand);
             // If we could reach a final state, we need to make this state final
             // as well
             for (AutomatonState s2 : ppSet) {
                 if (s2.isFinal()) {
-                    mCommands.add(new SetIsFinalCommand(automaton, newState,
-                            true));
+                    super.commands.add(new SetIsFinalCommand(automaton,
+                            newState, true));
                     break;
                 }
             }
@@ -78,7 +76,7 @@ public class RemoveNonDeterminismCommand extends Command {
         // Link up this new state
         AutomatonTransition newTrans = automaton.createNewTransition(mState,
                 newState, new BasicRegexp(mChar));
-        mCommands.add(new AddTransitionCommand(automaton, newTrans));
+        super.commands.add(new AddTransitionCommand(automaton, newTrans));
 
         if (!shouldAddState) {
             // A state already exists for this set of states, no need add
@@ -133,7 +131,7 @@ public class RemoveNonDeterminismCommand extends Command {
         for (AutomatonTransition t : outgoingTrans) {
             AutomatonTransition tmp = automaton.createNewTransition(newState,
                     t.getTo(), t.getData());
-            mCommands.add(new AddTransitionCommand(automaton, tmp));
+            super.commands.add(new AddTransitionCommand(automaton, tmp));
         }
     }
 
@@ -173,33 +171,6 @@ public class RemoveNonDeterminismCommand extends Command {
     public Set<AutomatonState> getReachableSet()
     {
         return Collections.unmodifiableSet(mReachableSet);
-    }
-
-    /**
-     * @return the list of commands which this command executes, as an
-     * unmodifiable list
-     */
-    public List<Command> getCommands()
-    {
-        return Collections.unmodifiableList(mCommands);
-    }
-
-    @Override
-    public void undo()
-    {
-        ListIterator<Command> it = mCommands.listIterator(mCommands.size());
-        while (it.hasPrevious()) {
-            Command c = it.previous();
-            c.undo();
-        }
-    }
-
-    @Override
-    public void redo()
-    {
-        for (Command c : mCommands) {
-            c.redo();
-        }
     }
 
 }

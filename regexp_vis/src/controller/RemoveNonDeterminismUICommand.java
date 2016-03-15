@@ -1,9 +1,5 @@
 package controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 
 import javafx.geometry.Point2D;
@@ -14,16 +10,16 @@ import model.RemoveNonDeterminismCommand;
 import view.GraphCanvasFX;
 import view.GraphNode;
 
-public class RemoveNonDeterminismUICommand extends UICommand {
-    private ArrayList<UICommand> commands;
+public class RemoveNonDeterminismUICommand extends CompositeUICommand {
+
     private final RemoveNonDeterminismCommand ccmd;
 
     public RemoveNonDeterminismUICommand(GraphCanvasFX graph,
             RemoveNonDeterminismCommand cmd) {
         super(graph, cmd);
         this.ccmd = cmd;
-        this.commands = new ArrayList<>();
 
+        super.commands.clear();
         AddStateCommand newStateCmd = cmd.getNewStateCommand();
         for (Command c : cmd.getCommands()) {
             // Place position of a new state a bit more intelligently
@@ -51,38 +47,12 @@ public class RemoveNonDeterminismUICommand extends UICommand {
                 location = location.add(targetNode.getX(), targetNode.getY());
                 location = location.multiply(0.5);
 
-                this.commands.add(
-                        new AddStateUICommand(graph, newStateCmd, location));
+                super.commands.add(new AddStateUICommand(graph, newStateCmd,
+                        location));
             } else {
-                this.commands.add(UICommand.fromCommand(graph, c));
+                super.commands.add(UICommand.fromCommand(graph, c));
             }
         }
-    }
-
-    // FIXME: duplicate code (e.g. BreakdownUICommand,
-    // RemoveEpsilonTransitionsUICommand, RemoveEquivalentStatesUICommand,
-    // RemoveNonDeterminismCommand, RemoveUnreachableStatesUICommand), maybe a
-    // new base class CompositeUICommand? CompositeUICommand as a field? Or a
-    // static utility method in UICommand?
-    @Override
-    public void undo() {
-        ListIterator<UICommand> it = this.commands
-                .listIterator(this.commands.size());
-        while (it.hasPrevious()) {
-            UICommand c = it.previous();
-            c.undo();
-        }
-    }
-
-    @Override
-    public void redo() {
-        for (UICommand c : this.commands) {
-            c.redo();
-        }
-    }
-
-    public List<UICommand> getCommands() {
-        return Collections.unmodifiableList(this.commands);
     }
 
     @Override
@@ -90,4 +60,5 @@ public class RemoveNonDeterminismUICommand extends UICommand {
         return "Removed non-determinism from state "
                 + this.ccmd.getState().toString();
     }
+
 }

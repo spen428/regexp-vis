@@ -4,12 +4,12 @@ import javafx.geometry.Point2D;
 import model.AddStateCommand;
 import model.AddTransitionCommand;
 import model.Automaton;
-import model.BreakdownChoiceCommand;
 import model.BreakdownCommand;
-import model.BreakdownIterationCommand;
-import model.BreakdownOptionCommand;
-import model.BreakdownSequenceCommand;
 import model.Command;
+import model.RemoveEpsilonTransitionsCommand;
+import model.RemoveEquivalentStatesCommand;
+import model.RemoveNonDeterminismCommand;
+import model.RemoveStateCleanlyCommand;
 import model.RemoveStateCommand;
 import model.RemoveTransitionCommand;
 import model.SetIsFinalCommand;
@@ -35,7 +35,7 @@ public abstract class UICommand extends Command {
         this.graph = graph;
         this.cmd = cmd;
     }
-    
+
     /**
      * Convert a {@link Command} into a {@link UICommand}
      *
@@ -51,10 +51,9 @@ public abstract class UICommand extends Command {
         if (cmd instanceof AddStateCommand) {
             return new AddStateUICommand(graph, (AddStateCommand) cmd, 0, 0);
         } else if (cmd instanceof AddTransitionCommand) {
-            return new AddTransitionUICommand(graph,
-                    (AddTransitionCommand) cmd);
+            return new AddTransitionUICommand(graph, (AddTransitionCommand) cmd);
         } else if (cmd instanceof BreakdownCommand) {
-            return UICommand.fromBreakdownCommand(graph, cmd);
+            return new BreakdownUICommand(graph, (BreakdownCommand) cmd);
         } else if (cmd instanceof RemoveStateCommand) {
             return new RemoveStateUICommand(graph, (RemoveStateCommand) cmd);
         } else if (cmd instanceof RemoveTransitionCommand) {
@@ -62,42 +61,24 @@ public abstract class UICommand extends Command {
                     (RemoveTransitionCommand) cmd);
         } else if (cmd instanceof SetIsFinalCommand) {
             return new SetIsFinalUICommand(graph, (SetIsFinalCommand) cmd);
+        } else if (cmd instanceof RemoveEpsilonTransitionsCommand) {
+            return new RemoveEpsilonTransitionsUICommand(graph,
+                    (RemoveEpsilonTransitionsCommand) cmd);
+        } else if (cmd instanceof RemoveEquivalentStatesCommand) {
+            return new RemoveEquivalentStatesUICommand(graph,
+                    (RemoveEquivalentStatesCommand) cmd);
+        } else if (cmd instanceof RemoveNonDeterminismCommand) {
+            return new RemoveNonDeterminismUICommand(graph,
+                    (RemoveNonDeterminismCommand) cmd);
+        } else if (cmd instanceof RemoveStateCleanlyCommand) {
+            return new RemoveUnreachableStateUICommand(graph,
+                    (RemoveStateCleanlyCommand) cmd);
         } else if (cmd == null) {
             return null;
-        } else {
-            String msg = String.format(
-                    "Conversion from %s to UICommand has "
-                            + "not yet been implemented.",
-                    cmd.getClass().toString());
-            throw new UnsupportedOperationException(msg);
         }
-    }
-
-    private static BreakdownUICommand fromBreakdownCommand(GraphCanvasFX graph,
-            Command cmd) {
-        if (cmd instanceof BreakdownSequenceCommand) {
-            return new BreakdownSequenceUICommand(graph,
-                    (BreakdownSequenceCommand) cmd);
-        } else if (cmd instanceof BreakdownChoiceCommand) {
-            return new BreakdownChoiceUICommand(graph,
-                    (BreakdownChoiceCommand) cmd);
-        } else if (cmd instanceof BreakdownIterationCommand) {
-            return new BreakdownIterationUICommand(graph,
-                    (BreakdownIterationCommand) cmd);
-        } else if (cmd instanceof BreakdownOptionCommand) {
-            return new BreakdownOptionUICommand(graph,
-                    (BreakdownOptionCommand) cmd);
-        }
-        // else
-        if (cmd instanceof BreakdownCommand) {
-            String msg = String.format(
-                    "Conversion from %s to BreakdownUICommand has "
-                            + "not yet been implemented.",
-                    cmd.getClass().toString());
-            throw new UnsupportedOperationException(msg);
-        }
-        throw new IllegalArgumentException(cmd.getClass().toString()
-                + " is not a subclass of BreakdownCommand.");
+        String msg = String.format("Conversion from %s to UICommand has "
+                + "not yet been implemented.", cmd.getClass().toString());
+        throw new UnsupportedOperationException(msg);
     }
 
     public abstract String getDescription();

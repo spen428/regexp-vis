@@ -1,12 +1,10 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
 
-public class IsolateInitialStateCommand extends Command {
-    protected final ArrayList<Command> mCommands;
+public class IsolateInitialStateCommand extends CompositeCommand {
+
     private final AutomatonState mStartStateCopy;
     private final AddStateCommand mNewStateCommand;
 
@@ -24,8 +22,6 @@ public class IsolateInitialStateCommand extends Command {
     private IsolateInitialStateCommand(Automaton automaton)
     {
         super(automaton);
-        mCommands = new ArrayList<>();
-
         AutomatonState startState = automaton.getStartState();
 
         List<AutomatonTransition> removeTransitions = new ArrayList<>();
@@ -41,7 +37,7 @@ public class IsolateInitialStateCommand extends Command {
 
         // Remove all in-going and out-going transitions on the start state
         for (AutomatonTransition t : removeTransitions) {
-            mCommands.add(new RemoveTransitionCommand(automaton, t));
+            super.commands.add(new RemoveTransitionCommand(automaton, t));
         }
 
         // Create a new state which will be a copy of the current start state,
@@ -50,8 +46,8 @@ public class IsolateInitialStateCommand extends Command {
         AutomatonTransition epsilonTrans = automaton.createNewTransition(
                 startState, mStartStateCopy, BasicRegexp.EPSILON_EXPRESSION);
         mNewStateCommand = new AddStateCommand(automaton, mStartStateCopy);
-        mCommands.add(mNewStateCommand);
-        mCommands.add(new AddTransitionCommand(automaton, epsilonTrans));
+        super.commands.add(mNewStateCommand);
+        super.commands.add(new AddTransitionCommand(automaton, epsilonTrans));
 
         // Add all the transitions we removed from the start state, but to/from
         // the copied state.
@@ -67,7 +63,7 @@ public class IsolateInitialStateCommand extends Command {
                 newTrans = automaton.createNewTransition(t.getFrom(),
                         mStartStateCopy, t.getData());
             }
-            mCommands.add(new AddTransitionCommand(automaton, newTrans));
+            super.commands.add(new AddTransitionCommand(automaton, newTrans));
         }
 
     }
@@ -86,33 +82,6 @@ public class IsolateInitialStateCommand extends Command {
     public AutomatonState getStartStateCopy()
     {
         return mStartStateCopy;
-    }
-
-    /**
-     * @return the list of commands which this command executes, as an
-     * unmodifiable list
-     */
-    public List<Command> getCommands()
-    {
-        return Collections.unmodifiableList(mCommands);
-    }
-
-    @Override
-    public void undo()
-    {
-        ListIterator<Command> it = mCommands.listIterator(mCommands.size());
-        while (it.hasPrevious()) {
-            Command c = it.previous();
-            c.undo();
-        }
-    }
-
-    @Override
-    public void redo()
-    {
-        for (Command c : mCommands) {
-            c.redo();
-        }
     }
 
 }

@@ -1,12 +1,16 @@
 package controller;
 
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 
+import javafx.geometry.Point2D;
+import model.AddStateCommand;
 import model.AutomatonTransition;
+import model.BreakdownChoiceCommand;
 import model.BreakdownCommand;
+import model.BreakdownIterationCommand;
+import model.BreakdownOptionCommand;
+import model.BreakdownSequenceCommand;
+import model.Command;
 import view.GraphCanvasFX;
 
 /**
@@ -15,36 +19,27 @@ import view.GraphCanvasFX;
  * @author sp611
  *
  */
-public abstract class BreakdownUICommand extends UICommand {
+public class BreakdownUICommand extends CompositeUICommand {
 
-    protected final LinkedList<UICommand> commands;
     protected final AutomatonTransition originalTransition;
 
     public BreakdownUICommand(GraphCanvasFX graph, BreakdownCommand cmd) {
         super(graph, cmd);
-        this.commands = new LinkedList<>();
         this.originalTransition = cmd.getOriginalTransition();
-    }
 
-    @Override
-    public void undo() {
-        ListIterator<UICommand> it = this.commands.listIterator(this.commands
-                .size());
-        while (it.hasPrevious()) {
-            UICommand c = it.previous();
-            c.undo();
+        super.commands.clear();
+        Point2D[] points = BreakdownUITools.placeNodes(graph, cmd);
+        int added = 0;
+        for (Command c : cmd.getCommands()) {
+            if (c instanceof AddStateCommand) {
+                Point2D loc = points[added++];
+                AddStateUICommand newCommand = new AddStateUICommand(graph,
+                        (AddStateCommand) c, loc.getX(), loc.getY());
+                super.commands.add(newCommand);
+            } else {
+                super.commands.add(UICommand.fromCommand(graph, c));
+            }
         }
-    }
-
-    @Override
-    public void redo() {
-        for (UICommand c : this.commands) {
-            c.redo();
-        }
-    }
-
-    public List<UICommand> getCommands() {
-        return Collections.unmodifiableList(this.commands);
     }
 
     public AutomatonTransition getOriginalTransition() {
@@ -57,18 +52,17 @@ public abstract class BreakdownUICommand extends UICommand {
         List<AutomatonTransition> newTransitions = BreakdownUITools
                 .getNewTransitions(this);
         String tranStr = StringUtils.transitionListToEnglish(newTransitions);
-
-        /* Format description string */
         String origStr = this.getOriginalTransition().getData().toString();
-        if (this instanceof BreakdownChoiceUICommand) {
+
+        if (this.cmd instanceof BreakdownChoiceCommand) {
             return String.format("Broke down choice %s into transitions %s",
                     origStr, tranStr);
-        } else if (this instanceof BreakdownSequenceUICommand) {
+        } else if (this.cmd instanceof BreakdownSequenceCommand) {
             return String.format("Broke down sequence %s into transitions %s",
                     origStr, tranStr);
-        } else if (this instanceof BreakdownIterationUICommand) {
+        } else if (this.cmd instanceof BreakdownIterationCommand) {
             return String.format("Broke down iteration %s", origStr);
-        } else if (this instanceof BreakdownOptionUICommand) {
+        } else if (this.cmd instanceof BreakdownOptionCommand) {
             return String.format("Broke down option %s", origStr);
         }
 

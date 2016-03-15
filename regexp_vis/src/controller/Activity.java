@@ -32,9 +32,9 @@ public abstract class Activity {
     private static final Logger LOGGER = Logger.getLogger("controller");
 
     enum ActivityType {
-        ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"),
-        ACTIVITY_NFA_TO_REGEXP("Convert NFA to Regular Expression"),
-        ACTIVITY_NFA_TO_DFA("Convert NFA to DFA");
+        ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"), ACTIVITY_NFA_TO_REGEXP(
+                "Convert NFA to Regular Expression"), ACTIVITY_NFA_TO_DFA(
+                "Convert NFA to DFA");
 
         private final String text;
 
@@ -112,8 +112,8 @@ public abstract class Activity {
         // TODO: Add the following to history
         AutomatonState startState = this.automaton.getStartState();
         AutomatonState finalState = this.automaton.createNewState();
-        AutomatonTransition trans = this.automaton
-                .createNewTransition(startState, finalState, re);
+        AutomatonTransition trans = this.automaton.createNewTransition(
+                startState, finalState, re);
         finalState.setFinal(true);
         this.automaton.addStateWithTransitions(finalState,
                 new LinkedList<AutomatonTransition>());
@@ -194,21 +194,24 @@ public abstract class Activity {
     public abstract void onHideContextMenu(MouseEvent event);
 
     protected void executeNewCommand(Command cmd) {
+        UICommand uiCmd;
         if (cmd instanceof UICommand) {
-            // TODO: This doesn't test for any different subclass types, but it
-            // should be okay...
-            throw new IllegalArgumentException(
-                    "Argument should be of type Command, not UICommand.");
+            uiCmd = (UICommand) cmd;
+        } else {
+            uiCmd = UICommand.fromCommand(this.canvas, cmd);
         }
 
-        UICommand uiCmd = UICommand.fromCommand(this.canvas, cmd);
         if (uiCmd != null) {
             this.history.executeNewCommand(uiCmd);
         }
     }
 
-    protected void executeNewUICommand(UICommand uiCmd) {
-        this.history.executeNewCommand(uiCmd);
+    /**
+     * @deprecated Use {@link #executeNewCommand(Command)} instead, there is no
+     *             need to instantiate the {@link UICommand} yourself
+     */
+    protected void executeNewUICommand(UICommand cmd) {
+        executeNewCommand(cmd);
     }
 
     // Expose CommandHistory methods, except for executeNewCommand()

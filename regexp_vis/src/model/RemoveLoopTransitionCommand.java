@@ -1,9 +1,6 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Command to a single loop for a state, this is done by prepending the loop
@@ -11,15 +8,14 @@ import java.util.ListIterator;
  *
  * Note this Command assumes the only loop transition is the given one.
  */
-public class RemoveLoopTransitionCommand extends Command {
-    private final ArrayList<Command> mCommands;
+public class RemoveLoopTransitionCommand extends CompositeCommand {
+
     private final AutomatonTransition mTransition;
 
     public RemoveLoopTransitionCommand(Automaton automaton,
             AutomatonTransition trans)
     {
         super(automaton);
-        mCommands = new ArrayList<>();
         mTransition = trans;
 
         AutomatonState state = mTransition.getFrom();
@@ -28,7 +24,7 @@ public class RemoveLoopTransitionCommand extends Command {
         loopRe = new BasicRegexp(loopRe, BasicRegexp.RegexpOperator.STAR);
 
         // Actually remove the loop
-        mCommands.add(new RemoveTransitionCommand(automaton, mTransition));
+        super.commands.add(new RemoveTransitionCommand(automaton, mTransition));
 
         for (AutomatonTransition t : automaton.getStateTransitions(state)) {
             if (t == mTransition) {
@@ -46,8 +42,8 @@ public class RemoveLoopTransitionCommand extends Command {
             AutomatonTransition newTrans = automaton.createNewTransition(state,
                     t.getTo(), newRe);
             // Remove the old and add the new
-            mCommands.add(new RemoveTransitionCommand(automaton, t));
-            mCommands.add(new AddTransitionCommand(automaton, newTrans));
+            super.commands.add(new RemoveTransitionCommand(automaton, t));
+            super.commands.add(new AddTransitionCommand(automaton, newTrans));
         }
     }
 
@@ -59,30 +55,4 @@ public class RemoveLoopTransitionCommand extends Command {
         return mTransition;
     }
 
-    /**
-     * @return the list of commands which this command executes, as an
-     * unmodifiable list
-     */
-    public List<Command> getCommands()
-    {
-        return Collections.unmodifiableList(mCommands);
-    }
-
-    @Override
-    public void undo()
-    {
-        ListIterator<Command> it = mCommands.listIterator(mCommands.size());
-        while (it.hasPrevious()) {
-            Command c = it.previous();
-            c.undo();
-        }
-    }
-
-    @Override
-    public void redo()
-    {
-        for (Command c : mCommands) {
-            c.redo();
-        }
-    }
 }

@@ -3,15 +3,14 @@ package model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Command to conjoin parallel transitions which come from one state and go to
  * another (could be the same state, in which case loops are being conjoined).
  * Part of the NFA to Regexp translation.
  */
-public class ConjoinParallelTransitionsCommand extends Command {
-    private final ArrayList<Command> mCommands;
+public class ConjoinParallelTransitionsCommand extends CompositeCommand {
+
     private final AutomatonState mFrom;
     private final AutomatonState mTo;
     private final ArrayList<AutomatonTransition> mParallelTrans;
@@ -21,7 +20,6 @@ public class ConjoinParallelTransitionsCommand extends Command {
             AutomatonState from, AutomatonState to)
     {
         super(automaton);
-        mCommands = new ArrayList<>();
         mFrom = from;
         mTo = to;
 
@@ -32,7 +30,7 @@ public class ConjoinParallelTransitionsCommand extends Command {
         for (AutomatonTransition t : automaton.getStateTransitions(mFrom)) {
             if (t.getTo() == mTo) {
                 mParallelTrans.add(t);
-                mCommands.add(new RemoveTransitionCommand(automaton, t));
+                super.commands.add(new RemoveTransitionCommand(automaton, t));
                 operands.add(t.getData());
             }
         }
@@ -43,7 +41,7 @@ public class ConjoinParallelTransitionsCommand extends Command {
         newRe = newRe.optimise(BasicRegexp.OPTIMISE_ALL, 1);
         mNewTransition = automaton.createNewTransition(mFrom, mTo,
                 newRe);
-        mCommands.add(new AddTransitionCommand(automaton, mNewTransition));
+        super.commands.add(new AddTransitionCommand(automaton, mNewTransition));
     }
 
     /**
@@ -76,33 +74,6 @@ public class ConjoinParallelTransitionsCommand extends Command {
     public AutomatonState getStateTo()
     {
         return mTo;
-    }
-
-    /**
-     * @return the list of commands which this command executes, as an
-     * unmodifiable list
-     */
-    public List<Command> getCommands()
-    {
-        return Collections.unmodifiableList(mCommands);
-    }
-
-    @Override
-    public void undo()
-    {
-        ListIterator<Command> it = mCommands.listIterator(mCommands.size());
-        while (it.hasPrevious()) {
-            Command c = it.previous();
-            c.undo();
-        }
-    }
-
-    @Override
-    public void redo()
-    {
-        for (Command c : mCommands) {
-            c.redo();
-        }
     }
 
 }

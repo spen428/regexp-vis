@@ -6,6 +6,7 @@ package model;
 public class SetIsFinalCommand extends Command {
     private final AutomatonState mState;
     private final boolean mDiffers;
+    private final boolean mOriginalFinality;
 
     public SetIsFinalCommand(Automaton automaton, AutomatonState state,
         boolean isFinal)
@@ -13,6 +14,7 @@ public class SetIsFinalCommand extends Command {
         super(automaton);
         mState = state;
         mDiffers = (state.isFinal() != isFinal);
+        mOriginalFinality = state.isFinal();
     }
 
     @Override
@@ -40,5 +42,9 @@ public class SetIsFinalCommand extends Command {
     public AutomatonState getState()
     {
         return mState;
+    }
+
+    public boolean getOriginalFinality() {
+        return mOriginalFinality;
     }
 }

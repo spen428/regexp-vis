@@ -1,9 +1,6 @@
 package controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
 
 import javafx.geometry.Point2D;
 import model.AddStateCommand;
@@ -13,8 +10,8 @@ import model.IsolateFinalStateCommand;
 import view.GraphCanvasFX;
 import view.GraphNode;
 
-public class IsolateFinalStateUICommand extends UICommand {
-    private ArrayList<UICommand> commands;
+public class IsolateFinalStateUICommand extends CompositeUICommand {
+
     private final IsolateFinalStateCommand ccmd;
 
     private static final double PLACEMENT_RADIUS_MIN = 50;
@@ -25,8 +22,8 @@ public class IsolateFinalStateUICommand extends UICommand {
     {
         super(graph, cmd);
         this.ccmd = cmd;
-        this.commands = new ArrayList<>();
 
+        super.commands.clear();
         AddStateCommand newStateCmd = cmd.getNewStateCommand();
         for (Command c : cmd.getCommands()) {
             // Place position of a new state a bit more intelligently
@@ -52,38 +49,12 @@ public class IsolateFinalStateUICommand extends UICommand {
                     location = location.add(x, y);
                 }
 
-                this.commands.add(
+                super.commands.add(
                         new AddStateUICommand(graph, newStateCmd, location));
             } else {
-                this.commands.add(UICommand.fromCommand(graph, c));
+                super.commands.add(UICommand.fromCommand(graph, c));
             }
         }
-    }
-
-    // FIXME: duplicate code (e.g. BreakdownUICommand,
-    // RemoveEpsilonTransitionsUICommand, RemoveEquivalentStatesUICommand,
-    // RemoveNonDeterminismCommand, RemoveUnreachableStatesUICommand), maybe a
-    // new base class CompositeUICommand? CompositeUICommand as a field? Or a
-    // static utility method in UICommand?
-    @Override
-    public void undo() {
-        ListIterator<UICommand> it = this.commands
-                .listIterator(this.commands.size());
-        while (it.hasPrevious()) {
-            UICommand c = it.previous();
-            c.undo();
-        }
-    }
-
-    @Override
-    public void redo() {
-        for (UICommand c : this.commands) {
-            c.redo();
-        }
-    }
-
-    public List<UICommand> getCommands() {
-        return Collections.unmodifiableList(this.commands);
     }
 
     @Override
