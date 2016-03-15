@@ -1,10 +1,10 @@
 package controller;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javafx.event.Event;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.ContextMenuEvent;
@@ -16,6 +16,7 @@ import model.BasicRegexp;
 import model.Command;
 import model.CommandHistory;
 import model.InvalidRegexpException;
+import model.TranslationTools;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 import view.GraphEdge;
@@ -49,6 +50,26 @@ public abstract class Activity {
     protected final GraphCanvasFX canvas;
     protected final Automaton automaton;
     protected final CommandHistory history;
+
+    /**
+     * Ensure that we don't have a hybrid automaton with regular expressions on
+     * the transitions instead of characters.
+     */
+    static void ensureNotHybridAutomaton(Automaton automaton,
+            GraphCanvasFX canvas) {
+        // Just break everything down in one go, don't add to the history
+        List<AutomatonTransition> trans = TranslationTools
+                .getAllTransitionsToBreakdown(automaton);
+        while (trans != null) {
+            for (AutomatonTransition t : trans) {
+                Command cmd = TranslationTools.createBreakdownCommand(
+                        automaton, t);
+                UICommand uiCmd = UICommand.fromCommand(canvas, cmd);
+                uiCmd.redo();
+            }
+            trans = TranslationTools.getAllTransitionsToBreakdown(automaton);
+        }
+    }
 
     protected Activity(GraphCanvasFX canvas, Automaton automaton) {
         super();
@@ -163,6 +184,10 @@ public abstract class Activity {
     public abstract void onEdgeClicked(GraphCanvasEvent event);
 
     public abstract void onBackgroundClicked(GraphCanvasEvent event);
+
+    public void onCreatedEdge(GraphCanvasEvent event) {
+
+    }
 
     public abstract void onContextMenuRequested(ContextMenuEvent event);
 

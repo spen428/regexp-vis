@@ -1,6 +1,9 @@
 package model;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Abstract class to represent a command which breaks down a complex expression

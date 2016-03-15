@@ -15,14 +15,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
-import view.GraphCanvasFX;
-import view.GraphNode;
 import model.Automaton;
 import model.Automaton.StateTransitionsPair;
 import model.AutomatonState;
 import model.AutomatonTransition;
 import model.BasicRegexp;
 import model.InvalidRegexpException;
+import view.GraphCanvasFX;
+import view.GraphNode;
 
 public class GraphExportFile {
     /**
@@ -137,11 +137,19 @@ public class GraphExportFile {
         InputStreamReader isr = new InputStreamReader(is, "UTF-8");
         try (BufferedReader br = new BufferedReader(isr)) {
             String strLine;
+            boolean firstLine = true;
 
             while ((strLine = br.readLine()) != null) {
+                if (firstLine) {
+                    if (strLine.length() > 0 && strLine.charAt(0) == 0xFEFF) {
+                        // Found a byte-order-mark (BOM), ignore this
+                        strLine = strLine.substring(1);
+                    }
+                    firstLine = false;
+                }
                 Scanner s = new Scanner(strLine);
-                 readLine(s);
-                 s.close();
+                readLine(s);
+                s.close();
             }
         }
     }

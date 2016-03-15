@@ -586,10 +586,17 @@ public final class GraphCanvasFX extends Canvas {
         if (mTempEdge != null) {
             NodeEdgePair pair = mGraph.get(mTempEdge.mFrom.getId());
             pair.removeEdge(mTempEdge);
+
+            // We removed the temporary edge, recalc between the nodes
+            NodeEdgePair pair1 = mGraph.get(mTempEdge.mFrom.getId());
+            NodeEdgePair pair2 = mGraph.get(mTempEdge.mTo.getId());
+            updateConnectionLayoutData(pair1, pair2);
+
             mTempEdge = null;
         }
         mCreateEdgeModeActive = false;
         mCreateEdgeFromNode = null;
+        doRedraw();
     }
 
     /**
@@ -1593,24 +1600,17 @@ public final class GraphCanvasFX extends Canvas {
                 + y + ", clickCount = " + event.getClickCount());
 
         if (mCreateEdgeModeActive) {
+            // Check if we should propagate a "created edge" event first
+            GraphCanvasEvent fireEvent = null;
             if (mTempEdge != null) {
                 NodeEdgePair pair = mGraph.get(mTempEdge.mFrom.getId());
-                pair.removeEdge(mTempEdge);
-                if (mCreatedEdgeHandler != null) {
-                    mCreatedEdgeHandler.handle(
-                            new GraphCanvasEvent(event, null, mTempEdge));
-                }
-
-                // We removed the temporary edge, recalc between the nodes
-                NodeEdgePair pair1 = mGraph.get(mTempEdge.mFrom.getId());
-                NodeEdgePair pair2 = mGraph.get(mTempEdge.mTo.getId());
-                updateConnectionLayoutData(pair1, pair2);
-
-                mTempEdge = null;
+                fireEvent = new GraphCanvasEvent(event, null, mTempEdge);
             }
-            mCreateEdgeModeActive = false;
-            mCreateEdgeFromNode = null;
-            doRedraw();
+            stopCreateEdgeMode();
+
+            if (fireEvent != null && mCreatedEdgeHandler != null) {
+                mCreatedEdgeHandler.handle(fireEvent);
+            }
             return;
         }
 

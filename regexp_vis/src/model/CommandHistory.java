@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 
-import controller.UICommand;
-
 /**
  * Stores a history of commands for rewind and playback
  *

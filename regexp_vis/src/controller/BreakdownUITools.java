@@ -102,21 +102,22 @@ public class BreakdownUITools {
     }
 
     /**
-     * Returns an array of the new {@link AutomatonTransition}s added by this
+     * Returns a list of the new {@link AutomatonTransition}s added by this
      * {@link BreakdownUICommand}
-     * 
+     *
      * @param cmd
      *            the {@link BreakdownUICommand}
-     * @return an array of {@link AutomatonTransition}
+     * @return a list of {@link AutomatonTransition}
      */
-    public static AutomatonTransition[] getNewTransitions(BreakdownUICommand cmd) {
+    public static List<AutomatonTransition> getNewTransitions(
+            BreakdownUICommand cmd) {
         ArrayList<AutomatonTransition> transitions = new ArrayList<>();
         for (UICommand c : cmd.getCommands()) {
             if (c instanceof AddTransitionUICommand) {
                 transitions.add(((AddTransitionUICommand) c).getTransition());
             }
         }
-        return transitions.toArray(new AutomatonTransition[0]);
+        return transitions;
     }
 
     /**
@@ -140,7 +141,7 @@ public class BreakdownUITools {
      * Intelligently place new {@link AutomatonState}s that are created by this
      * {@link BreakdownCommand}, so that the layout requires minimal alteration
      * to be readable
-     * 
+     *
      * @param graph
      *            the {@link GraphCanvasFX} onto which the
      *            {@link AutomatonState}s will be rendered

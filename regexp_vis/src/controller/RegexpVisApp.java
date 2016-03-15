@@ -3,7 +3,6 @@ package controller;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.logging.Level;
@@ -38,7 +37,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import model.Automaton;
-import model.Command;
 import model.CommandHistory;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
@@ -377,6 +375,14 @@ public class RegexpVisApp implements Observer {
                     }
                 });
 
+        this.mCanvas.setOnCreatedEdge(new EventHandler<GraphCanvasEvent>() {
+            @Override
+            public void handle(GraphCanvasEvent event) {
+                onCreatedEdge(event);
+            }
+
+        });
+
         this.mCanvas.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED,
                 new EventHandler<ContextMenuEvent>() {
                     @Override
@@ -469,21 +475,7 @@ public class RegexpVisApp implements Observer {
 
         /* Update history list */
         this.historyList.getItems().clear();
-        List<Command> cmds = this.currentActivity.history.getCommands();
-        for (int i = 0; i <= cmds.size(); i++) {
-            String text;
-            if (i == 0) {
-                text = HISTORY_INITIAL_STATE_TEXT;
-            } else {
-                if (cmds.get(i - 1) instanceof UICommand) {
-                    text = ((UICommand) cmds.get(i - 1)).getDescription();
-                } else {
-                    text = "Step " + i;
-                }
-            }
-            this.historyList.addItem(text);
-            this.historyList.getSelectionModel().select(i);
-        }
+        this.currentActivity.history.clear();
 
         this.currentActivity.onStarted();
     }
@@ -503,6 +495,12 @@ public class RegexpVisApp implements Observer {
     private void onBackgroundClicked(GraphCanvasEvent event) {
         if (this.currentActivity != null) {
             this.currentActivity.onBackgroundClicked(event);
+        }
+    }
+
+    private void onCreatedEdge(GraphCanvasEvent event) {
+        if (this.currentActivity != null) {
+            this.currentActivity.onCreatedEdge(event);
         }
     }
 
