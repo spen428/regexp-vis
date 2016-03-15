@@ -45,6 +45,9 @@
         <unjar dest="bin">
             <fileset dir="lib" includes="*.jar" />
         </unjar>
+        <copy todir="bin">
+            <fileset dir="res" includes="userguide/**" />
+        </copy>
     </target>
 
     <target name="jar" depends="build,libs">

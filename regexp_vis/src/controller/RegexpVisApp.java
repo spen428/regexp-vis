@@ -36,6 +36,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import model.Automaton;
 import model.CommandHistory;
 import view.GraphCanvasEvent;
@@ -67,7 +68,7 @@ public class RegexpVisApp implements Observer {
             + " (v" + Main.VERSION + ")";
     protected static final String ABOUT_CONTENT = "Authors:\n\n"
             + "William Dix\t\t\t<wrd2@kent.ac.uk>\n"
-            + "Parham Ghassemi\t<pg272@kent.ac.uk>\n"
+            + "Parham Ghassemi\t\t<pg272@kent.ac.uk>\n"
             + "Matthew Nicholls\t\t<mjn33@kent.ac.uk>\n"
             + "Samuel Pengelly\t\t<sp611@kent.ac.uk>\n";
 
@@ -77,6 +78,7 @@ public class RegexpVisApp implements Observer {
     /* Variables */
     protected Activity currentActivity;
     protected boolean enterKeyDown;
+    protected Stage userGuideStage = null; // The user guide window
 
     public RegexpVisApp(Stage stage) {
         final VBox root = new VBox();
@@ -195,6 +197,31 @@ public class RegexpVisApp implements Observer {
 
         // --- Menu About
         Menu menuHelp = new Menu("Help");
+        MenuItem menuUserGuide = new MenuItem("User Guide");
+        menuUserGuide.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (userGuideStage == null) {
+                    userGuideStage = new Stage();
+                    userGuideStage.setTitle("User Guide");
+                    userGuideStage.setScene(new Scene(new UserGuideView(),
+                            UserGuideView.WIDTH, UserGuideView.HEIGHT));
+                    userGuideStage
+                            .setOnCloseRequest(new EventHandler<WindowEvent>() {
+                        @Override
+                        public void handle(WindowEvent evt) {
+                            LOGGER.fine("User guide window closed.");
+                            userGuideStage = null;
+                        }
+                    });
+                    LOGGER.fine("User guide window opened.");
+                    userGuideStage.show();
+                } else {
+                    // Window is already open
+                    userGuideStage.requestFocus();
+                }
+            }
+        });
         MenuItem about = new MenuItem("About");
         about.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -206,7 +233,7 @@ public class RegexpVisApp implements Observer {
                 alert.showAndWait();
             }
         });
-        menuHelp.getItems().addAll(about);
+        menuHelp.getItems().addAll(menuUserGuide, about);
 
         menuBar.getMenus().addAll(menuFile, menuEdit, menuActivity, menuView,
                 menuHelp);
@@ -414,6 +441,15 @@ public class RegexpVisApp implements Observer {
                         this.automaton);
         setActivity(Activity.ActivityType.ACTIVITY_REGEXP_BREAKDOWN);
 
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                // Close the user guide if it is open
+                if (userGuideStage != null) {
+                    userGuideStage.close();
+                }
+            }
+        });
         stage.setTitle(WINDOW_TITLE);
         stage.setScene(scene);
         stage.show();
@@ -577,7 +613,8 @@ public class RegexpVisApp implements Observer {
         }
 
         try {
-            GraphExportFile f = new GraphExportFile(automaton, mCanvas);
+            GraphExportFile f = new GraphExportFile(this.automaton,
+                    this.mCanvas);
             f.writeFile(selectedFile);
         } catch (IOException e) {
             new Alert(AlertType.ERROR,
