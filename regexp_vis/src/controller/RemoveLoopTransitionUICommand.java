@@ -7,7 +7,6 @@ import java.util.ListIterator;
 
 import model.AutomatonTransition;
 import model.Command;
-import model.ConjoinParallelTransitionsCommand;
 import model.RemoveLoopTransitionCommand;
 import view.GraphCanvasFX;
 

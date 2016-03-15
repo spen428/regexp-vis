@@ -1,6 +1,6 @@
 package model;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * Command which breaks down an iteration expression (e.g. "a+" or "a*") into a

@@ -1,6 +1,6 @@
 package model;
 
-import java.util.*;
+import java.util.LinkedList;
 
 /**
  * Command to remove a state and its outgoing transitions from an automaton

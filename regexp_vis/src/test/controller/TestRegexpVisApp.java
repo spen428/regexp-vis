@@ -3,7 +3,6 @@ package test.controller;
 import controller.Activity;
 import controller.RegexpVisApp;
 import javafx.stage.Stage;
-import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
 
 /**

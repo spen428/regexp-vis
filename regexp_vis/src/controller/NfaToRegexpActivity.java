@@ -5,9 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import view.GraphCanvasEvent;
-import view.GraphCanvasFX;
-import view.GraphNode;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
@@ -27,6 +24,9 @@ import model.RemoveLoopTransitionCommand;
 import model.RemoveStateCleanlyCommand;
 import model.SequenceStateTransitionsCommand;
 import model.TranslationTools;
+import view.GraphCanvasEvent;
+import view.GraphCanvasFX;
+import view.GraphNode;
 
 public class NfaToRegexpActivity extends Activity {
     private ContextMenu contextMenu;

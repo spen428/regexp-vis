@@ -15,14 +15,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
-import view.GraphCanvasFX;
-import view.GraphNode;
 import model.Automaton;
 import model.Automaton.StateTransitionsPair;
 import model.AutomatonState;
 import model.AutomatonTransition;
 import model.BasicRegexp;
 import model.InvalidRegexpException;
+import view.GraphCanvasFX;
+import view.GraphNode;
 
 public class GraphExportFile {
     /**

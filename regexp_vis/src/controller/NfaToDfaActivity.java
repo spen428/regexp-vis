@@ -15,8 +15,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import model.Automaton;
 import model.AutomatonState;
-import model.AutomatonTransition;
-import model.Command;
 import model.RemoveEpsilonTransitionsCommand;
 import model.RemoveEpsilonTransitionsContext;
 import model.RemoveEquivalentStatesCommand;

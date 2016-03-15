@@ -4,17 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Set;
 
-import javafx.geometry.Point2D;
-import model.AddStateCommand;
-import model.AutomatonState;
 import model.AutomatonTransition;
 import model.Command;
 import model.ConjoinParallelTransitionsCommand;
-import model.RemoveNonDeterminismCommand;
 import view.GraphCanvasFX;
-import view.GraphNode;
 
 public class ConjoinParallelTransitionsUICommand extends UICommand {
     private ArrayList<UICommand> commands;
