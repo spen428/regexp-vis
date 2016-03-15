@@ -19,8 +19,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
@@ -146,7 +146,7 @@ public class RegexpVisApp implements Observer {
         // });
         MenuItem menuEditPreferences = new MenuItem("Preferences...");
         menuEdit.getItems().addAll(menuEditUndo, menuEditRedo,
-                // menuEditClobberHistory,
+        // menuEditClobberHistory,
                 menuEditPreferences);
 
         // --- Menu Activity
@@ -176,10 +176,9 @@ public class RegexpVisApp implements Observer {
                         .setVisible(!RegexpVisApp.this.historyList.isVisible());
                 RegexpVisApp.this.historyList
                         .setManaged(RegexpVisApp.this.historyList.isVisible());
-                menuViewHistory
-                        .setText(RegexpVisApp.this.historyList.isVisible()
-                                ? HISTORY_LIST_HIDE_TEXT
-                                : HISTORY_LIST_SHOW_TEXT);
+                menuViewHistory.setText(RegexpVisApp.this.historyList
+                        .isVisible() ? HISTORY_LIST_HIDE_TEXT
+                        : HISTORY_LIST_SHOW_TEXT);
             }
         });
         final MenuItem menuViewControlPanel = new MenuItem(
@@ -189,19 +188,25 @@ public class RegexpVisApp implements Observer {
             public void handle(ActionEvent t) {
                 controlPanel.setVisible(!controlPanel.isVisible());
                 controlPanel.setManaged(controlPanel.isVisible());
-                menuViewControlPanel.setText(controlPanel.isVisible()
-                        ? CONTROL_PANEL_HIDE_TEXT : CONTROL_PANEL_SHOW_TEXT);
+                menuViewControlPanel.setText(controlPanel.isVisible() ? CONTROL_PANEL_HIDE_TEXT
+                        : CONTROL_PANEL_SHOW_TEXT);
             }
         });
-        final MenuItem menuViewAdvancedOptions = new CheckMenuItem("Show advanced options");
+        final CheckMenuItem menuViewAdvancedOptions = new CheckMenuItem(
+                "Show Advanced Options");
         menuViewAdvancedOptions.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
-                advancedPanel.setVisible(advancedPanel.isVisible());
-                advancedPanel.setManaged(advancedPanel.isVisible());
+                RegexpVisApp.this.advancedPanel
+                        .setVisible(!RegexpVisApp.this.advancedPanel
+                                .isVisible());
+                RegexpVisApp.this.advancedPanel
+                        .setManaged(RegexpVisApp.this.advancedPanel.isVisible());
             }
         });
-        menuView.getItems().addAll(menuViewHistory, menuViewControlPanel, menuViewAdvancedOptions);
+        menuViewAdvancedOptions.setSelected(true);
+        menuView.getItems().addAll(menuViewHistory, menuViewControlPanel,
+                menuViewAdvancedOptions);
 
         // --- Menu About
         Menu menuHelp = new Menu("Help");
@@ -245,6 +250,13 @@ public class RegexpVisApp implements Observer {
 
         root.getChildren().add(canvasContainer);
         this.mCanvas.requestFocus(); // Pulls focus away from the text field
+
+        this.advancedPanel = new VBox();
+        HBox optimisePanel = new HBox();
+        optimisePanel.setPadding(new Insets(0, BUTTON_PANEL_PADDING_PX, 0,
+                BUTTON_PANEL_PADDING_PX));
+        optimisePanel.getChildren().addAll(new ComboBox<String>());
+        this.advancedPanel.getChildren().add(optimisePanel);
 
         HBox buttonPanel = new HBox();
         buttonPanel.setMinSize(0, BUTTON_PANEL_PADDING_PX * 2);
@@ -295,7 +307,8 @@ public class RegexpVisApp implements Observer {
             }
         });
         buttonPanel.getChildren().addAll(buttonBackToStart, buttonBack,
-                buttonLoad, buttonSave, buttonForward, buttonForwardToEnd);
+                buttonLoad, buttonSave, buttonForward, buttonForwardToEnd,
+                this.advancedPanel);
         controlPanel.getChildren().add(buttonPanel);
 
         final HBox inputPanel = new HBox();
@@ -309,16 +322,8 @@ public class RegexpVisApp implements Observer {
                 CONTROL_PANEL_PADDING_VERTICAL_PX,
                 CONTROL_PANEL_PADDING_HORIZONTAL_PX));
         controlPanel.getChildren().add(inputPanel);
-        
-        advancedPanel = new VBox();
-        HBox optimisePanel = new HBox();
-        CheckBox c1 = new CheckBox();
-        CheckBox c2 = new CheckBox();
-        CheckBox c3 = new CheckBox();
-        CheckBox c4 = new CheckBox();
-        optimisePanel.getChildren().addAll(c1,c2,c3,c4);
-        advancedPanel.getChildren().add(optimisePanel);
-        root.getChildren().addAll(advancedPanel, controlPanel);
+
+        root.getChildren().add(controlPanel);
 
         // Textfield focus listener
         // https://stackoverflow.com/questions/16549296/how-perform-task-on-javafx-textfield-at-onfocus-and-outfocus
@@ -424,13 +429,11 @@ public class RegexpVisApp implements Observer {
         /* Using ordinals of enum to prevent misordering */
         this.activities[Activity.ActivityType.ACTIVITY_REGEXP_BREAKDOWN
                 .ordinal()] = new RegexpBreakdownActivity(this.mCanvas,
-                        this.automaton);
-        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_DFA
-                .ordinal()] = new NfaToDfaActivity(this.mCanvas,
-                        this.automaton);
-        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_REGEXP
-                .ordinal()] = new NfaToRegexpActivity(this.mCanvas,
-                        this.automaton);
+                this.automaton);
+        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_DFA.ordinal()] = new NfaToDfaActivity(
+                this.mCanvas, this.automaton);
+        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_REGEXP.ordinal()] = new NfaToRegexpActivity(
+                this.mCanvas, this.automaton);
         setActivity(Activity.ActivityType.ACTIVITY_REGEXP_BREAKDOWN);
 
         stage.setTitle(WINDOW_TITLE);
@@ -541,9 +544,9 @@ public class RegexpVisApp implements Observer {
         fileChooser.setTitle("Import Automaton Graph File");
         // Choose .txt, our file format is text based as this just makes it
         // easier to edit with text editors.
-        fileChooser.getExtensionFilters()
-                .addAll(new FileChooser.ExtensionFilter("Automaton Graph Files",
-                        "*" + AUTOMATON_GRAPH_FILE_EXT),
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Automaton Graph Files", "*"
+                        + AUTOMATON_GRAPH_FILE_EXT),
                 new FileChooser.ExtensionFilter("All Files", "*"));
 
         File selectedFile = fileChooser.showOpenDialog(this.stage);
@@ -560,7 +563,7 @@ public class RegexpVisApp implements Observer {
         } catch (BadGraphExportFileException e) {
             new Alert(AlertType.ERROR,
                     "Failed to load file, file isn't a valid automaton graph file.")
-                            .showAndWait();
+                    .showAndWait();
         } catch (FileNotFoundException e) {
             new Alert(AlertType.ERROR,
                     "Failed to load file, could not find file: "
@@ -577,9 +580,9 @@ public class RegexpVisApp implements Observer {
         fileChooser.setTitle("Export Automaton Graph File");
         // Choose .txt, our file format is text based as this just makes it
         // easier to edit with text editors.
-        fileChooser.getExtensionFilters()
-                .addAll(new FileChooser.ExtensionFilter("Automaton Graph Files",
-                        "*" + AUTOMATON_GRAPH_FILE_EXT),
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Automaton Graph Files", "*"
+                        + AUTOMATON_GRAPH_FILE_EXT),
                 new FileChooser.ExtensionFilter("All Files", "*"));
 
         File selectedFile = fileChooser.showSaveDialog(this.stage);
@@ -589,14 +592,14 @@ public class RegexpVisApp implements Observer {
         }
 
         // Add file extension if it was not specified
-        if (!selectedFile.getAbsolutePath()
-                .endsWith(AUTOMATON_GRAPH_FILE_EXT)) {
-            selectedFile = new File(
-                    selectedFile.getAbsolutePath() + AUTOMATON_GRAPH_FILE_EXT);
+        if (!selectedFile.getAbsolutePath().endsWith(AUTOMATON_GRAPH_FILE_EXT)) {
+            selectedFile = new File(selectedFile.getAbsolutePath()
+                    + AUTOMATON_GRAPH_FILE_EXT);
         }
 
         try {
-            GraphExportFile f = new GraphExportFile(automaton, mCanvas);
+            GraphExportFile f = new GraphExportFile(this.automaton,
+                    this.mCanvas);
             f.writeFile(selectedFile);
         } catch (IOException e) {
             new Alert(AlertType.ERROR,
