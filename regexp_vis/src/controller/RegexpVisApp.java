@@ -477,21 +477,7 @@ public class RegexpVisApp implements Observer {
 
         /* Update history list */
         this.historyList.getItems().clear();
-        List<Command> cmds = this.currentActivity.history.getCommands();
-        for (int i = 0; i <= cmds.size(); i++) {
-            String text;
-            if (i == 0) {
-                text = HISTORY_INITIAL_STATE_TEXT;
-            } else {
-                if (cmds.get(i - 1) instanceof UICommand) {
-                    text = ((UICommand) cmds.get(i - 1)).getDescription();
-                } else {
-                    text = "Step " + i;
-                }
-            }
-            this.historyList.addItem(text);
-            this.historyList.getSelectionModel().select(i);
-        }
+        this.currentActivity.history.clear();
 
         this.currentActivity.onStarted();
     }
