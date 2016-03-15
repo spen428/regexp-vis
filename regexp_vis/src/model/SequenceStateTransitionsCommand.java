@@ -1,17 +1,15 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Command to remove a state and sequence the in-going transitions for that
  * state with the out-going transitions for that state. Part of the NFA to
  * Regexp translation.
  */
-public class SequenceStateTransitionsCommand extends Command {
-    private final ArrayList<Command> mCommands;
+public class SequenceStateTransitionsCommand extends CompositeCommand {
+
     private final AutomatonState mState;
     private final ArrayList<AutomatonTransition> mNewTransitions;
 
@@ -19,7 +17,6 @@ public class SequenceStateTransitionsCommand extends Command {
             AutomatonState state)
     {
         super(automaton);
-        mCommands = new ArrayList<>();
         mState = state;
         mNewTransitions = new ArrayList<>();
 
@@ -42,21 +39,21 @@ public class SequenceStateTransitionsCommand extends Command {
                 newRe = newRe.optimise(BasicRegexp.OPTIMISE_ALL, 1);
                 AutomatonTransition newTrans = automaton
                         .createNewTransition(t1.getFrom(), t2.getTo(), newRe);
-                mCommands.add(new AddTransitionCommand(automaton, newTrans));
+                super.commands.add(new AddTransitionCommand(automaton, newTrans));
                 mNewTransitions.add(newTrans);
             }
         }
 
         // Remove all in-going transitions
         for (AutomatonTransition t : ingoingTrans) {
-            mCommands.add(new RemoveTransitionCommand(automaton, t));
+            super.commands.add(new RemoveTransitionCommand(automaton, t));
         }
         // Remove all out-going transitions
         for (AutomatonTransition t : outgoingTrans) {
-            mCommands.add(new RemoveTransitionCommand(automaton, t));
+            super.commands.add(new RemoveTransitionCommand(automaton, t));
         }
         // Remove the state itself
-        mCommands.add(new RemoveStateCommand(automaton, mState));
+        super.commands.add(new RemoveStateCommand(automaton, mState));
     }
 
     /**
@@ -76,30 +73,4 @@ public class SequenceStateTransitionsCommand extends Command {
         return mState;
     }
 
-    /**
-     * @return the list of commands which this command executes, as an
-     * unmodifiable list
-     */
-    public List<Command> getCommands()
-    {
-        return Collections.unmodifiableList(mCommands);
-    }
-
-    @Override
-    public void undo()
-    {
-        ListIterator<Command> it = mCommands.listIterator(mCommands.size());
-        while (it.hasPrevious()) {
-            Command c = it.previous();
-            c.undo();
-        }
-    }
-
-    @Override
-    public void redo()
-    {
-        for (Command c : mCommands) {
-            c.redo();
-        }
-    }
 }

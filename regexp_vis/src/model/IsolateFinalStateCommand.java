@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public class IsolateFinalStateCommand extends Command {
-    protected final ArrayList<Command> mCommands;
+public class IsolateFinalStateCommand extends CompositeCommand {
+
     private final List<AutomatonState> mOldFinalStates;
     private final AutomatonState mNewFinalState;
     private final AddStateCommand mNewStateCommand;
@@ -51,22 +51,21 @@ public class IsolateFinalStateCommand extends Command {
             List<AutomatonState> finalStates)
     {
         super(automaton);
-        mCommands = new ArrayList<>();
         mOldFinalStates = finalStates;
 
         // Create the new final state
         mNewFinalState = automaton.createNewState();
         mNewFinalState.setFinal(true);
         mNewStateCommand = new AddStateCommand(automaton, mNewFinalState);
-        mCommands.add(mNewStateCommand);
+        super.commands.add(mNewStateCommand);
 
         for (AutomatonState state : finalStates) {
             // Make all the old states not final anymore
-            mCommands.add(new SetIsFinalCommand(automaton, state, false));
+            super.commands.add(new SetIsFinalCommand(automaton, state, false));
             // Add an epsilon transition to the new state
             AutomatonTransition newTrans = automaton.createNewTransition(state,
                     mNewFinalState, BasicRegexp.EPSILON_EXPRESSION);
-            mCommands.add(new AddTransitionCommand(automaton, newTrans));
+            super.commands.add(new AddTransitionCommand(automaton, newTrans));
         }
     }
 
@@ -92,33 +91,6 @@ public class IsolateFinalStateCommand extends Command {
     public AutomatonState getNewFinalState()
     {
         return mNewFinalState;
-    }
-
-    /**
-     * @return the list of commands which this command executes, as an
-     * unmodifiable list
-     */
-    public List<Command> getCommands()
-    {
-        return Collections.unmodifiableList(mCommands);
-    }
-
-    @Override
-    public void undo()
-    {
-        ListIterator<Command> it = mCommands.listIterator(mCommands.size());
-        while (it.hasPrevious()) {
-            Command c = it.previous();
-            c.undo();
-        }
-    }
-
-    @Override
-    public void redo()
-    {
-        for (Command c : mCommands) {
-            c.redo();
-        }
     }
 
 }
