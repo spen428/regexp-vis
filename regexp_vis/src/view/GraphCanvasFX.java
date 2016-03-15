@@ -1662,7 +1662,7 @@ public final class GraphCanvasFX extends Canvas {
      * @param y The y coordinate of the hit test
      * @return The edge which was hit, or null if no edge was hit
      */
-    private GraphEdge findEdgeLabelHit(double x, double y) {
+    public GraphEdge findEdgeLabelHit(double x, double y) {
         for (NodeEdgePair pair : mGraph.values()) {
             for (GraphEdge e : pair.mLoopedEdges) {
                 if (edgeLabelHitTest(e, x, y)) {

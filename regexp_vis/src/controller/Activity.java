@@ -34,9 +34,10 @@ public abstract class Activity {
     private static final Logger LOGGER = Logger.getLogger("controller");
 
     enum ActivityType {
-        ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"), ACTIVITY_NFA_TO_REGEXP(
-                "Convert NFA to Regular Expression"), ACTIVITY_NFA_TO_DFA(
-                "Convert NFA to DFA");
+        ACTIVITY_REGEXP_BREAKDOWN("Breakdown Regular Expression to FSA"),
+        ACTIVITY_NFA_TO_REGEXP("Convert NFA to Regular Expression"),
+        ACTIVITY_NFA_TO_DFA("Convert NFA to DFA"),
+        ACTIVITY_CREATE_AUTOMATON("Create Automaton");
 
         private final String text;
 

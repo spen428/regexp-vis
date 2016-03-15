@@ -481,11 +481,16 @@ public class RegexpVisApp implements Observer {
         /* Using ordinals of enum to prevent misordering */
         this.activities[Activity.ActivityType.ACTIVITY_REGEXP_BREAKDOWN
                 .ordinal()] = new RegexpBreakdownActivity(this.mCanvas,
+                        this.automaton);
+        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_DFA
+                .ordinal()] = new NfaToDfaActivity(this.mCanvas,
+                        this.automaton);
+        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_REGEXP
+                .ordinal()] = new NfaToRegexpActivity(this.mCanvas,
+                        this.automaton);
+        this.activities[Activity.ActivityType.ACTIVITY_CREATE_AUTOMATON
+                .ordinal()] = new CreateAutomatonActivity(this.mCanvas,
                 this.automaton);
-        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_DFA.ordinal()] = new NfaToDfaActivity(
-                this.mCanvas, this.automaton);
-        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_REGEXP.ordinal()] = new NfaToRegexpActivity(
-                this.mCanvas, this.automaton);
         setActivity(Activity.ActivityType.ACTIVITY_REGEXP_BREAKDOWN);
 
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
