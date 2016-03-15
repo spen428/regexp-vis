@@ -27,7 +27,8 @@ public class BreakdownUITools {
 
     public static final double MIN_BREAKDOWN_HEIGHT = 4 * GraphCanvasFX.DEFAULT_NODE_RADIUS;
 
-    private static final double VARIATION = 10;
+    private static final double MIN_VARIATION = 8;
+    private static final double MAX_VARIATION = 12;
 
     /**
      * @return The number of occurrences of {@link AddStateCommand} in the given
@@ -132,8 +133,15 @@ public class BreakdownUITools {
      *         {@value #VARIATION}
      */
     private static Point2D variedPoint(double x, double y) {
-        double dx = (Math.random() * 2 * VARIATION) - VARIATION;
-        double dy = (Math.random() * 2 * VARIATION) - VARIATION;
+        
+        double dx = (Math.random() * (MAX_VARIATION - MIN_VARIATION)) + MIN_VARIATION;
+        if (Math.random() < 0.5) {
+            dx = -dx;
+        }
+        double dy = (Math.random() * (MAX_VARIATION - MIN_VARIATION)) + MIN_VARIATION;
+        if (Math.random() < 0.5) {
+            dy = -dy;
+        }
         return new Point2D(x + dx, y + dy);
     }
 
@@ -189,7 +197,11 @@ public class BreakdownUITools {
             if (tmpCmd instanceof AddStateCommand) {
                 curX += dxPerNode;
                 curY += dyPerNode;
-                points[i] = variedPoint(curX, curY);
+                if (graph.findNodeHit(curX, curY) != null) {
+                    points[i] = variedPoint(curX, curY);
+                } else {
+                    points[i] = new Point2D(curX, curY);
+                }
                 i++;
             }
         }
