@@ -1,13 +1,20 @@
 package controller;
 
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import model.Automaton;
+import model.AutomatonState;
 import model.AutomatonTransition;
 import model.BreakdownCommand;
+import model.Command;
+import model.RemoveStateCleanlyCommand;
 import model.TranslationTools;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
@@ -24,6 +31,54 @@ public class RegexpBreakdownActivity extends Activity {
 
     public RegexpBreakdownActivity(GraphCanvasFX canvas, Automaton automaton) {
         super(canvas, automaton);
+    }
+
+    private void initiateActivity() {
+        // Only show message if we are showing something on the canvas
+        if (checkActivityDone() && canvas.getNumNodes() > 0) {
+            onActivityDone();
+        }
+    }
+
+    private void onActivityDone() {
+        new Alert(AlertType.INFORMATION,
+                "The regular expression has been converted to an NFA/DFA")
+                .showAndWait();
+    }
+
+    /**
+     * Checks whether this activity is done. That is when:
+     * <ol>
+     *   <li> All transitions are single character transitions
+     * </ol>
+     *
+     * @return True if this activity is done, false otherwise
+     */
+    private boolean checkActivityDone() {
+        List<AutomatonTransition> todo = TranslationTools
+                .getAllTransitionsToBreakdown(this.automaton);
+
+        return todo == null;
+    }
+
+    @Override
+    public void onEnteredRegexp(String text) {
+        super.onEnteredRegexp(text);
+        ensureNoUnreachableStates(this.automaton, this.canvas);
+        initiateActivity();
+    }
+
+    @Override
+    public void onGraphFileImport(GraphExportFile file) {
+        super.onGraphFileImport(file);
+        ensureNoUnreachableStates(this.automaton, this.canvas);
+        initiateActivity();
+    }
+
+    @Override
+    public void onStarted() {
+        ensureNoUnreachableStates(this.automaton, this.canvas);
+        initiateActivity();
     }
 
     @Override
@@ -77,5 +132,9 @@ public class RegexpBreakdownActivity extends Activity {
         BreakdownCommand cmd = TranslationTools
                 .createBreakdownCommand(this.automaton, trans);
         super.executeNewCommand(cmd);
+
+        if (checkActivityDone()) {
+            onActivityDone();
+        }
     }
 }

@@ -2,6 +2,7 @@ package controller;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,6 +17,7 @@ import model.BasicRegexp;
 import model.Command;
 import model.CommandHistory;
 import model.InvalidRegexpException;
+import model.RemoveStateCleanlyCommand;
 import model.TranslationTools;
 import view.GraphCanvasEvent;
 import view.GraphCanvasFX;
@@ -69,6 +71,26 @@ public abstract class Activity {
                 uiCmd.redo();
             }
             trans = TranslationTools.getAllTransitionsToBreakdown(automaton);
+        }
+    }
+
+    /**
+     * Ensure that we don't have any unreachable states, doesn't add to the
+     * history.
+     */
+    static void ensureNoUnreachableStates(Automaton automaton,
+            GraphCanvasFX canvas) {
+        Set<AutomatonState> unreachable = TranslationTools
+                .automatonCalcUnreachableStates(automaton);
+
+        for (AutomatonState state : unreachable) {
+            List<Command> cmds = new RemoveStateCleanlyCommand(automaton, state)
+                    .getCommands();
+            for (Command cmd : cmds) {
+                UICommand uiCmd = UICommand.fromCommand(canvas, cmd);
+                // Don't add to the history
+                uiCmd.redo();
+            }
         }
     }
 
@@ -182,19 +204,29 @@ public abstract class Activity {
 
     }
 
-    public abstract void onNodeClicked(GraphCanvasEvent event);
+    public void onNodeClicked(GraphCanvasEvent event) {
 
-    public abstract void onEdgeClicked(GraphCanvasEvent event);
+    }
 
-    public abstract void onBackgroundClicked(GraphCanvasEvent event);
+    public void onEdgeClicked(GraphCanvasEvent event) {
+
+    }
+
+    public void onBackgroundClicked(GraphCanvasEvent event) {
+
+    }
 
     public void onCreatedEdge(GraphCanvasEvent event) {
 
     }
 
-    public abstract void onContextMenuRequested(ContextMenuEvent event);
+    public void onContextMenuRequested(ContextMenuEvent event) {
 
-    public abstract void onHideContextMenu(MouseEvent event);
+    }
+
+    public void onHideContextMenu(MouseEvent event) {
+
+    }
 
     protected void executeNewCommand(Command cmd) {
         UICommand uiCmd;
