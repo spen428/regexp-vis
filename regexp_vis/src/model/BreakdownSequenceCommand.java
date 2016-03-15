@@ -1,6 +1,6 @@
 package model;
 
-import java.util.*;
+import java.util.Iterator;
 
 /**
  * Command which breaks down a sequence of expressions (e.g. "abcd") into a set

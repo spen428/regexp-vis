@@ -1,5 +1,7 @@
 package controller;
 
+import java.util.List;
+
 import javafx.geometry.Point2D;
 import model.AddStateCommand;
 import model.AutomatonTransition;
@@ -47,31 +49,17 @@ public class BreakdownUICommand extends CompositeUICommand {
     @Override
     public String getDescription() {
         /* Construct a string listing the new transitions */
-        AutomatonTransition[] newTransitions = BreakdownUITools
+        List<AutomatonTransition> newTransitions = BreakdownUITools
                 .getNewTransitions(this);
-        StringBuilder tranStr = new StringBuilder();
-        for (int i = 0; i < newTransitions.length; i++) {
-            tranStr.append(newTransitions[i].getData().toString());
-            if (newTransitions.length != 2 && i < newTransitions.length - 1) {
-                tranStr.append(",");
-            }
-
-            if (i == newTransitions.length - 2) {
-                /* Penultimate */
-                tranStr.append(" and ");
-            } else {
-                tranStr.append(" ");
-            }
-        }
-
-        /* Format description string */
+        String tranStr = StringUtils.transitionListToEnglish(newTransitions);
         String origStr = this.getOriginalTransition().getData().toString();
+
         if (this.cmd instanceof BreakdownChoiceCommand) {
             return String.format("Broke down choice %s into transitions %s",
-                    origStr, tranStr.toString());
+                    origStr, tranStr);
         } else if (this.cmd instanceof BreakdownSequenceCommand) {
             return String.format("Broke down sequence %s into transitions %s",
-                    origStr, tranStr.toString());
+                    origStr, tranStr);
         } else if (this.cmd instanceof BreakdownIterationCommand) {
             return String.format("Broke down iteration %s", origStr);
         } else if (this.cmd instanceof BreakdownOptionCommand) {

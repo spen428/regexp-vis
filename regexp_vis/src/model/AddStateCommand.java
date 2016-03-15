@@ -1,6 +1,6 @@
 package model;
 
-import java.util.*;
+import java.util.LinkedList;
 
 /**
  * Command to add a state to an automaton

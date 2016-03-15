@@ -15,8 +15,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import model.Automaton;
 import model.AutomatonState;
-import model.AutomatonTransition;
-import model.Command;
 import model.RemoveEpsilonTransitionsCommand;
 import model.RemoveEpsilonTransitionsContext;
 import model.RemoveEquivalentStatesCommand;
@@ -44,26 +42,6 @@ public class NfaToDfaActivity extends Activity {
         this.removeEpsilonActivity = new RemoveEpsilonTransitionsActivity();
         this.removeNonDeterminismActivity = new RemoveNonDeterminismActivity();
         this.subActivity = removeEpsilonActivity;
-    }
-
-    /**
-     * Ensure that we don't have a hybrid automaton with regular expressions on
-     * the transitions instead of characters.
-     */
-    private void ensureNotHybridAutomaton() {
-        // Just break everything down in one go, don't add to the history
-        List<AutomatonTransition> trans = TranslationTools
-                .getAllTransitionsToBreakdown(this.automaton);
-        while (trans != null) {
-            for (AutomatonTransition t : trans) {
-                Command cmd = TranslationTools.createBreakdownCommand(
-                        this.automaton, t);
-                UICommand uiCmd = UICommand.fromCommand(this.canvas, cmd);
-                uiCmd.redo();
-            }
-            trans = TranslationTools
-                    .getAllTransitionsToBreakdown(this.automaton);
-        }
     }
 
     /**
@@ -106,7 +84,7 @@ public class NfaToDfaActivity extends Activity {
     public void onStarted() {
         // Start off removing epsilon transitions
         subActivity = removeEpsilonActivity;
-        ensureNotHybridAutomaton();
+        ensureNotHybridAutomaton(this.automaton, this.canvas);
         initiateActivity();
     }
 
@@ -115,7 +93,7 @@ public class NfaToDfaActivity extends Activity {
         // Start off removing epsilon transitions
         subActivity = removeEpsilonActivity;
         super.onGraphFileImport(file);
-        ensureNotHybridAutomaton();
+        ensureNotHybridAutomaton(this.automaton, this.canvas);
         initiateActivity();
     }
 
@@ -195,7 +173,7 @@ public class NfaToDfaActivity extends Activity {
         // Start off removing epsilon transitions
         subActivity = removeEpsilonActivity;
         super.onEnteredRegexp(text);
-        ensureNotHybridAutomaton();
+        ensureNotHybridAutomaton(this.automaton, this.canvas);
         initiateActivity();
     }
 

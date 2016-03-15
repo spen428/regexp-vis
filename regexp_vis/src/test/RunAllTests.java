@@ -3,6 +3,7 @@ package test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import test.controller.ActivityTest;
 import test.model.AutomatonStateTest;
 import test.model.AutomatonTest;
 import test.model.AutomatonTransitionTest;
@@ -18,6 +19,7 @@ import test.view.GraphUtilsTest;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         /* test.controller */
+        ActivityTest.class,
 
         /* test.model */
         AutomatonStateTest.class,
