@@ -52,7 +52,7 @@ public class NfaToRegexpActivity extends Activity {
         ensureNoUnreachableStates(this.automaton, this.canvas);
 
         hasFinalState = TranslationTools.automatonHasFinalState(automaton);
-        if (!hasFinalState) {
+        if (!hasFinalState  && this.canvas.getNumNodes() != 0) {
             new Alert(AlertType.INFORMATION,
                     "The automaton doesn't have a final state, the language of "
                             + "the automaton is the empty set").showAndWait();
