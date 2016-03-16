@@ -267,7 +267,7 @@ public class NfaToDfaActivity extends Activity {
          * closure)
          * <li>There are no unreachable states
          * </ol>
-         * 
+         *
          * @return True if this activity is done, false otherwise
          */
         public boolean checkActivityDone() {
@@ -361,10 +361,18 @@ public class NfaToDfaActivity extends Activity {
 
                 // Can only remove other equivalent states if we don't have any
                 // out-going epsilon transitions, and some equivalent states do
-                // actually exist
+                // actually exist. Also we cannot remove an equivalent state
+                // which happens to be the initial state.
+                boolean wouldRemoveStartState = this.ctx.getEquivalentStates(
+                        this.rightClickedState).contains(
+                        automaton.getStartState());
+                wouldRemoveStartState = wouldRemoveStartState
+                        && automaton.getStartState() != this.rightClickedState;
+
                 boolean canRemoveEquivalent = !canRemoveOutgoing
                         && this.ctx.equivalentStatesExist(automaton,
-                                this.rightClickedState);
+                                this.rightClickedState)
+                        && !wouldRemoveStartState;
                 itemRemoveEquivalent.setDisable(!canRemoveEquivalent);
 
                 // IDEA(mjn33): cache this result?
@@ -469,7 +477,7 @@ public class NfaToDfaActivity extends Activity {
          * non-determinism has been removed)
          * <li>There are no unreachable states
          * </ol>
-         * 
+         *
          * @return True if this activity is done, false otherwise
          */
         public boolean checkActivityDone() {
