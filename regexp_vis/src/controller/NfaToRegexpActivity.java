@@ -162,7 +162,7 @@ public class NfaToRegexpActivity extends Activity {
         itemRemoveLoop = new MenuItem("Remove loop");
         itemRemoveParallelTrans = new MenuItem(
                 "Remove parallel transitions");
-        itemRemoveAndSeq = new MenuItem("Remove state, sequence transitions");
+        itemRemoveAndSeq = new MenuItem("Remove state, concatenate transitions");
 
         itemRemoveLoop.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {

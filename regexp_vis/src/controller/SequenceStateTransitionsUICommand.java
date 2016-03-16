@@ -18,12 +18,14 @@ public class SequenceStateTransitionsUICommand extends CompositeUICommand {
 
     @Override
     public String getDescription() {
-        List<AutomatonTransition> sequencedTrans = ccmd.getSequencedTransitions();
-        String sequencedStr = StringUtils.transitionListToEnglish(sequencedTrans);
+        List<AutomatonTransition> sequencedTrans = ccmd
+                .getSequencedTransitions();
+        String sequencedStr = StringUtils
+                .transitionListToEnglish(sequencedTrans);
         String stateStr = ccmd.getState().toString();
 
-        return String.format(
-                "Sequenced transitions for state %s into transitions %s",
-                stateStr, sequencedStr);
+        return String.format("Concatenated transitions going through "
+                + "state %s into transition%s %s", stateStr,
+                sequencedTrans.size() != 1 ? "s" : "", sequencedStr);
     }
 }
