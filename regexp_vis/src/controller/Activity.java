@@ -50,6 +50,7 @@ public abstract class Activity {
     protected final GraphCanvasFX canvas;
     protected final Automaton automaton;
     protected final CommandHistory history;
+    protected int optimisationFlags, optimisationLevel;
 
     /**
      * Ensure that we don't have a hybrid automaton with regular expressions on
@@ -72,10 +73,7 @@ public abstract class Activity {
     }
 
     protected Activity(GraphCanvasFX canvas, Automaton automaton) {
-        super();
-        this.canvas = canvas;
-        this.automaton = automaton;
-        this.history = new CommandHistory();
+        this(canvas, automaton, new CommandHistory());
     }
 
     protected Activity(GraphCanvasFX canvas, Automaton automaton,
@@ -83,6 +81,8 @@ public abstract class Activity {
         this.canvas = canvas;
         this.automaton = automaton;
         this.history = history;
+        this.optimisationFlags = 0;
+        this.optimisationLevel = 0;
     }
 
     /**
@@ -106,6 +106,9 @@ public abstract class Activity {
             alert.showAndWait();
             return;
         }
+
+        // Do optimisations
+        re = re.optimise(optimisationFlags, optimisationLevel);
 
         this.canvas.removeAllNodes();
         this.automaton.clear();
@@ -237,6 +240,14 @@ public abstract class Activity {
 
     void historyClear() {
         this.history.clear();
+    }
+
+    void setOptimisationFlags(int optimisationFlags) {
+        this.optimisationFlags = optimisationFlags;
+    }
+
+    void setOptimisationLevel(int optimisationLevel) {
+        this.optimisationLevel = optimisationLevel;
     }
 
 }
