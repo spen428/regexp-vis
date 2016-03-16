@@ -49,22 +49,10 @@ public class NfaToRegexpActivity extends Activity {
     }
 
     private void ensureInvariants() {
-        // Remove unreachable states first
-        Set<AutomatonState> unreachable = TranslationTools
-                .automatonCalcUnreachableStates(automaton);
-
-        for (AutomatonState state : unreachable) {
-            List<Command> cmds = new RemoveStateCleanlyCommand(automaton, state)
-                    .getCommands();
-            for (Command cmd : cmds) {
-                UICommand uiCmd = UICommand.fromCommand(canvas, cmd);
-                // Don't add to the history
-                uiCmd.redo();
-            }
-        }
+        ensureNoUnreachableStates(this.automaton, this.canvas);
 
         hasFinalState = TranslationTools.automatonHasFinalState(automaton);
-        if (!hasFinalState) {
+        if (!hasFinalState  && this.canvas.getNumNodes() != 0) {
             new Alert(AlertType.INFORMATION,
                     "The automaton doesn't have a final state, the language of "
                             + "the automaton is the empty set").showAndWait();
