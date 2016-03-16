@@ -11,8 +11,8 @@ public class IsolateInitialStateUICommand extends CompositeUICommand {
 
     private final IsolateInitialStateCommand ccmd;
 
-    private static final double PLACEMENT_RADIUS_MIN = 50;
-    private static final double PLACEMENT_RADIUS_MAX = 80;
+    private static final double PLACEMENT_RADIUS_MIN = 80;
+    private static final double PLACEMENT_RADIUS_MAX = 120;
 
     public IsolateInitialStateUICommand(GraphCanvasFX graph,
             IsolateInitialStateCommand cmd) {
