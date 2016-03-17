@@ -24,10 +24,12 @@ public class UserGuideView extends Region {
     public UserGuideView() {
         super();
         this.browser = new WebView();
+        this.browser.setPrefWidth(WIDTH);
         this.engine = this.browser.getEngine();
         URL url = this.getClass().getResource("/userguide/index.html");
         this.engine.load(url.toExternalForm());
         getChildren().add(this.browser);
+        
     }
 
 }
