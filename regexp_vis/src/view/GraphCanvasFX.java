@@ -1604,14 +1604,13 @@ public final class GraphCanvasFX extends Canvas {
             // Check if we should propagate a "created edge" event first
             GraphCanvasEvent fireEvent = null;
             if (mTempEdge != null) {
-                NodeEdgePair pair = mGraph.get(mTempEdge.mFrom.getId());
                 fireEvent = new GraphCanvasEvent(event, null, mTempEdge);
             }
-            stopCreateEdgeMode();
 
             if (fireEvent != null && mCreatedEdgeHandler != null) {
                 mCreatedEdgeHandler.handle(fireEvent);
             }
+            stopCreateEdgeMode();
             return;
         }
 
