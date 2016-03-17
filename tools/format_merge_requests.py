@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import json
+from format_common import get_json_list
+
 import textwrap
 from datetime import datetime
 import os
-import urllib.request
 import sys, getopt
 
 try:
@@ -22,14 +22,7 @@ if private_token is None:
     print("Usage: " + sys.argv[0] + " --token PRIVATE-TOKEN")
     sys.exit(2)
 
-def make_request(what):
-    request = urllib.request.Request(url="https://git.cs.kent.ac.uk/api/v3" + what)
-    request.add_header("PRIVATE-TOKEN", private_token)
-    return urllib.request.urlopen(request).read().decode()
-
-process_output = make_request("/projects/97/merge_requests")
-
-data = json.loads(process_output)
+data = get_json_list("/projects/97/merge_requests", private_token)
 
 print("Merge Requests")
 print("==============")
@@ -63,9 +56,7 @@ for req in reversed(data):
     print("");
     print("### Comments")
 
-    process_output = make_request("/projects/97/merge_requests/" + str(real_id) + "/notes")
-
-    comments_data = json.loads(process_output)
+    comments_data = get_json_list("/projects/97/merge_requests/" + str(real_id) + "/notes", private_token)
     for comment in reversed(comments_data):
         comment_date = comment["created_at"]
         comment_date = datetime.strptime(comment_date, "%Y-%m-%dT%H:%M:%S.%fZ")
