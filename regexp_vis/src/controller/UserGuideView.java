@@ -17,7 +17,7 @@ import javafx.scene.web.WebView;
  */
 public class UserGuideView extends Region {
 
-    public static final double WIDTH = 800;
+    public static final double WIDTH = 400;
     public static final double HEIGHT = 600;
 
     private final WebView browser;
