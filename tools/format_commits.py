@@ -61,7 +61,7 @@ for commit in reversed(data):
 
     print("");
     print("### Message")
-    for line in commit["message"].splitlines()
+    for line in commit["message"].splitlines():
         print(line)
 
     print("");
