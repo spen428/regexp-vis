@@ -1,33 +1,40 @@
 <!DOCTYPE html>
 <head>
+<style>
+body{
+font-family: "Helvetica", Times, serif;
+}
+</style>
 <title>User Guide</title>
 </head>
 <body>
-<p><a href="index.html">Return to index</a></p>
-<p> STEP 2. Enter your regular expression, into the text area <br> and press enter</p>
+<p><a href="index.html"> <- Return to index</a></p>
+<h1>NFA - Regular Expression</h1>
+<p> STEP 2. Enter your regular expression, into the text area (this activity will completely breakdown the expression). Alternatively you can import a graph or resume from another activity
 <br>
 <img src="nfa-regex2.png" style="width:350px;height:300px;">
 <br>
-<p> STEP 3a. once the graph appears, it will already be broken down  right clicking on a node opens some options:  "Remove parallel transitions" will create a temporary arrow to choose which node<br> to remove transitions between.
+<br>
+<p> STEP 3a. once the graph appears, right clicking on a node opens options:  "Remove parallel transitions" will create a temporary arrow to choose which states to remove transitions between.
+<br>
 <img src="nfa-regex3a.png" style="width:200px;height:150px;">
 <br>
 <img src="nfa-regex3aa.png" style="width:350px;height:300px;">
-<br>
 <img src="nfa-regex3aaa.png" style="width:350px;height:300px;">
 <br>
-<p> STEP 3b. Right clicking on a node opens some options: "Concatenate transitions" will concatenate two transitions.
+<br>
+<p> STEP 3b. Right clicking on a node opens options: "Remove State, Concatenate transitions" will concatenate in going transitions with the outgoing transitions then the state is removed.
 <br>
 <img src="nfa-regex3b.png" style="width:350px;height:300px;">
-<br>
 <img src="nfa-regex3bb.png" style="width:350px;height:300px;">
 <br>
-<p> STEP 3b. Right clicking on a node opens some options: "Remove loop" will remove looped transition.
+<br>
+<p> STEP 3b. Right clicking on a node opens  options: "Remove loop" will only become available if there is one loop. Once the loop is removed the expression is put into a star in front of any regular expression leaving that state.
 <br>
 <img src="nfa-regex3c.png" style="width:350px;height:300px;">
-<br>
 <img src="nfa-regex3cc.png" style="width:350px;height:300px;">
 <br>
-
+<p><a href="index.html"> <- Return to index</a></p>
 
 </body>
 </html>
