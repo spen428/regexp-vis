@@ -133,7 +133,7 @@ public class BreakdownUITools {
      *         {@value #VARIATION}
      */
     private static Point2D variedPoint(double x, double y) {
-        
+
         double dx = (Math.random() * (MAX_VARIATION - MIN_VARIATION)) + MIN_VARIATION;
         if (Math.random() < 0.5) {
             dx = -dx;

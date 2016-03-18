@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
-import json
-import textwrap
+from format_common import get_json_list
+
 from datetime import datetime
 import os
-import urllib.request
 import sys, getopt
 
 try:
@@ -22,14 +21,7 @@ if private_token is None:
     print("Usage: " + sys.argv[0] + " --token PRIVATE-TOKEN")
     sys.exit(2)
 
-def make_request(what):
-    request = urllib.request.Request(url="https://git.cs.kent.ac.uk/api/v3" + what)
-    request.add_header("PRIVATE-TOKEN", private_token)
-    return urllib.request.urlopen(request).read().decode()
-
-process_output = make_request("/projects/97/merge_requests")
-
-data = json.loads(process_output)
+data = get_json_list("/projects/97/merge_requests", private_token)
 
 print("Merge Requests")
 print("==============")
@@ -43,7 +35,7 @@ for req in reversed(data):
         "opened" : "[OPEN]",
         "merged" : "[MERGED]",
     }.get(req["state"])
-    pretty_title = ("## Merge Request #" + str(req["iid"]) + " - " + req["title"] +
+    pretty_title = ("Merge Request #" + str(req["iid"]) + " - " + req["title"] +
                     " " + status_str)
     pretty_created_at = datetime.strptime(req["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
     pretty_created_at = pretty_created_at.strftime("%d/%m/%Y %H:%M")
@@ -51,27 +43,27 @@ for req in reversed(data):
     print(pretty_title);
     print("-" * len(pretty_title))
     print("**Opened by:** " + req["author"]["name"])
+    print("")
     if not (req["assignee"] is None):
         print("**Assigned to:** " + req["assignee"]["name"])
     else:
         print("**Assigned to:** None")
+    print("")
     print(pretty_created_at)
     print("");
-    for line in textwrap.wrap(req["description"], 80):
+    for line in req["description"].splitlines():
         print(line)
 
     print("");
     print("### Comments")
 
-    process_output = make_request("/projects/97/merge_requests/" + str(real_id) + "/notes")
-
-    comments_data = json.loads(process_output)
+    comments_data = get_json_list("/projects/97/merge_requests/" + str(real_id) + "/notes", private_token)
     for comment in reversed(comments_data):
         comment_date = comment["created_at"]
         comment_date = datetime.strptime(comment_date, "%Y-%m-%dT%H:%M:%S.%fZ")
         comment_date = comment_date.strftime("%d/%m/%Y %H:%M")
         print("On " + comment_date + " " + comment["author"]["name"] + " wrote:")
-        comment_body = textwrap.wrap(comment["body"], 78)
+        comment_body = comment["body"].splitlines()
         for line in comment_body:
             print("> " + line)
         print("")

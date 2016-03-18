@@ -228,12 +228,12 @@ public class RegexpVisApp implements Observer {
                             UserGuideView.WIDTH, UserGuideView.HEIGHT));
                     userGuideStage
                             .setOnCloseRequest(new EventHandler<WindowEvent>() {
-                        @Override
-                        public void handle(WindowEvent evt) {
-                            LOGGER.fine("User guide window closed.");
-                            userGuideStage = null;
-                        }
-                    });
+                                @Override
+                                public void handle(WindowEvent evt) {
+                                    LOGGER.fine("User guide window closed.");
+                                    userGuideStage = null;
+                                }
+                            });
                     LOGGER.fine("User guide window opened.");
                     userGuideStage.show();
                 } else {
@@ -319,6 +319,7 @@ public class RegexpVisApp implements Observer {
             @Override
             public void handle(ActionEvent arg0) {
                 RegexpVisApp.this.currentActivity.historyStart();
+                historyList.scrollTo(0);
             }
         });
         Button buttonBack = new Button("<--");
@@ -356,6 +357,7 @@ public class RegexpVisApp implements Observer {
             public void handle(ActionEvent arg0) {
                 // TODO: Breakdown all edges if at end of history?
                 RegexpVisApp.this.currentActivity.historyEnd();
+                historyList.scrollTo(historyList.getItems().size() - 1);
             }
         });
         buttonPanel.getChildren().addAll(buttonBackToStart, buttonBack,
@@ -481,13 +483,11 @@ public class RegexpVisApp implements Observer {
         /* Using ordinals of enum to prevent misordering */
         this.activities[Activity.ActivityType.ACTIVITY_REGEXP_BREAKDOWN
                 .ordinal()] = new RegexpBreakdownActivity(this.mCanvas,
-                        this.automaton);
-        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_DFA
-                .ordinal()] = new NfaToDfaActivity(this.mCanvas,
-                        this.automaton);
-        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_REGEXP
-                .ordinal()] = new NfaToRegexpActivity(this.mCanvas,
-                        this.automaton);
+                this.automaton);
+        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_DFA.ordinal()] = new NfaToDfaActivity(
+                this.mCanvas, this.automaton);
+        this.activities[Activity.ActivityType.ACTIVITY_NFA_TO_REGEXP.ordinal()] = new NfaToRegexpActivity(
+                this.mCanvas, this.automaton);
         this.activities[Activity.ActivityType.ACTIVITY_CREATE_AUTOMATON
                 .ordinal()] = new CreateAutomatonActivity(this.mCanvas,
                 this.automaton);
@@ -707,8 +707,8 @@ public class RegexpVisApp implements Observer {
             String text = ((UICommand) arg).getDescription();
             this.historyList.addItem(text);
             this.historyList.getSelectionModel().select(items.size() - 1);
+            this.historyList.scrollTo(items.size() - 1);
         }
-        this.historyList.scrollTo(items.size() - 1);
     }
 
 }
