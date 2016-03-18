@@ -2,7 +2,6 @@
 
 from format_common import get_json_list
 
-import textwrap
 from datetime import datetime
 import os
 import sys, getopt
@@ -52,7 +51,7 @@ for req in reversed(data):
     print("")
     print(pretty_created_at)
     print("");
-    for line in textwrap.wrap(req["description"], 80):
+    for line in req["description"].splitlines():
         print(line)
 
     print("");
@@ -64,7 +63,7 @@ for req in reversed(data):
         comment_date = datetime.strptime(comment_date, "%Y-%m-%dT%H:%M:%S.%fZ")
         comment_date = comment_date.strftime("%d/%m/%Y %H:%M")
         print("On " + comment_date + " " + comment["author"]["name"] + " wrote:")
-        comment_body = textwrap.wrap(comment["body"], 78)
+        comment_body = comment["body"].splitlines()
         for line in comment_body:
             print("> " + line)
         print("")
