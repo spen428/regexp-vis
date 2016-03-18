@@ -152,9 +152,10 @@ public class RegexpVisApp implements Observer {
         // }
         // });
         MenuItem menuEditPreferences = new MenuItem("Preferences...");
-        menuEdit.getItems().addAll(menuEditUndo, menuEditRedo,
+        menuEdit.getItems().addAll(menuEditUndo, menuEditRedo
         // menuEditClobberHistory,
-                menuEditPreferences);
+        //menuEditPreferences
+        );
 
         // --- Menu Activity
         Menu menuActivity = new Menu("Activity");
