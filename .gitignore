@@ -68,3 +68,6 @@ hs_err_pid*
 *.x86_64
 *.hex
 *.dSYM/
+
+# Python
+__pycache__/
