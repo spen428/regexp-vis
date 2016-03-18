@@ -36,7 +36,7 @@ for req in reversed(data):
         "opened" : "[OPEN]",
         "merged" : "[MERGED]",
     }.get(req["state"])
-    pretty_title = ("## Merge Request #" + str(req["iid"]) + " - " + req["title"] +
+    pretty_title = ("Merge Request #" + str(req["iid"]) + " - " + req["title"] +
                     " " + status_str)
     pretty_created_at = datetime.strptime(req["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
     pretty_created_at = pretty_created_at.strftime("%d/%m/%Y %H:%M")
@@ -44,10 +44,12 @@ for req in reversed(data):
     print(pretty_title);
     print("-" * len(pretty_title))
     print("**Opened by:** " + req["author"]["name"])
+    print("")
     if not (req["assignee"] is None):
         print("**Assigned to:** " + req["assignee"]["name"])
     else:
         print("**Assigned to:** None")
+    print("")
     print(pretty_created_at)
     print("");
     for line in textwrap.wrap(req["description"], 80):

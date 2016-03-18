@@ -31,13 +31,14 @@ print("      ")
 for issue in reversed(data):
     real_id = issue["id"]
     closed_str = "[CLOSED]" if issue["state"] == "closed" else "[OPEN]"
-    pretty_title = ("## Issue #" + str(issue["iid"]) + " - " + issue["title"] +
+    pretty_title = ("Issue #" + str(issue["iid"]) + " - " + issue["title"] +
                     " " + closed_str)
     pretty_created_at = datetime.strptime(issue["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
     pretty_created_at = pretty_created_at.strftime("%d/%m/%Y %H:%M")
     print(pretty_title)
     print("-" * len(pretty_title))
     print("**Opened by:** " + issue["author"]["name"] + " @ " + pretty_created_at)
+    print("")
     if not (issue["assignee"] is None):
         print("**Assigned to:** " + issue["assignee"]["name"])
     else:
