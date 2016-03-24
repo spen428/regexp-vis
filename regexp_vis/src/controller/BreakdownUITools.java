@@ -7,11 +7,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javafx.geometry.Point2D;
+import javafx.scene.transform.Rotate;
 import model.AddStateCommand;
 import model.Automaton;
 import model.AutomatonState;
 import model.AutomatonTransition;
 import model.BreakdownCommand;
+import model.BreakdownIterationCommand;
 import model.Command;
 import model.RemoveStateCommand;
 import view.GraphCanvasFX;
@@ -25,7 +27,8 @@ public class BreakdownUITools {
 
     private static final Logger LOGGER = Logger.getLogger("controller");
 
-    public static final double MIN_BREAKDOWN_HEIGHT = 4 * GraphCanvasFX.DEFAULT_NODE_RADIUS;
+    public static final double MIN_BREAKDOWN_HEIGHT = 4
+            * GraphCanvasFX.DEFAULT_NODE_RADIUS;
 
     private static final double MIN_VARIATION = 8;
     private static final double MAX_VARIATION = 12;
@@ -134,11 +137,13 @@ public class BreakdownUITools {
      */
     private static Point2D variedPoint(double x, double y) {
 
-        double dx = (Math.random() * (MAX_VARIATION - MIN_VARIATION)) + MIN_VARIATION;
+        double dx = (Math.random() * (MAX_VARIATION - MIN_VARIATION))
+                + MIN_VARIATION;
         if (Math.random() < 0.5) {
             dx = -dx;
         }
-        double dy = (Math.random() * (MAX_VARIATION - MIN_VARIATION)) + MIN_VARIATION;
+        double dy = (Math.random() * (MAX_VARIATION - MIN_VARIATION))
+                + MIN_VARIATION;
         if (Math.random() < 0.5) {
             dy = -dy;
         }
@@ -160,7 +165,8 @@ public class BreakdownUITools {
      *         {@link AddStateCommand}s appear when iterating over the
      *         {@link BreakdownCommand}
      */
-    public static Point2D[] placeNodes(GraphCanvasFX graph, BreakdownCommand cmd) {
+    public static Point2D[] placeNodes(GraphCanvasFX graph,
+            BreakdownCommand cmd) {
         final AutomatonTransition transition = cmd.getOriginalTransition();
         final AutomatonState fromState = transition.getFrom();
         final AutomatonState toState = transition.getTo();
@@ -177,14 +183,19 @@ public class BreakdownUITools {
         double dxPerNode = (toX - fromX) / transCount;
         double dyPerNode = (toY - fromY) / transCount;
 
-        Point2D middlePoint = graph.lookupEdge(
-                cmd.getOriginalTransition().getId()).getEdgeMiddlePoint();
+        Point2D middlePoint = graph
+                .lookupEdge(cmd.getOriginalTransition().getId())
+                .getEdgeMiddlePoint();
         Point2D offsetVec = middlePoint.subtract(midPointX, midPointY);
         double mag = offsetVec.magnitude();
-        LOGGER.log(Level.FINER, "oldmag = " + mag);
-        if (mag != 0 && mag < MIN_BREAKDOWN_HEIGHT) {
+
+        if (mag == 0 && cmd instanceof BreakdownIterationCommand) {
+            // Enforce minimum breakdown height for iteration breakdowns
+            middlePoint = new Rotate(270).transform(middlePoint).normalize()
+                    .multiply(MIN_BREAKDOWN_HEIGHT);
+            offsetVec = offsetVec.add(middlePoint);
+        } else if (mag != 0 && mag < MIN_BREAKDOWN_HEIGHT) {
             offsetVec = offsetVec.multiply(MIN_BREAKDOWN_HEIGHT / mag);
-            LOGGER.log(Level.FINER, "newmag = " + offsetVec.magnitude());
         }
 
         Point2D[] points = new Point2D[numAddedStates];
