@@ -11,17 +11,15 @@ This is the Git repository for the CO600 project.
 
 ## Project Structure
 
-The project code can be found under the `regexp_vis` directory, documentation
-under `doc`, and miscellaneous tools and scripts under `tools`.
+The project code can be found under the `regexp_vis` directory and miscellaneous
+tools and scripts under `tools`. Project management documentation was previously
+under a directory called `doc`, this has been erased from the Git history.
 
 `regexp_vis` is further subdivided into modules. The project follows a
 Model-View-Controller (MVC) architecture design pattern, `model` and `view` are
 designed to not depend on any other modules, the `controller` package acts as
 the "glue" between the `model` and `view` packages. Accompanying unit tests are
 in packages `test.model`, `test.view`, and `test.controller`.
-
-The application is written using JavaFX, see the JavaFX migration document for
-more information.
 
 We have also retained some demo code written to test the *Jython* programming
 language, as we initially considered using that language so that we could
