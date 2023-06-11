@@ -1,19 +1,27 @@
-# Read-me
+# Regular Language Visualiser
 
-This is the Git repository for the CO600 project.
+Final year CO600 group project. This is a tool for the visual breakdown and
+translation of regular expressions and finite state automata.
 
-## Team members
+## Authors
 
 * Matthew Nicholls <mjn33@kent.ac.uk>
-* Sam Pengelly <sp611@kent.ac.uk>
+* Samuel Pengelly <sp611@kent.ac.uk>
 * Parham Ghassemi <pg272@kent.ac.uk>
 * Billy Dix <wrd2@kent.ac.uk>
+
+## Screenshots
+
+![GUI Labelled](regexp_vis/res/userguide/labeled.png)
+
+![Regexp Breakdown](regexp_vis/res/userguide/regex-fsa5.png)
 
 ## Project Structure
 
 The project code can be found under the `regexp_vis` directory and miscellaneous
 tools and scripts under `tools`. Project management documentation was previously
-under a directory called `doc`, this has been erased from the Git history.
+under a directory called `doc`, this has been erased from the Git history. A
+user guide can be found under `regexp_vis/res/userguide`.
 
 `regexp_vis` is further subdivided into modules. The project follows a
 Model-View-Controller (MVC) architecture design pattern, `model` and `view` are
@@ -47,3 +55,7 @@ generate HTML-formatted test results under the directory `testreports`.
 
 This project is licenced under the MIT / X11 licence, a copy can be found in the
 LICENSE file.
+
+This project includes JARs for hamcrest-core-1.3 and junit-4.12 and their sources.
+The JARs and their licenses can be found under `regexp-vis/regexp_vis/lib`.
+
